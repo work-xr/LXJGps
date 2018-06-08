@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">XLJGPS</string>
+
+    <string-array name="main_item_name" >
+        <item>set relation number</item>
+        <item>upload info to platform</item>
+        <item>download info from platform</item>
+        <item>report SOS-GPS info</item>
+    </string-array>
+
+    <string-array name="relation_item_name" >
+        <item>relation number 1: </item>
+        <item>relation number 2: </item>
+        <item>relation number 3: </item>
+    </string-array>
+
+    <string name="sure">sure</string>
+    <string name="cancel">cancel</string>
+    <string name="upload_title">upload tip</string>
+    <string name="upload_content">local relation number will be uploaded to the platform, continue?</string>
+    <string name="download_title">download tip</string>
+    <string name="download_content">relation number will be override by the platform, continue?</string>
+
+    <string name="input_hint">please input phone number!</string>
+    <string name="set_relation_number">set relation number</string>
+
+    <string name="upload_success">upload success!</string>
+    <string name="upload_failed">upload failed!</string>
+    <string name="download_success">download success!</string>
+    <string name="download_failed">download failed!</string>
+    <string name="report_success">report success!</string>
+    <string name="report_failed">report failed!</string>
+
+    <string name="get_gps_permission_fail">get gps permission failed!</string>
+</resources>

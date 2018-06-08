@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">XLJGPS</string>
+
+    <string-array name="main_item_name" >
+        <item>设置亲情号码</item>
+        <item>上传信息到孝老平台</item>
+        <item>从孝老平台下载信息</item>
+        <item>上报SOS-GPS信息到孝老平台</item>
+    </string-array>
+
+    <string-array name="relation_item_name" >
+        <item>亲情号码1:  </item>
+        <item>亲情号码2:  </item>
+        <item>亲情号码3:  </item>
+    </string-array>
+
+    <string name="sure">确定</string>
+    <string name="cancel">取消</string>
+    <string name="upload_title">上传提示</string>
+    <string name="upload_content">本地亲情号码将上传到孝老平台, 继续 ?</string>
+    <string name="download_title">下载提示</string>
+    <string name="download_content">孝老平台上设置的亲情号码将覆盖本地设置的亲情号码, 继续 ?</string>
+
+    <string name="input_hint">请输入亲情号码 !</string>
+    <string name="set_relation_number">设置亲情号码</string>
+
+    <string name="upload_success">上传成功 !</string>
+    <string name="upload_failed">上传失败 !</string>
+    <string name="download_success">下载成功 !</string>
+    <string name="download_failed">下载失败 !</string>
+    <string name="report_success">上报成功 !</string>
+    <string name="report_failed">上报失败!</string>
+
+    <string name="get_gps_permission_fail">获取权限失败 !</string>
+</resources>
