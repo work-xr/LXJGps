@@ -25,7 +25,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
-        android:name=".XLJGpsApplication"
+        android:name=".app.XLJGpsApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -36,7 +36,7 @@
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="n7z2OEn7BGuFpVEVnUndE6B67h8Eugrq" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -44,16 +44,16 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SetRelationNumberActivity" >
+        <activity android:name=".ui.SetRelationNumberActivity" >
         </activity>
 
-        <receiver android:name=".StartupReceiver" >
+        <receiver android:name=".receiver.StartupReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <service android:name=".XLJGpsService" />
+        <service android:name=".service.XLJGpsService" />
 	
         <service android:name="com.baidu.location.f"
             android:enabled="true"

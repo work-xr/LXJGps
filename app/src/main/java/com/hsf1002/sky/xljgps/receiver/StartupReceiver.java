@@ -1,4 +1,4 @@
-package com.hsf1002.sky.xljgps;
+package com.hsf1002.sky.xljgps.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

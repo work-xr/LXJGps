@@ -1,11 +1,12 @@
-package com.hsf1002.sky.xljgps;
+package com.hsf1002.sky.xljgps.adapter;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.hsf1002.sky.xljgps.R;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class MainRecycleAdapter extends RecyclerView.Adapter<MainRecycleAdapter.
     private List<String> list;
     private onItemClickListener listener;
 
-    MainRecycleAdapter(List<String> list)
+    public MainRecycleAdapter(List<String> list)
     {
         this.list = list;
     }

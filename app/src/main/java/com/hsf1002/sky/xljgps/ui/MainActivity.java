@@ -1,4 +1,4 @@
-package com.hsf1002.sky.xljgps;
+package com.hsf1002.sky.xljgps.ui;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,18 +10,31 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.*;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import com.hsf1002.sky.xljgps.*;
+import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
+import com.hsf1002.sky.xljgps.bean.ResultMsg;
+import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
+import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenterImpl;
+import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
+import com.hsf1002.sky.xljgps.view.BaseView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import static com.hsf1002.sky.xljgps.util.Const.DOWNLOAD_INFO_FROM_PLATFORM_INDEX;
+import static com.hsf1002.sky.xljgps.util.Const.REPORT_INFO_TO_PLATFORM_INDEX;
+import static com.hsf1002.sky.xljgps.util.Const.SET_RELATION_NUMBER_INDEX;
+import static com.hsf1002.sky.xljgps.util.Const.UPLOAD_INFO_TO_PLATFORM_INDEX;
+
+public class MainActivity extends AppCompatActivity implements BaseView{
     private static final String TAG = "MainActivity";
     private RecyclerView recyclerView;
     private MainRecycleAdapter adapter;
     private List<String> items = new ArrayList<>();
+    private RxjavaHttpPresenterImpl presenter = new RxjavaHttpPresenterImpl(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.main_rv);
         initItems();
-        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+        recyclerView.addItemDecoration(new com.hsf1002.sky.xljgps.util.DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MainRecycleAdapter(items);
         adapter.setOnItemClickListener(new MainRecycleAdapter.onItemClickListener() {
@@ -38,16 +51,16 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(View view, int position) {
                 switch (position)
                 {
-                    case 0:
+                    case SET_RELATION_NUMBER_INDEX:
                         startActivity(new Intent(MainActivity.this, SetRelationNumberActivity.class));
                         break;
-                    case 1:
+                    case UPLOAD_INFO_TO_PLATFORM_INDEX:
                         uploadInfoToPlatform();
                         break;
-                    case 2:
+                    case DOWNLOAD_INFO_FROM_PLATFORM_INDEX:
                         downloadInfoFromPlatform();
                         break;
-                    case 3:
+                    case REPORT_INFO_TO_PLATFORM_INDEX:
                         reportSosGpsInfoToPlatform();
                         break;
                     default:
@@ -124,11 +137,6 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void uploadInfo()
-    {
-        Toast.makeText(this, getString(R.string.upload_success), Toast.LENGTH_SHORT).show();
-    }
-
     private void downloadInfoFromPlatform()
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -151,14 +159,19 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
+    private void uploadInfo()
+    {
+        presenter.uploadInfo();
+    }
+
     private void downloadInfo()
     {
-        Toast.makeText(this, getString(R.string.download_success), Toast.LENGTH_SHORT).show();
+        presenter.downloadInfo();
     }
 
     private void reportSosGpsInfoToPlatform()
     {
-        Toast.makeText(this, getString(R.string.report_success), Toast.LENGTH_SHORT).show();
+        presenter.reportInfo();
     }
 
     @Override
@@ -183,6 +196,36 @@ public class MainActivity extends AppCompatActivity {
             default:
                 break;
         }
+    }
+
+    @Override
+    public void uploadSuccess(ResultMsg resultMsg) {
+        Toast.makeText(this, getString(R.string.upload_success), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void uploadFailed(ResultMsg resultMsg) {
+        Toast.makeText(this, getString(R.string.upload_failed), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void downloadSuccess(ResultMsg resultMsg) {
+        Toast.makeText(this, getString(R.string.download_success), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void downloadFailed(ResultMsg resultMsg) {
+        Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void reportSuccess(ResultMsg resultMsg) {
+        Toast.makeText(this, getString(R.string.report_success), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void reportFailed(ResultMsg resultMsg) {
+        Toast.makeText(this, getString(R.string.report_failed), Toast.LENGTH_SHORT).show();
     }
 
     @Override

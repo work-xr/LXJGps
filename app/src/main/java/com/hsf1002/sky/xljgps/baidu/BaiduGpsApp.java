@@ -1,4 +1,4 @@
-package com.hsf1002.sky.xljgps;
+package com.hsf1002.sky.xljgps.baidu;
 
 import android.content.Context;
 import android.util.Log;

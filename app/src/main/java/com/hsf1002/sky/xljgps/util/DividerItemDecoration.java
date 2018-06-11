@@ -1,4 +1,4 @@
-package com.hsf1002.sky.xljgps;
+package com.hsf1002.sky.xljgps.util;
 
 import android.content.Context;
 import android.content.res.TypedArray;

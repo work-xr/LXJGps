@@ -1,4 +1,4 @@
-package com.hsf1002.sky.xljgps;
+package com.hsf1002.sky.xljgps.ui;
 
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -13,6 +13,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+
+import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
+import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
+import com.hsf1002.sky.xljgps.R;
+import com.hsf1002.sky.xljgps.util.SharedPreUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +39,12 @@ public class SetRelationNumberActivity extends AppCompatActivity {
     private static final String RELATION_NUMBER_COUNT = "relation_number_count";
     private EditText relationNumberEt;
     private static int relationNumberCount = 3;
-    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         recyclerView = findViewById(R.id.main_rv);
         initItems();
@@ -103,7 +106,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         {
             String itemName = names[i];
 
-            String relationNumberStr = sharedPreferences.getString(RELATION_NUMBER + i, "");
+            String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER + i, "");
 
             if (!TextUtils.isEmpty(relationNumberStr))
             {
@@ -119,7 +122,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         for (int i = 0; i < relationNumberCount; ++i)
         {
             String itemName = list.get(i).toString();
-            sharedPreferences.edit().putString(RELATION_NUMBER + i, itemName).commit();
+            SharedPreUtils.getInstance().putString(RELATION_NUMBER + i, itemName);
         }
     }
 
@@ -132,7 +135,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
     {
         String currentNumberStr = relationNumberEt.getText().toString();
         relationNumbers.set(position, currentNumberStr);
-        sharedPreferences.edit().putString(RELATION_NUMBER + position, currentNumberStr).commit();
+        SharedPreUtils.getInstance().putString(RELATION_NUMBER + position, currentNumberStr);
     }
 
     @Override

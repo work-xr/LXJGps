@@ -1,4 +1,4 @@
-package com.hsf1002.sky.xljgps;
+package com.hsf1002.sky.xljgps.service;
 
 import android.app.AlarmManager;
 import android.app.IntentService;
@@ -8,13 +8,17 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
+
+import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL;
+
 /**
  * Created by hefeng on 18-6-6.
  */
 
 public class XLJGpsService extends IntentService {
     private static final String TAG = "XLJGpsService";
-    private static int startServiceInterval = 1 * 60 * 1000;
+    private static int startServiceInterval = BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL;
 
     public XLJGpsService()
     {
