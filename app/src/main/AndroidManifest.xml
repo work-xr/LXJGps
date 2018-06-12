@@ -54,6 +54,7 @@
         </receiver>
 
         <service android:name=".service.XLJGpsService" />
+        <service android:name=".service.GpsService" />
 	
         <service android:name="com.baidu.location.f"
             android:enabled="true"

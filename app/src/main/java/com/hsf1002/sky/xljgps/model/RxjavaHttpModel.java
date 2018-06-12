@@ -6,7 +6,7 @@ import com.allen.library.RxHttpUtils;
 import com.allen.library.interceptor.Transformer;
 import com.allen.library.observer.CommonObserver;
 import com.hsf1002.sky.xljgps.bean.BookBean;
-import com.hsf1002.sky.xljgps.http.ApiService;
+import com.hsf1002.sky.xljgps.http.XiaoLaJiao.ApiService;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
 
 import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_BASE_URL;
@@ -55,6 +55,25 @@ public class RxjavaHttpModel implements BaseModel {
 
     }
 
+    public void getGpsInfo()
+    {
+        RxHttpUtils.getSInstance()
+                .createSApi(com.hsf1002.sky.xljgps.http.XiLaiLe.ApiService.class)
+                .getGpsInfo()
+                .compose(Transformer.<String>switchSchedulers())
+                .subscribe(new CommonObserver<String>() {
+                    @Override
+                    protected void onError(String s) {
+                        Log.d(TAG, "onSuccess: s = " + s);
+                    }
+
+                    @Override
+                    protected void onSuccess(String s) {
+                        Log.d(TAG, "onSuccess: s = " + s);
+                    }
+                });
+    }
+
     public static RxjavaHttpModel getInstance()
     {
         return Holder.instance;
@@ -64,5 +83,4 @@ public class RxjavaHttpModel implements BaseModel {
     {
         private static RxjavaHttpModel instance = new RxjavaHttpModel();
     }
-
 }

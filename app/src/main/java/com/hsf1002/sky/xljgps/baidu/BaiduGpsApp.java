@@ -8,6 +8,8 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 
+import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_FIRST_SCAN_TIME_MAX;
+
 /**
  * Created by hefeng on 18-6-6.
  */
@@ -17,6 +19,8 @@ public class BaiduGpsApp {
     private LocationClient client;
     private MyLocationLister myLocationLister;
     private LocationClientOption option;
+    private static long startTime = 0;
+    private static long currentTime = 0;
 
     BaiduGpsApp()
     {
@@ -37,6 +41,7 @@ public class BaiduGpsApp {
         Log.d(TAG, "initBaiduSDK: ");
         myLocationLister = new MyLocationLister();
         client = new LocationClient(context);
+        startTime = System.currentTimeMillis();
         initLocation();
     }
 
@@ -72,9 +77,12 @@ public class BaiduGpsApp {
     }
 
     public void stopBaiduGps() {
-        Log.d(TAG, "stopBaiduGps: ");
-        client.unRegisterLocationListener(myLocationLister);
-        client.stop();
+        Log.d(TAG, "stopBaiduGps: isStarted = " + client.isStarted());
+        if (client.isStarted()) 
+        {
+            client.unRegisterLocationListener(myLocationLister);
+            client.stop();
+        }
     }
 
     public void restartBaiduGps()
@@ -103,19 +111,37 @@ public class BaiduGpsApp {
             curPosition.append("Street:").append(bdLocation.getStreet()).append(", ");
             curPosition.append("location way: ");
 
-            if (bdLocation.getLocType() == BDLocation.TypeGpsLocation)  // 61
+            if (bdLocation.getLocType() == BDLocation.TypeGpsLocation)
             {
                 curPosition.append("GPS");
             }
-            else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) // 161
+            else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) 
             {
                 curPosition.append("NETWORK");
             }
             else
             {
-                curPosition.append("null");         // 63: network error  505: apk not compatible
+                curPosition.append("null");         
+            }
+            
+            currentTime = System.currentTimeMillis();
+            Log.d(TAG, "onReceiveLocation: startTimie = " + startTime + ", currentTime = " + currentTime);
+            if (currentTime - startTime >= BAIDU_GPS_FIRST_SCAN_TIME_MAX)
+            {
+                Log.d(TAG, "onReceiveLocation: cost too long(larger than) " + BAIDU_GPS_FIRST_SCAN_TIME_MAX/1000 + " seconds to locate, timeout, stop gps..........");
+                stopBaiduGps();
+                return;
             }
 /*
+* http://lbsyun.baidu.com/index.php?title=android-locsdk/guide/addition-func/error-code
+*若返回值是162~167，请将错误码、IMEI、定位唯一标识（自v7.2版本起，通过BDLocation.getLocationID方法获取）和定位时间反馈至邮箱loc-bugs@baidu.com
+*           61: GPS success
+*           62: 无法获取有效定位依据，定位失败，请检查运营商网络或者WiFi网络是否正常开启，尝试重新请求定位
+*           63: 网络异常，没有成功向服务器发起请求，请确认当前测试手机网络是否通畅，尝试重新请求定位
+*           161: Network Success
+*           162: 请求串密文解析失败，一般是由于客户端SO文件加载失败造成，请严格参照开发指南或demo开发，放入对应SO文件
+*           167: 服务端定位失败，请您检查是否禁用获取位置信息权限，尝试重新请求定位
+*           505: AK不存在或者非法，请按照说明文档重新申请AK(1. 将申请的AK写入AndroidMenifest.xml 2. AS->Build中Generated Signed APK再进行安装)
 *  在应用内部, 断网, 还是会取到上次联网时的定位, 退出应用再进入则是断网 63 状态, 此时联网则可正常定位
 * */
             Log.d(TAG, "onReceiveLocation: getLocType = " + bdLocation.getLocType() + ", curPosition = " + curPosition);

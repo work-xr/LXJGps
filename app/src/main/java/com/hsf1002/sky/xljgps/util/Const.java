@@ -17,5 +17,8 @@ public class Const {
     public static final int RXJAVAHTTP_WRITE_TIMEOUT = 100;
     public static final int RXJAVAHTTP_CONNCET_TIMEOUT = 100;
 
+    // 每隔多久启动一次IntentService服务来开始定位,可由服务器端通过调用setStartServiceInterval进行设置更改
     public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
+    // 每次启动百度地图服务XLJGpsService.setServiceAlarm(getApplicationContext(), true);, 如果3分钟内没有定位成功, 自动停止地图服务stopBaiduGps
+    public static final int BAIDU_GPS_FIRST_SCAN_TIME_MAX = 3 * 60 * 1000;
 }
