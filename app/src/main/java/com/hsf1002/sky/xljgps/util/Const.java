@@ -12,7 +12,22 @@ public class Const {
 
     public static final String SHARED_PREFERENCE_NAME = "lxjgps_sp";
 
-    public static final String RXJAVAHTTP_BASE_URL = "https://api.douban.com/";
+    public static final String RXJAVAHTTP_BASE_URL_DOUBAN = "https://api.douban.com/";
+    public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaobawangtest/";
+    public static final String RXJAVAHTTP_BASE_URL_FORMAL = "http://healthdata.4000300659.com:8088/api/xiaobawang/";
+    public static final String RXJAVAHTTP_REPORT_SOSPOSITION = "sosPosition";
+    public static final String RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM = "familyNumber";
+    public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "updatePhone";
+    public static final String RXJAVAHTTP_REPORT_POSITION = "position";
+
+    public static final String RXJAVAHTTP_TYPE_DOWNLOAD = "103";
+    public static final String RXJAVAHTTP_TYPE_UPLOAD = "203";
+    public static final String RXJAVAHTTP_TYPE_REPORT = "202";
+    public static final String RXJAVAHTTP_COMPANY = "xunrui";
+    public static final String RXJAVAHTTP_SECRET_CODE = "iETOECQ9kiJw75AZ";//"ab2342145acdf";    // iETOECQ9kiJw75AZ
+    public static final String RXJAVAHTTP_ENCODE_TYPE = "UTF-8";
+    public static final String RXJAVAHTTP_NAME = "xunrui";
+
     public static final int RXJAVAHTTP_READ_TIMEOUT = 100;
     public static final int RXJAVAHTTP_WRITE_TIMEOUT = 100;
     public static final int RXJAVAHTTP_CONNCET_TIMEOUT = 100;
@@ -21,4 +36,7 @@ public class Const {
     public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
     // 每次启动百度地图服务XLJGpsService.setServiceAlarm(getApplicationContext(), true);, 如果3分钟内没有定位成功, 自动停止地图服务stopBaiduGps
     public static final int BAIDU_GPS_FIRST_SCAN_TIME_MAX = 3 * 60 * 1000;
+
+    public static final String RELATION_NUMBER = "relation_number_";
+    public static final String RELATION_NUMBER_COUNT = "relation_number_count";
 }

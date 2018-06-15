@@ -15,8 +15,10 @@ import android.widget.Toast;
 
 import com.hsf1002.sky.xljgps.*;
 import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
-import com.hsf1002.sky.xljgps.bean.ResultMsg;
-import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
+import com.hsf1002.sky.xljgps.bean.ReceiveMsgBean;
+import com.hsf1002.sky.xljgps.bean.ReportMsgBean;
+import com.hsf1002.sky.xljgps.bean.ResultMsgBean;
+import com.hsf1002.sky.xljgps.bean.SendMsgBean;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenterImpl;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
 import com.hsf1002.sky.xljgps.view.BaseView;
@@ -199,32 +201,32 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     }
 
     @Override
-    public void uploadSuccess(ResultMsg resultMsg) {
+    public void uploadSuccess(SendMsgBean resultMsg) {
         Toast.makeText(this, getString(R.string.upload_success), Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void uploadFailed(ResultMsg resultMsg) {
+    public void uploadFailed(String resultMsg) {
         Toast.makeText(this, getString(R.string.upload_failed), Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void downloadSuccess(ResultMsg resultMsg) {
+    public void downloadSuccess(ReceiveMsgBean resultMsg) {
         Toast.makeText(this, getString(R.string.download_success), Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void downloadFailed(ResultMsg resultMsg) {
+    public void downloadFailed(String resultMsg) {
         Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void reportSuccess(ResultMsg resultMsg) {
+    public void reportSuccess(ReportMsgBean resultMsg) {
         Toast.makeText(this, getString(R.string.report_success), Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void reportFailed(ResultMsg resultMsg) {
+    public void reportFailed(String resultMsg) {
         Toast.makeText(this, getString(R.string.report_failed), Toast.LENGTH_SHORT).show();
     }
 

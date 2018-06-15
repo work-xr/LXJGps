@@ -43,7 +43,7 @@ public class SharedPreUtils {
         editor.remove(key).apply();
     }
 
-    private int getInt(String key, int value)
+    public int getInt(String key, int value)
     {
         return sharedPreferences.getInt(key, value);
     }

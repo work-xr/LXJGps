@@ -60,6 +60,11 @@ public class GpsService extends Service {
         return pi != null;
     }
 
+    public void stopGpsService()
+    {
+        stopSelf();
+    }
+
     public static void setStartServiceInterval(int interval)
     {
         startServiceInterval = interval;

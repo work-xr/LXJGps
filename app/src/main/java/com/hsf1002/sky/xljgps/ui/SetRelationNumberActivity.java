@@ -22,6 +22,9 @@ import com.hsf1002.sky.xljgps.util.SharedPreUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER;
+import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER_COUNT;
+
 /**
  * Created by hefeng on 18-6-6.
  */
@@ -32,13 +35,13 @@ public class SetRelationNumberActivity extends AppCompatActivity {
     private MainRecycleAdapter adapter;
     private List<String> items = new ArrayList<>();
     private List<String> relationNumbers = new ArrayList<>();
-    private static final String RELATION_NUMBER = "relation_number_";
+
     //private static final String RELATION_NUMBER_1 = "relation_number_1";
     //private static final String RELATION_NUMBER_2 = "relation_number_2";
     //private static final String RELATION_NUMBER_3 = "relation_number_3";
-    private static final String RELATION_NUMBER_COUNT = "relation_number_count";
+
     private EditText relationNumberEt;
-    private static int relationNumberCount = 3;
+    private static int relationNumberCount = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,7 +51,6 @@ public class SetRelationNumberActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.main_rv);
         initItems();
-        //recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL_LIST));
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MainRecycleAdapter(items);
@@ -100,7 +102,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
 
         relationNumbers.clear();
         items.clear();
-        relationNumberCount = names.length;
+        relationNumberCount = 0;
 
         for (int i=0; i<names.length; ++i)
         {
@@ -110,7 +112,8 @@ public class SetRelationNumberActivity extends AppCompatActivity {
 
             if (!TextUtils.isEmpty(relationNumberStr))
             {
-                itemName += relationNumberStr;
+                itemName += ":  " + relationNumberStr;
+                relationNumberCount++;
             }
             relationNumbers.add(i, relationNumberStr);
             items.add(itemName);
@@ -138,10 +141,33 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         SharedPreUtils.getInstance().putString(RELATION_NUMBER + position, currentNumberStr);
     }
 
+    private void saveRelationNumberCount()
+    {
+        relationNumberCount = 0;
+
+        for (int i=0; i<3; ++i)
+        {
+            String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER + i, "");
+
+            if (!TextUtils.isEmpty(relationNumberStr))
+            {
+                relationNumberCount++;
+            }
+        }
+        SharedPreUtils.getInstance().putInt(RELATION_NUMBER_COUNT, relationNumberCount);
+        Log.d(TAG, "saveRelationNumberCount: relationNumberCount = " + relationNumberCount);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause: save real number count............");
+        saveRelationNumberCount();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: refreshing.......................");
-        adapter.notifyDataSetChanged();
     }
 }

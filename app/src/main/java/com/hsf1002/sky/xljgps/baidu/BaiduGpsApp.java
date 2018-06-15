@@ -7,6 +7,7 @@ import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.hsf1002.sky.xljgps.bean.BaiduGpsMsgBean;
 
 import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_FIRST_SCAN_TIME_MAX;
 
@@ -21,9 +22,11 @@ public class BaiduGpsApp {
     private LocationClientOption option;
     private static long startTime = 0;
     private static long currentTime = 0;
+    private static BaiduGpsMsgBean sBaiduGpsMsgBean;
 
     BaiduGpsApp()
     {
+        sBaiduGpsMsgBean = new BaiduGpsMsgBean();
     }
 
     public static BaiduGpsApp getInstance()
@@ -103,8 +106,13 @@ public class BaiduGpsApp {
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
             StringBuilder curPosition = new StringBuilder();
-            curPosition.append("Lantitude: ").append(bdLocation.getLatitude()).append(", ");
-            curPosition.append("Longtitude:").append(bdLocation.getLongitude()).append(", ");
+            String latitude = String.valueOf(bdLocation.getLatitude());
+            String longitude = String.valueOf(bdLocation.getLongitude());
+            String locationType = "GPS";
+            String locType = "Baidu";
+
+            curPosition.append("Lantitude: ").append(latitude).append(", ");
+            curPosition.append("Longtitude:").append(longitude).append(", ");
             curPosition.append("Country: ").append(bdLocation.getCountry()).append(", ");
             curPosition.append("City:").append(bdLocation.getCity()).append(", ");
             curPosition.append("District: ").append(bdLocation.getDistrict()).append(", ");
@@ -114,23 +122,26 @@ public class BaiduGpsApp {
             if (bdLocation.getLocType() == BDLocation.TypeGpsLocation)
             {
                 curPosition.append("GPS");
+                locationType = "GPS";
             }
             else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) 
             {
                 curPosition.append("NETWORK");
+                locationType = "NETWORK";
             }
             else
             {
-                curPosition.append("null");         
+                curPosition.append("null");
+                locationType = "null";
             }
             
             currentTime = System.currentTimeMillis();
             Log.d(TAG, "onReceiveLocation: startTimie = " + startTime + ", currentTime = " + currentTime);
+            Log.d(TAG, "onReceiveLocation: getLocType = " + bdLocation.getLocType() + ", curPosition = " + curPosition);
             if (currentTime - startTime >= BAIDU_GPS_FIRST_SCAN_TIME_MAX)
             {
                 Log.d(TAG, "onReceiveLocation: cost too long(larger than) " + BAIDU_GPS_FIRST_SCAN_TIME_MAX/1000 + " seconds to locate, timeout, stop gps..........");
                 stopBaiduGps();
-                return;
             }
 /*
 * http://lbsyun.baidu.com/index.php?title=android-locsdk/guide/addition-func/error-code
@@ -144,13 +155,13 @@ public class BaiduGpsApp {
 *           505: AK不存在或者非法，请按照说明文档重新申请AK(1. 将申请的AK写入AndroidMenifest.xml 2. AS->Build中Generated Signed APK再进行安装)
 *  在应用内部, 断网, 还是会取到上次联网时的定位, 退出应用再进入则是断网 63 状态, 此时联网则可正常定位
 * */
-            Log.d(TAG, "onReceiveLocation: getLocType = " + bdLocation.getLocType() + ", curPosition = " + curPosition);
-
-            if (bdLocation.getLocType() == BDLocation.TypeGpsLocation || bdLocation.getLocType() == BDLocation.TypeNetWorkLocation)
+            else if (bdLocation.getLocType() == BDLocation.TypeGpsLocation || bdLocation.getLocType() == BDLocation.TypeNetWorkLocation)
             {
                 Log.d(TAG, "onReceiveLocation: 0   get location success, stop gps service");
                 stopBaiduGps();
             }
+
+            setBaiduGpsStatus(locationType, locType, longitude, latitude);
         }
 
         @Override
@@ -162,5 +173,24 @@ public class BaiduGpsApp {
         public void onLocDiagnosticMessage(int i, int i1, String s) {
             super.onLocDiagnosticMessage(i, i1, s);
         }
+    }
+
+
+    private void setBaiduGpsStatus(String locationType, String locType, String longitude, String latitude)
+    {
+        sBaiduGpsMsgBean.setPosition_type(locationType);
+        sBaiduGpsMsgBean.setLoc_type(locType);
+        sBaiduGpsMsgBean.setLongitude(longitude);
+        sBaiduGpsMsgBean.setLatitude(latitude);
+    }
+
+    public BaiduGpsMsgBean getBaiduGpsStatus()
+    {
+        sBaiduGpsMsgBean.setPosition_type("NETWORK");
+        sBaiduGpsMsgBean.setLoc_type("Baidu");
+        sBaiduGpsMsgBean.setLongitude("22.3333");
+        sBaiduGpsMsgBean.setLatitude("110.1122");
+
+        return sBaiduGpsMsgBean;
     }
 }

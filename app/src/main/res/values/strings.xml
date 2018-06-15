@@ -9,9 +9,9 @@
     </string-array>
 
     <string-array name="relation_item_name" >
-        <item>relation number 1: </item>
-        <item>relation number 2: </item>
-        <item>relation number 3: </item>
+        <item>platform center number</item>
+        <item>relation number 1</item>
+        <item>relation number 2</item>
     </string-array>
 
     <string name="sure">sure</string>
