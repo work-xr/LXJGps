@@ -12,6 +12,7 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM;
+import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_REPORT_POSITION;
 import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_REPORT_SOSPOSITION;
 import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_UPDATE_TO_PLATFORM;
 
@@ -71,7 +72,7 @@ public interface ApiService {
 
     //http://healthdata.4000300659.com:8088/api/xiaobawangtest/position
     //http://healthdata.4000300659.com:8088/api/xiaobawang/position
-    @POST(RXJAVAHTTP_REPORT_SOSPOSITION)
+    @POST(RXJAVAHTTP_REPORT_POSITION)
     @FormUrlEncoded
     Observable<ReportMsgBean> reportPosition(
             @Field("imei") String imei,

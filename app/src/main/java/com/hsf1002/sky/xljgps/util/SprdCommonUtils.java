@@ -8,9 +8,16 @@ import android.util.Log;
 import com.hsf1002.sky.xljgps.R;
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
+import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME;
+import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME_COUNT;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER_COUNT;
 
@@ -20,6 +27,7 @@ import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER_COUNT;
 
 public class SprdCommonUtils {
     private static final String TAG = "SprdCommonUtils";
+    private static final String BATTERY_CAPACITY_FILE_PATH = "/sys/class/power_supply/battery/capacity";
     private Context context;
 
     public void init(Context context)
@@ -93,6 +101,18 @@ public class SprdCommonUtils {
         return numberString.toString();
     }
 
+    public void setRelationNumber(List<String> relationNumber)
+    {
+        int count = relationNumber.size();
+
+        for (int i=0; i<count; ++i)
+        {
+            SharedPreUtils.getInstance().putString(RELATION_NUMBER + i, relationNumber.get(i));
+        }
+
+        SharedPreUtils.getInstance().putInt(RELATION_NUMBER_COUNT, count);
+    }
+
     public String getRelationNumberNames()
     {
         StringBuilder numberStringNames = new StringBuilder();
@@ -116,9 +136,46 @@ public class SprdCommonUtils {
         return numberStringNames.toString();
     }
 
+    public void setRelationNumberNames(List<String> relationNames)
+    {
+        int count = relationNames.size();
+
+        for (int i=0; i<count; ++i)
+        {
+            SharedPreUtils.getInstance().putString(RELATION_NAME + i, relationNames.get(i));
+        }
+
+        SharedPreUtils.getInstance().putInt(RELATION_NAME_COUNT, count);
+    }
+
     public String getCurrentBatteryCapacity()
     {
-        return String.valueOf(90);
+        File localFile = new File(BATTERY_CAPACITY_FILE_PATH);
+        int percent = 0;
+
+        try
+        {
+            FileReader localFileReader = new FileReader(localFile);
+            char[] arrayOfChar = new char[30];
+            try
+            {
+                String[] arrayOfString = new String(arrayOfChar, 0, localFileReader.read(arrayOfChar)).trim().split("\n");
+                Log.i(TAG, "getCurrentBatteryCapacity: percent = " + arrayOfString[0]);
+
+                //can do run time test only when battery percent >= 40%
+                percent = Integer.parseInt(arrayOfString[0]);
+            }
+            catch (IOException localIOException)
+            {
+                Log.e(TAG, "getCurrentBatteryCapacity: read battery-capacity file err!");
+            }
+        }
+        catch (FileNotFoundException localFileNotFoundException)
+        {
+            Log.e(TAG, "getCurrentBatteryCapacity: get battery capacity file err!");
+        }
+
+        return String.valueOf(percent);
     }
 
     public static SprdCommonUtils getInstance()

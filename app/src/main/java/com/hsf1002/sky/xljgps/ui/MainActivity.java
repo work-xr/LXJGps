@@ -21,6 +21,7 @@ import com.hsf1002.sky.xljgps.bean.ResultMsgBean;
 import com.hsf1002.sky.xljgps.bean.SendMsgBean;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenterImpl;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
+import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 import com.hsf1002.sky.xljgps.view.BaseView;
 
 import java.util.ArrayList;
@@ -213,6 +214,12 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     @Override
     public void downloadSuccess(ReceiveMsgBean resultMsg) {
         Toast.makeText(this, getString(R.string.download_success), Toast.LENGTH_SHORT).show();
+
+        List<String> relationName = resultMsg.getRelationship();
+        List<String> relationNumber = resultMsg.getPhone();
+
+        //SprdCommonUtils.getInstance().setRelationNumberNames(relationName);
+        //SprdCommonUtils.getInstance().setRelationNumber(relationNumber);
     }
 
     @Override

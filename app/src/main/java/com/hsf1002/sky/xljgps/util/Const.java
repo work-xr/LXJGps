@@ -23,8 +23,13 @@ public class Const {
     public static final String RXJAVAHTTP_TYPE_DOWNLOAD = "103";
     public static final String RXJAVAHTTP_TYPE_UPLOAD = "203";
     public static final String RXJAVAHTTP_TYPE_REPORT = "202";
+    //101:实时定位数据；100：开机；201：定时上传定位数据
+    public static final String RXJAVAHTTP_TYPE_CURRENT = "101";
+    public static final String RXJAVAHTTP_TYPE_POWERON = "100";
+    public static final String RXJAVAHTTP_TYPE_TIMING = "201";
+
     public static final String RXJAVAHTTP_COMPANY = "xunrui";
-    public static final String RXJAVAHTTP_SECRET_CODE = "iETOECQ9kiJw75AZ";//"ab2342145acdf";    // iETOECQ9kiJw75AZ
+    public static final String RXJAVAHTTP_SECRET_CODE = "iETOECQ9kiJw75AZ";//ab2342145acdf;    // iETOECQ9kiJw75AZ
     public static final String RXJAVAHTTP_ENCODE_TYPE = "UTF-8";
     public static final String RXJAVAHTTP_NAME = "xunrui";
 
@@ -39,4 +44,6 @@ public class Const {
 
     public static final String RELATION_NUMBER = "relation_number_";
     public static final String RELATION_NUMBER_COUNT = "relation_number_count";
+    public static final String RELATION_NAME = "relation_name_";
+    public static final String RELATION_NAME_COUNT = "relation_name_count";
 }

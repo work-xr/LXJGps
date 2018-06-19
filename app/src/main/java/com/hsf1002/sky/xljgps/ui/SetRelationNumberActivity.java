@@ -22,6 +22,8 @@ import com.hsf1002.sky.xljgps.util.SharedPreUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME;
+import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME_COUNT;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER_COUNT;
 
@@ -35,6 +37,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
     private MainRecycleAdapter adapter;
     private List<String> items = new ArrayList<>();
     private List<String> relationNumbers = new ArrayList<>();
+    private List<String> relationNames = new ArrayList<>();
 
     //private static final String RELATION_NUMBER_1 = "relation_number_1";
     //private static final String RELATION_NUMBER_2 = "relation_number_2";
@@ -42,6 +45,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
 
     private EditText relationNumberEt;
     private static int relationNumberCount = 0;
+    private static int relationNameCount = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,33 +103,62 @@ public class SetRelationNumberActivity extends AppCompatActivity {
     private void getPresetRelationNumber()
     {
         String[]  names = getResources().getStringArray(R.array.relation_item_name);
+        int nameCount = SharedPreUtils.getInstance().getInt(RELATION_NAME_COUNT, 0);
+        int numberCount = SharedPreUtils.getInstance().getInt(RELATION_NUMBER_COUNT, 0);
 
         relationNumbers.clear();
         items.clear();
-        relationNumberCount = 0;
 
-        for (int i=0; i<names.length; ++i)
+        Log.d(TAG, "getPresetRelationNumber: nameCount = " + nameCount + ", numberCount = " + numberCount);
+
+        if (nameCount == 0)
         {
-            String itemName = names[i];
+            relationNumberCount = 0;
+            relationNameCount = 0;
+            nameCount = names.length;
 
+            for (int i=0; i<nameCount; ++i)
+            {
+                String itemName = names[i];
+                String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER + i, "");
+                SharedPreUtils.getInstance().putString(RELATION_NAME + i, itemName);
+
+                if (!TextUtils.isEmpty(relationNumberStr))
+                {
+                    itemName += ":  " + relationNumberStr;
+                    relationNumberCount++;
+                }
+                relationNumbers.add(i, relationNumberStr);
+                items.add(itemName);
+
+                relationNameCount++;
+            }
+            SharedPreUtils.getInstance().putInt(RELATION_NAME_COUNT, nameCount);
+        }
+        else
+        {
+            setDataUpdate();
+        }
+    }
+
+    private void setDataUpdate()
+    {
+        int nameCount = SharedPreUtils.getInstance().getInt(RELATION_NAME_COUNT, 0);
+        //int numberCount = SharedPreUtils.getInstance().getInt(RELATION_NUMBER_COUNT, 0);
+        relationNumbers.clear();
+        items.clear();
+
+        for (int i=0; i<nameCount; ++i)
+        {
+            String itemName = SharedPreUtils.getInstance().getString(RELATION_NAME + i, "");
             String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER + i, "");
 
             if (!TextUtils.isEmpty(relationNumberStr))
             {
                 itemName += ":  " + relationNumberStr;
-                relationNumberCount++;
             }
             relationNumbers.add(i, relationNumberStr);
             items.add(itemName);
-        }
-    }
-
-    public void setRelationNumberFromPlatform(List<String> list)
-    {
-        for (int i = 0; i < relationNumberCount; ++i)
-        {
-            String itemName = list.get(i).toString();
-            SharedPreUtils.getInstance().putString(RELATION_NUMBER + i, itemName);
         }
     }
 
@@ -139,6 +172,9 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         String currentNumberStr = relationNumberEt.getText().toString();
         relationNumbers.set(position, currentNumberStr);
         SharedPreUtils.getInstance().putString(RELATION_NUMBER + position, currentNumberStr);
+
+        setDataUpdate();
+        adapter.notifyItemChanged(position);
     }
 
     private void saveRelationNumberCount()
