@@ -1,6 +1,7 @@
 package com.hsf1002.sky.xljgps.util;
 
 import android.content.Context;
+import android.os.BatteryManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import static android.content.Context.BATTERY_SERVICE;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME_COUNT;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER;
@@ -150,8 +152,9 @@ public class SprdCommonUtils {
 
     public String getCurrentBatteryCapacity()
     {
+        int percent;
+        /*
         File localFile = new File(BATTERY_CAPACITY_FILE_PATH);
-        int percent = 0;
 
         try
         {
@@ -172,8 +175,12 @@ public class SprdCommonUtils {
         }
         catch (FileNotFoundException localFileNotFoundException)
         {
-            Log.e(TAG, "getCurrentBatteryCapacity: get battery capacity file err!");
-        }
+            Log.e(TAG, "getCurrentBatteryCapacity: get battery capacity file err!");                    // the path is correct, Maybe no system permission
+        }*/
+
+        BatteryManager batteryManager = (BatteryManager)XLJGpsApplication.getAppContext().getSystemService(BATTERY_SERVICE);
+        percent = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+        Log.d(TAG, "getCurrentBatteryCapacity: battery = " + percent);
 
         return String.valueOf(percent);
     }

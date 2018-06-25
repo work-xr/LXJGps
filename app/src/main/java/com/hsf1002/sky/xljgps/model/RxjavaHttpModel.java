@@ -29,6 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+
 import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_BASE_URL_DOUBAN;
 import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_BASE_URL_TEST;
 import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_COMPANY;
@@ -215,6 +218,74 @@ public class RxjavaHttpModel implements BaseModel {
                     @Override
                     protected void onSuccess(ReportMsgBean reportMsgBean) {
                         Log.d(TAG, "reportInfo onSuccess: reportMsgBean = " + reportMsgBean);
+                        listener.reportInfoSuccess(reportMsgBean);
+                    }
+                });
+    }
+
+    @Override
+    public void reportGsonInfo(final RxjavaHttpPresenter.OnReportListener listener) {
+        String imei = SprdCommonUtils.getInstance().getIMEI();
+        String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
+        String capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
+        String data = null;
+        String sign = null;
+
+        BaiduGpsMsgBean baiduGpsMsgBean = BaiduGpsApp.getInstance().getBaiduGpsStatus();
+        String positionType = baiduGpsMsgBean.getPosition_type();
+        String locType = baiduGpsMsgBean.getLoc_type();
+        String latitude = baiduGpsMsgBean.getLatitude();
+        String longitude = baiduGpsMsgBean.getLongitude();
+
+        ReportParamBean reportParamBean = new ReportParamBean(imei,
+                RXJAVAHTTP_COMPANY,
+                RXJAVAHTTP_TYPE_REPORT,
+                positionType,
+                time,
+                locType,
+                longitude,
+                latitude,
+                capacity
+        );
+
+        String gsonString = ReportParamBean.getReportParamGson(reportParamBean);
+        Log.d(TAG, "reportGsonInfo: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
+        String sortedGsonString = getSortedParam(gsonString);
+
+        try
+        {
+            data = URLEncoder.encode(sortedGsonString, RXJAVAHTTP_ENCODE_TYPE);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "reportGsonInfo: encode data = " + data);
+        sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
+        Log.d(TAG, "reportGsonInfo: sign = " + sign);
+        String sign1 = MD5Utils.encrypt("1234");
+        Log.d(TAG, "reportGsonInfo: sign1 = " + sign1);
+
+        //RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), data.toString());
+
+        RxHttpUtils.getSInstance()
+                .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
+                .createSApi(ApiService.class)
+                .reportGsonInfo(
+                        data,
+                        sign,
+                        RXJAVAHTTP_COMPANY)
+                .compose(Transformer.<ReportMsgBean>switchSchedulers())
+                .subscribe(new CommonObserver<ReportMsgBean>() {
+                    @Override
+                    protected void onError(String s) {
+                        Log.d(TAG, "reportGsonInfo onError: s = " + s);
+                        listener.reportInfoFailed(s);
+                    }
+
+                    @Override
+                    protected void onSuccess(ReportMsgBean reportMsgBean) {
+                        Log.d(TAG, "reportGsonInfo onSuccess: reportMsgBean = " + reportMsgBean);
                         listener.reportInfoSuccess(reportMsgBean);
                     }
                 });
@@ -417,7 +488,7 @@ public class RxjavaHttpModel implements BaseModel {
         params = params.substring(1);  // delete {
         String[] strSplits = params.split(":");
         length = strSplits.length - 1;
-        Log.d(TAG, "geSortedParam: paramNumber = " + length + ", params = " + params);
+        Log.d(TAG, "getSortedParam: before sorted paramNumber = " + length + ", params = " + params);
 
         for (int i=0; i<length; ++i)
         {
@@ -453,7 +524,7 @@ public class RxjavaHttpModel implements BaseModel {
         }
         sortedParam.append("}");
 
-        Log.d(TAG, "geSortedParam: sortedParam = " + sortedParam);
+        Log.d(TAG, "getSortedParam: after sorted sortedParam = " + sortedParam);
 
         return sortedParam.toString();
     }

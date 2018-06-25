@@ -28,7 +28,7 @@ public class Const {
     public static final String RXJAVAHTTP_TYPE_POWERON = "100";
     public static final String RXJAVAHTTP_TYPE_TIMING = "201";
 
-    public static final String RXJAVAHTTP_COMPANY = "xunrui";
+    public static final String RXJAVAHTTP_COMPANY = "IJIA";
     public static final String RXJAVAHTTP_SECRET_CODE = "iETOECQ9kiJw75AZ";//ab2342145acdf;    // iETOECQ9kiJw75AZ
     public static final String RXJAVAHTTP_ENCODE_TYPE = "UTF-8";
     public static final String RXJAVAHTTP_NAME = "xunrui";
@@ -41,6 +41,9 @@ public class Const {
     public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
     // 每次启动百度地图服务XLJGpsService.setServiceAlarm(getApplicationContext(), true);, 如果3分钟内没有定位成功, 自动停止地图服务stopBaiduGps
     public static final int BAIDU_GPS_FIRST_SCAN_TIME_MAX = 3 * 60 * 1000;
+    public static final String BAIDU_GPS_LOCATION_TYPE_GPS = "gps";
+    public static final String BAIDU_GPS_LOCATION_TYPE_LBS = "lbs";
+    public static final String BAIDU_GPS_LOCATION_TYPE_WIFI = "wifi";
 
     public static final String RELATION_NUMBER = "relation_number_";
     public static final String RELATION_NUMBER_COUNT = "relation_number_count";

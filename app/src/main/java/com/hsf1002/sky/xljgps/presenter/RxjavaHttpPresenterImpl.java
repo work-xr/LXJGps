@@ -57,7 +57,8 @@ public class RxjavaHttpPresenterImpl implements RxjavaHttpPresenter.OnDownloadLi
 
     @Override
     public void reportInfo() {
-        model.reportInfo(this);
+        //model.reportInfo(this);
+        model.reportGsonInfo(this);
     }
 
     @Override

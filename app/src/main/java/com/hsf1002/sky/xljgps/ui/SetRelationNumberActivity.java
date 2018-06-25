@@ -81,6 +81,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         if (relationNumbers.get(position) != null)
         {
             relationNumberEt.setText(relationNumbers.get(position).toString());
+            relationNumberEt.setSelection(relationNumbers.get(position).toString().length());
         }
         builder.setTitle(getString(R.string.set_relation_number));
         builder.setView(view);

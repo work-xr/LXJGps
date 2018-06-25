@@ -1,15 +1,23 @@
 package com.hsf1002.sky.xljgps.baidu;
 
 import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
 import com.hsf1002.sky.xljgps.bean.BaiduGpsMsgBean;
 
+import static android.content.Context.WIFI_SERVICE;
 import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_FIRST_SCAN_TIME_MAX;
+import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_LOCATION_TYPE_GPS;
+import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_LOCATION_TYPE_LBS;
+import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_LOCATION_TYPE_WIFI;
 
 /**
  * Created by hefeng on 18-6-6.
@@ -108,8 +116,8 @@ public class BaiduGpsApp {
             StringBuilder curPosition = new StringBuilder();
             String latitude = String.valueOf(bdLocation.getLatitude());
             String longitude = String.valueOf(bdLocation.getLongitude());
-            String locationType = "GPS";
-            String locType = "Baidu";
+            String locationType = BAIDU_GPS_LOCATION_TYPE_GPS;
+            String locType = "1";// 1->"Baidu" 2->"GaoDe";
 
             curPosition.append("Lantitude: ").append(latitude).append(", ");
             curPosition.append("Longtitude:").append(longitude).append(", ");
@@ -122,12 +130,29 @@ public class BaiduGpsApp {
             if (bdLocation.getLocType() == BDLocation.TypeGpsLocation)
             {
                 curPosition.append("GPS");
-                locationType = "GPS";
+                locationType = BAIDU_GPS_LOCATION_TYPE_GPS;
             }
             else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) 
             {
                 curPosition.append("NETWORK");
-                locationType = "NETWORK";
+
+                // wifi or ds
+                WifiManager wifiManager = (WifiManager)XLJGpsApplication.getAppContext().getSystemService(WIFI_SERVICE);
+                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED && wifiInfo != null)
+                {
+                    String ssid = wifiInfo.getSSID();
+                    Log.d(TAG, "onReceiveLocation: ssid = " + ssid);
+
+                    if (!TextUtils.isEmpty(ssid))
+                    {
+                        locationType = BAIDU_GPS_LOCATION_TYPE_WIFI;
+                    }
+                    else
+                    {
+                        locationType = BAIDU_GPS_LOCATION_TYPE_LBS;
+                    }
+                }
             }
             else
             {
@@ -175,7 +200,6 @@ public class BaiduGpsApp {
         }
     }
 
-
     private void setBaiduGpsStatus(String locationType, String locType, String longitude, String latitude)
     {
         sBaiduGpsMsgBean.setPosition_type(locationType);
@@ -186,10 +210,10 @@ public class BaiduGpsApp {
 
     public BaiduGpsMsgBean getBaiduGpsStatus()
     {
-        sBaiduGpsMsgBean.setPosition_type("NETWORK");
-        sBaiduGpsMsgBean.setLoc_type("Baidu");
+        sBaiduGpsMsgBean.setPosition_type(BAIDU_GPS_LOCATION_TYPE_LBS);
+        sBaiduGpsMsgBean.setLoc_type("1");
         sBaiduGpsMsgBean.setLongitude("22.3333");
-        sBaiduGpsMsgBean.setLatitude("110.1122");
+        sBaiduGpsMsgBean.setLatitude("113.1122");
 
         return sBaiduGpsMsgBean;
     }

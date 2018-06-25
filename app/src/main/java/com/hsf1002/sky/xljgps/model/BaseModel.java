@@ -10,5 +10,6 @@ public interface BaseModel {
     void downloadInfo(RxjavaHttpPresenter.OnDownloadListener listener);
     void uploadInfo(RxjavaHttpPresenter.OnUploadListener listener);
     void reportInfo(RxjavaHttpPresenter.OnReportListener listener);
+    void reportGsonInfo(RxjavaHttpPresenter.OnReportListener listener);
     void reportPosition(String type, RxjavaHttpPresenter.OnReportListener listener);
 }

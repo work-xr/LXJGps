@@ -6,6 +6,8 @@ import com.hsf1002.sky.xljgps.bean.ReportMsgBean;
 import com.hsf1002.sky.xljgps.bean.SendMsgBean;
 
 import io.reactivex.Observable;
+import okhttp3.RequestBody;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -40,6 +42,14 @@ public interface ApiService {
             @Field("power") String power,
             @Field("data") String data,
             @Field("sign") String sign
+    );
+
+    @POST(RXJAVAHTTP_REPORT_SOSPOSITION)
+    @FormUrlEncoded
+    Observable<ReportMsgBean> reportGsonInfo(
+            @Field("data") String data,
+            @Field("sign") String sign,
+            @Field("company") String company
     );
 
     //http://healthdata.4000300659.com:8088/api/xiaobawangtest/updatePhone
