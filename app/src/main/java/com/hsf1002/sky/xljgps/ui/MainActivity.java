@@ -14,14 +14,11 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.hsf1002.sky.xljgps.*;
+import com.hsf1002.sky.xljgps.ReturnMsg.ResultMsg;
 import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
-import com.hsf1002.sky.xljgps.bean.ReceiveMsgBean;
-import com.hsf1002.sky.xljgps.bean.ReportMsgBean;
-import com.hsf1002.sky.xljgps.bean.ResultMsgBean;
-import com.hsf1002.sky.xljgps.bean.SendMsgBean;
+import com.hsf1002.sky.xljgps.ReturnMsg.ReceiveMsgBean;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenterImpl;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
-import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 import com.hsf1002.sky.xljgps.view.BaseView;
 
 import java.util.ArrayList;
@@ -202,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     }
 
     @Override
-    public void uploadSuccess(SendMsgBean resultMsg) {
+    public void uploadSuccess(ResultMsg resultMsg) {
         Toast.makeText(this, getString(R.string.upload_success), Toast.LENGTH_SHORT).show();
     }
 
@@ -212,11 +209,11 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     }
 
     @Override
-    public void downloadSuccess(ReceiveMsgBean resultMsg) {
+    public void downloadSuccess(ResultMsg<ReceiveMsgBean> resultMsg) {
         Toast.makeText(this, getString(R.string.download_success), Toast.LENGTH_SHORT).show();
 
-        List<String> relationName = resultMsg.getRelationship();
-        List<String> relationNumber = resultMsg.getPhone();
+        List<String> relationName = resultMsg.getMessage().getRelationship();
+        List<String> relationNumber = resultMsg.getMessage().getPhone();
 
         //SprdCommonUtils.getInstance().setRelationNumberNames(relationName);
         //SprdCommonUtils.getInstance().setRelationNumber(relationNumber);
@@ -228,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     }
 
     @Override
-    public void reportSuccess(ReportMsgBean resultMsg) {
+    public void reportSuccess(ResultMsg resultMsg) {
         Toast.makeText(this, getString(R.string.report_success), Toast.LENGTH_SHORT).show();
     }
 

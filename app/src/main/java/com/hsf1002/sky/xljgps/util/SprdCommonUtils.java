@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.List;
 
 import static android.content.Context.BATTERY_SERVICE;
+import static android.os.Build.MANUFACTURER;
+import static android.os.Build.MODEL;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME_COUNT;
 import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER;
@@ -37,8 +39,7 @@ public class SprdCommonUtils {
         this.context = context;
     }
 
-    SprdCommonUtils()
-    {
+    SprdCommonUtils(){
     }
 
     public String getIMEI()
@@ -65,6 +66,16 @@ public class SprdCommonUtils {
         }
 
         return deviceId;
+    }
+
+    public String getManufactory()
+    {
+        return MANUFACTURER;
+    }
+
+    public String getModel()
+    {
+        return MODEL;
     }
 
     public String getFormatCurrentTime()

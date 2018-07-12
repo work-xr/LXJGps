@@ -38,6 +38,9 @@ public class XLJGpsApplication extends Application {
         rxjavaHttpInit();
 
         //RxjavaHttpModel.getInstance().getUserInfo();
+        //RxjavaHttpModel.getInstance().getPersonList();
+        //RxjavaHttpModel.getInstance().getPersonById(2);
+        //RxjavaHttpModel.getInstance().addPerson("lili", 19);
     }
 
     private void rxjavaHttpInit()

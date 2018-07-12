@@ -1,4 +1,4 @@
-package com.hsf1002.sky.xljgps.bean;
+package com.hsf1002.sky.xljgps.ReturnMsg;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -21,29 +21,20 @@ public class ReceiveMsgBean {
     {"success": 1,"message": "SUCCEED","relationship": "亲情号码1，亲情号码2，亲情号码3","phone": "10086,1008611,10010"}
     失败：
     { "success ": 0, " message": "failing"}
-*/
+
     //private static final String JSON_ID = "id";
     private static final String JSON_SUCCESS = "success";
     private static final String JSON_MESSAGE = "message";
     private static final String JSON_RELATIONSHIP = "relationship";
-    private static final String JSON_PHONE = "phone";
+    private static final String JSON_PHONE = "phone";*/
 
     //private static final String JSON_DATA = "data";
     //private static final String JSON_SIGN = "sign";
     //private static final String JSON_COMPANY = "company";
 
-    private int success;
-    private String message;
-    List<String> relationship;
-    List<String> phone;
+    private List<String> relationship;
+    private List<String> phone;
 
-    public int getSuccess() {
-        return success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 
     public List<String> getRelationship() {
         return relationship;
@@ -53,10 +44,8 @@ public class ReceiveMsgBean {
         return phone;
     }
 
-
+/*
     public ReceiveMsgBean(Gson gson ) throws JSONException{
-        success = Integer.valueOf(gson.fromJson(JSON_SUCCESS, String.class));
-        message = gson.fromJson(JSON_MESSAGE, String.class);
         relationship = gson.fromJson(JSON_RELATIONSHIP, new TypeToken<List<String>>(){}.getType());
         phone = gson.fromJson(JSON_PHONE, new TypeToken<List<String>>(){}.getType());
     }
@@ -66,8 +55,6 @@ public class ReceiveMsgBean {
         Gson gson = null;
         GsonBuilder gsonBuilder = new GsonBuilder();
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put(JSON_SUCCESS, success);
-        hashMap.put(JSON_MESSAGE, message);
         hashMap.put(JSON_RELATIONSHIP, relationship);
         hashMap.put(JSON_PHONE, phone);
 
@@ -75,22 +62,5 @@ public class ReceiveMsgBean {
         gson.toJson(hashMap);
 
         return gson;
-    }
-
-    @Override
-    public String toString() {
-        String msg = "success = " + success + ", message = " + message;
-
-        if (relationship != null && !relationship.isEmpty())
-        {
-            msg += ", relationship = " + relationship.toArray().toString();
-        }
-
-        if (phone != null && !phone.isEmpty())
-        {
-            msg += ", phone = " + phone.toArray().toString();
-        }
-
-        return  msg;
-    }
+    }*/
 }

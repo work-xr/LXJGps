@@ -4,6 +4,45 @@ use IntentService & AlarmService start service
 use Baidu SDK to locate  
 use RxJava to visit network  
 
+### 主要步骤
+1. 收到开机广播,开启定时服务
+2. 每隔30分钟启动一次服务
+3. 后台服务会开始用百度进行定位
+4. 如果定位失败如超时,则停止定位服务
+5. 如果定位成功,将定位信息上传到服务器,并停止定位服务
+6. 将本地孝老平台设置号码上传到服务器
+7. 将服务器上设置的号码同步到本地
+
+对传递到服务器的参数data,先转成GSON格式,再排序,然后按照UTF-8编码  
+```
+ReportParamBean reportParamBean = new ReportParamBean(imei,
+                RXJAVAHTTP_COMPANY,
+                RXJAVAHTTP_TYPE_REPORT,
+                positionType,
+                time,
+                locType,
+                longitude,
+                latitude,
+                capacity
+        );
+
+String gsonString = ReportParamBean.getReportParamGson(reportParamBean);
+String sortedGsonString = getSortedParam(gsonString);
+
+try
+{
+    data = URLEncoder.encode(sortedGsonString, RXJAVAHTTP_ENCODE_TYPE);
+}
+catch (UnsupportedEncodingException e)
+{
+    e.printStackTrace();
+}
+```
+对传递到服务器的参数sign,需要进行MD5编码  
+```
+sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
+```
+
 ### 自启动失败-接收不到BOOT_COMPLETED广播可能的原因  
 1. BOOT_COMPLETED对应的action和uses-permission没有一起添加
 2. 应用安装到了sd卡内，安装在sd卡内的应用是收不到BOOT_COMPLETED广播的

@@ -1,9 +1,7 @@
 package com.hsf1002.sky.xljgps.presenter;
 
-import com.hsf1002.sky.xljgps.bean.ReceiveMsgBean;
-import com.hsf1002.sky.xljgps.bean.ReportMsgBean;
-import com.hsf1002.sky.xljgps.bean.ResultMsgBean;
-import com.hsf1002.sky.xljgps.bean.SendMsgBean;
+import com.hsf1002.sky.xljgps.ReturnMsg.ReceiveMsgBean;
+import com.hsf1002.sky.xljgps.ReturnMsg.ResultMsg;
 import com.hsf1002.sky.xljgps.model.BaseModel;
 import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
 import com.hsf1002.sky.xljgps.view.BaseView;
@@ -31,7 +29,7 @@ public class RxjavaHttpPresenterImpl implements RxjavaHttpPresenter.OnDownloadLi
     }
 
     @Override
-    public void downloadInfoSuccess(ReceiveMsgBean resultMsg) {
+    public void downloadInfoSuccess(ResultMsg<ReceiveMsgBean> resultMsg) {
         view.downloadSuccess(resultMsg);
     }
 
@@ -46,7 +44,7 @@ public class RxjavaHttpPresenterImpl implements RxjavaHttpPresenter.OnDownloadLi
     }
 
     @Override
-    public void uploadInfoSuccess(SendMsgBean resultMsg) {
+    public void uploadInfoSuccess(ResultMsg resultMsg) {
         view.uploadSuccess(resultMsg);
     }
 
@@ -57,12 +55,12 @@ public class RxjavaHttpPresenterImpl implements RxjavaHttpPresenter.OnDownloadLi
 
     @Override
     public void reportInfo() {
-        //model.reportInfo(this);
-        model.reportGsonInfo(this);
+        model.reportInfo(this);
+        //model.reportGsonInfo(this);
     }
 
     @Override
-    public void reportInfoSuccess(ReportMsgBean resultMsg) {
+    public void reportInfoSuccess(ResultMsg resultMsg) {
         view.reportSuccess(resultMsg);
     }
 

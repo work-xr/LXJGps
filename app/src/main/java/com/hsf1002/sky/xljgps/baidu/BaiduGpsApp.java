@@ -11,7 +11,7 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
-import com.hsf1002.sky.xljgps.bean.BaiduGpsMsgBean;
+import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 
 import static android.content.Context.WIFI_SERVICE;
 import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_FIRST_SCAN_TIME_MAX;
@@ -30,11 +30,11 @@ public class BaiduGpsApp {
     private LocationClientOption option;
     private static long startTime = 0;
     private static long currentTime = 0;
-    private static BaiduGpsMsgBean sBaiduGpsMsgBean;
+    private static BaiduGpsParam sBaiduGpsMsgBean;
 
     BaiduGpsApp()
     {
-        sBaiduGpsMsgBean = new BaiduGpsMsgBean();
+        sBaiduGpsMsgBean = new BaiduGpsParam();
     }
 
     public static BaiduGpsApp getInstance()
@@ -166,6 +166,7 @@ public class BaiduGpsApp {
             if (currentTime - startTime >= BAIDU_GPS_FIRST_SCAN_TIME_MAX)
             {
                 Log.d(TAG, "onReceiveLocation: cost too long(larger than) " + BAIDU_GPS_FIRST_SCAN_TIME_MAX/1000 + " seconds to locate, timeout, stop gps..........");
+                startTime = System.currentTimeMillis();
                 stopBaiduGps();
             }
 /*
@@ -208,7 +209,7 @@ public class BaiduGpsApp {
         sBaiduGpsMsgBean.setLatitude(latitude);
     }
 
-    public BaiduGpsMsgBean getBaiduGpsStatus()
+    public BaiduGpsParam getBaiduGpsStatus()
     {
         sBaiduGpsMsgBean.setPosition_type(BAIDU_GPS_LOCATION_TYPE_LBS);
         sBaiduGpsMsgBean.setLoc_type("1");

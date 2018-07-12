@@ -1,4 +1,4 @@
-package com.hsf1002.sky.xljgps.bean;
+package com.hsf1002.sky.xljgps.params;
 
 import java.util.List;
 

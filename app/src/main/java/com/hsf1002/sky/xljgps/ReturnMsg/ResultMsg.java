@@ -1,18 +1,18 @@
-package com.hsf1002.sky.xljgps.bean;
+package com.hsf1002.sky.xljgps.ReturnMsg;
 
 /**
  * Created by hefeng on 18-6-8.
  */
 
-public class ResultMsgBean {
+public class ResultMsg<T> {
     protected int success;
-    protected String message;
+    protected T message;
 
     public int getSuccess() {
         return success;
     }
 
-    public String getMessage() {
+    public T getMessage() {
         return message;
     }
 

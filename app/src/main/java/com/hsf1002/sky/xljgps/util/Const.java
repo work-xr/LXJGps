@@ -17,8 +17,16 @@ public class Const {
     public static final String RXJAVAHTTP_BASE_URL_FORMAL = "http://healthdata.4000300659.com:8088/api/xiaobawang/";
     public static final String RXJAVAHTTP_REPORT_SOSPOSITION = "sosPosition";
     public static final String RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM = "familyNumber";
-    public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "updatePhone";
+    public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "phone";
     public static final String RXJAVAHTTP_REPORT_POSITION = "position";
+
+    public static final String RXJAVAHTTP_BASE_PERSON_URL = "http://192.168.100.62:8081/api/test/";
+    public static final String RXJAVAHTTP_PERSON_LIST = "person";
+    public static final String RXJAVAHTTP_PERSON_ID = "person/{id}";
+
+    public static final String RXJAVAHTTP_BASE_GPS_URL = "http://192.168.100.62:8081/api/";
+    public static final String RXJAVAHTTP_BASE_GPS_URL_TEST = "http://192.168.100.62:8081/api/test/";
+    public static final String RXJAVAHTTP_GPS = "gps";
 
     public static final String RXJAVAHTTP_TYPE_DOWNLOAD = "103";
     public static final String RXJAVAHTTP_TYPE_UPLOAD = "203";
@@ -28,7 +36,7 @@ public class Const {
     public static final String RXJAVAHTTP_TYPE_POWERON = "100";
     public static final String RXJAVAHTTP_TYPE_TIMING = "201";
 
-    public static final String RXJAVAHTTP_COMPANY = "IJIA";
+    public static final String RXJAVAHTTP_COMPANY = "XUNRUI";
     public static final String RXJAVAHTTP_SECRET_CODE = "iETOECQ9kiJw75AZ";//ab2342145acdf;    // iETOECQ9kiJw75AZ
     public static final String RXJAVAHTTP_ENCODE_TYPE = "UTF-8";
     public static final String RXJAVAHTTP_NAME = "xunrui";

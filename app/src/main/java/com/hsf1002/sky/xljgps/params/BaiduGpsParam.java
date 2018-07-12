@@ -1,19 +1,19 @@
-package com.hsf1002.sky.xljgps.bean;
+package com.hsf1002.sky.xljgps.params;
 
 /**
  * Created by hefeng on 18-6-15.
  */
 
-public class BaiduGpsMsgBean {
+public class BaiduGpsParam {
     protected String position_type;
     protected String loc_type;
     protected String longitude;
     protected String latitude;
 
-    public BaiduGpsMsgBean() {
+    public BaiduGpsParam() {
     }
 
-    public BaiduGpsMsgBean(String position_type, String loc_type, String longitude, String latitude) {
+    public BaiduGpsParam(String position_type, String loc_type, String longitude, String latitude) {
         this.position_type = position_type;
         this.loc_type = loc_type;
         this.longitude = longitude;
