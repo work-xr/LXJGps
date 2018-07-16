@@ -4,7 +4,7 @@ package com.hsf1002.sky.xljgps.util;
  * Created by hefeng on 18-6-8.
  */
 
-public class Const {
+public class Constant {
     public static final int SET_RELATION_NUMBER_INDEX = 0;
     public static final int UPLOAD_INFO_TO_PLATFORM_INDEX = 1;
     public static final int DOWNLOAD_INFO_FROM_PLATFORM_INDEX = 2;
@@ -16,7 +16,7 @@ public class Const {
     public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaobawangtest/";
     public static final String RXJAVAHTTP_BASE_URL_FORMAL = "http://healthdata.4000300659.com:8088/api/xiaobawang/";
     public static final String RXJAVAHTTP_REPORT_SOSPOSITION = "sosPosition";
-    public static final String RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM = "familyNumber";
+    public static final String RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM ="phonelatest";//= "familyNumber";
     public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "phone";
     public static final String RXJAVAHTTP_REPORT_POSITION = "position";
 

@@ -1,12 +1,11 @@
 package com.hsf1002.sky.xljgps.util;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
 
-import static com.hsf1002.sky.xljgps.util.Const.SHARED_PREFERENCE_NAME;
+import static com.hsf1002.sky.xljgps.util.Constant.SHARED_PREFERENCE_NAME;
 
 /**
  * Created by hefeng on 18-6-8.

@@ -14,10 +14,10 @@ import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 
 import static android.content.Context.WIFI_SERVICE;
-import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_FIRST_SCAN_TIME_MAX;
-import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_LOCATION_TYPE_GPS;
-import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_LOCATION_TYPE_LBS;
-import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_LOCATION_TYPE_WIFI;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_FIRST_SCAN_TIME_MAX;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_GPS;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_LBS;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_WIFI;
 
 /**
  * Created by hefeng on 18-6-6.

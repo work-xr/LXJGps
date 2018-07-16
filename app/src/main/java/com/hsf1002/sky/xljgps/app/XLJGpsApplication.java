@@ -2,19 +2,15 @@ package com.hsf1002.sky.xljgps.app;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 import com.allen.library.RxHttpUtils;
-import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
-import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
-import com.hsf1002.sky.xljgps.service.GpsService;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_BASE_URL_TEST;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_CONNCET_TIMEOUT;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_READ_TIMEOUT;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_WRITE_TIMEOUT;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_URL_TEST;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_CONNCET_TIMEOUT;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_READ_TIMEOUT;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_WRITE_TIMEOUT;
 
 /**
  * Created by hefeng on 18-6-6.

@@ -23,6 +23,7 @@
 
     <string name="input_hint">please input phone number!</string>
     <string name="set_relation_number">set relation number</string>
+    <string name="set_relation_number_success">set relation number success!</string>
 
     <string name="upload_success">upload success!</string>
     <string name="upload_failed">upload failed!</string>
@@ -30,6 +31,8 @@
     <string name="download_failed">download failed!</string>
     <string name="report_success">report success!</string>
     <string name="report_failed">report failed!</string>
+
+    <string name="center_number_cannot_empty">center number cannot be empty!</string>
 
     <string name="get_gps_permission_fail">get gps permission failed!</string>
 </resources>

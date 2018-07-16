@@ -26,15 +26,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_BASE_GPS_URL;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_BASE_GPS_URL_TEST;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_BASE_URL_TEST;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_COMPANY;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_ENCODE_TYPE;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_SECRET_CODE;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_TYPE_DOWNLOAD;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_TYPE_REPORT;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_TYPE_UPLOAD;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_GPS_URL_TEST;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_ENCODE_TYPE;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_SECRET_CODE;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_DOWNLOAD;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_REPORT;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_UPLOAD;
 
 /**
  * Created by hefeng on 18-6-8.
@@ -501,7 +499,7 @@ public class RxjavaHttpModel implements BaseModel {
         {
             String param = getOneParam(params, paramLen + i);
             paramLen += param.length();
-            Log.d(TAG, "getSortedParam: param = " + param + ", param.length() = " + param.length());
+            //Log.d(TAG, "getSortedParam: param = " + param + ", param.length() = " + param.length());
             listString.add(param);
         }
 
@@ -568,10 +566,10 @@ public class RxjavaHttpModel implements BaseModel {
         HashMap<String, String> hashMap = new HashMap<>();
         hashMap.put(key, value);
 
-        Log.d(TAG, "getOneParam: key = " + key + ", value = " + value);
+        /*Log.d(TAG, "getOneParam: key = " + key + ", value = " + value);
         Log.d(TAG, "getOneParam: key = " + hashMap.keySet() + ", value = " + hashMap.get(key));
         Log.d(TAG, "getOneParam: hashMap = " + hashMap);
-
+*/
         return param;
     }
 

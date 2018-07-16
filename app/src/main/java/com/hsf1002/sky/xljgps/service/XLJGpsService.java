@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 
-import static com.hsf1002.sky.xljgps.util.Const.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL;
 
 /**
  * Created by hefeng on 18-6-6.

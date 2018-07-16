@@ -32,19 +32,26 @@ public class ReceiveMsgBean {
     //private static final String JSON_SIGN = "sign";
     //private static final String JSON_COMPANY = "company";
 
-    private List<String> relationship;
-    private List<String> phone;
+    private String relationship;
+    private String phone;
 
-
-    public List<String> getRelationship() {
+    public String getRelationship() {
         return relationship;
     }
 
-    public List<String> getPhone() {
+    public String getPhone() {
         return phone;
     }
 
-/*
+    @Override
+    public String toString() {
+        return "ReceiveMsgBean{" +
+                "relationship='" + relationship + '\'' +
+                ", phone='" + phone + '\'' +
+                '}';
+    }
+
+    /*
     public ReceiveMsgBean(Gson gson ) throws JSONException{
         relationship = gson.fromJson(JSON_RELATIONSHIP, new TypeToken<List<String>>(){}.getType());
         phone = gson.fromJson(JSON_PHONE, new TypeToken<List<String>>(){}.getType());

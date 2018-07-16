@@ -15,13 +15,12 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Query;
 
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_GPS;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_PERSON_ID;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_PERSON_LIST;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_REPORT_POSITION;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_REPORT_SOSPOSITION;
-import static com.hsf1002.sky.xljgps.util.Const.RXJAVAHTTP_UPDATE_TO_PLATFORM;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_GPS;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_PERSON_ID;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_PERSON_LIST;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_REPORT_POSITION;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_UPDATE_TO_PLATFORM;
 
 /**
  * Created by hefeng on 18-6-8.
@@ -68,15 +67,14 @@ public interface ApiService {
 
     //http://healthdata.4000300659.com:8088/api/xiaobawangtest/familyNumber
     //http://healthdata.4000300659.com:8088/api/xiaobawang/familyNumber
-    @POST(RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM)
-    @FormUrlEncoded
+    @GET(RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM)
     Observable<ResultMsg<ReceiveMsgBean>> downloadInfo(/*
             @Field("imei") String imei,
             @Field("company") String company,
             @Field("type") String type,
             @Field("time") String time,*/
-            @Field("data") String data,
-            @Field("sign") String sign
+            @Query("data") String data,
+            @Query("sign") String sign
             );
 
     //http://healthdata.4000300659.com:8088/api/xiaobawangtest/position

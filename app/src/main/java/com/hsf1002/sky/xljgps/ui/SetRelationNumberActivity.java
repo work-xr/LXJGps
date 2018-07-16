@@ -1,9 +1,7 @@
 package com.hsf1002.sky.xljgps.ui;
 
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +11,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.allen.library.utils.ToastUtils;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
 import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
 import com.hsf1002.sky.xljgps.R;
@@ -22,10 +22,10 @@ import com.hsf1002.sky.xljgps.util.SharedPreUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME;
-import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME_COUNT;
-import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER;
-import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER_COUNT;
+import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME;
+import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME_COUNT;
+import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER;
+import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
 
 /**
  * Created by hefeng on 18-6-6.
@@ -88,6 +88,12 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         builder.setPositiveButton(getString(R.string.sure), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
+                if (position == 0 && TextUtils.isEmpty(relationNumberEt.getText().toString()))
+                {
+                    Toast.makeText(SetRelationNumberActivity.this, getString(R.string.center_number_cannot_empty), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 setRelationNumber(position);
             }
         });
@@ -175,6 +181,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         SharedPreUtils.getInstance().putString(RELATION_NUMBER + position, currentNumberStr);
 
         setDataUpdate();
+        Toast.makeText(SetRelationNumberActivity.this, getString(R.string.set_relation_number_success), Toast.LENGTH_SHORT).show();
         adapter.notifyItemChanged(position);
     }
 

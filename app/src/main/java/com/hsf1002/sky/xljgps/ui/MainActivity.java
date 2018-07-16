@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.*;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -19,15 +20,16 @@ import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
 import com.hsf1002.sky.xljgps.ReturnMsg.ReceiveMsgBean;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenterImpl;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
+import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 import com.hsf1002.sky.xljgps.view.BaseView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hsf1002.sky.xljgps.util.Const.DOWNLOAD_INFO_FROM_PLATFORM_INDEX;
-import static com.hsf1002.sky.xljgps.util.Const.REPORT_INFO_TO_PLATFORM_INDEX;
-import static com.hsf1002.sky.xljgps.util.Const.SET_RELATION_NUMBER_INDEX;
-import static com.hsf1002.sky.xljgps.util.Const.UPLOAD_INFO_TO_PLATFORM_INDEX;
+import static com.hsf1002.sky.xljgps.util.Constant.DOWNLOAD_INFO_FROM_PLATFORM_INDEX;
+import static com.hsf1002.sky.xljgps.util.Constant.REPORT_INFO_TO_PLATFORM_INDEX;
+import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER_INDEX;
+import static com.hsf1002.sky.xljgps.util.Constant.UPLOAD_INFO_TO_PLATFORM_INDEX;
 
 public class MainActivity extends AppCompatActivity implements BaseView{
     private static final String TAG = "MainActivity";
@@ -212,11 +214,14 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     public void downloadSuccess(ResultMsg<ReceiveMsgBean> resultMsg) {
         Toast.makeText(this, getString(R.string.download_success), Toast.LENGTH_SHORT).show();
 
-        List<String> relationName = resultMsg.getMessage().getRelationship();
-        List<String> relationNumber = resultMsg.getMessage().getPhone();
+        String relationName = resultMsg.getData().getRelationship();
+        String relationNumber = resultMsg.getData().getPhone();
 
-        //SprdCommonUtils.getInstance().setRelationNumberNames(relationName);
-        //SprdCommonUtils.getInstance().setRelationNumber(relationNumber);
+        Log.d(TAG, "downloadSuccess: relationName = " + relationName);
+        Log.d(TAG, "downloadSuccess: relationNumber = " + relationNumber);
+
+        SprdCommonUtils.getInstance().setRelationNumberNames(relationName);
+        SprdCommonUtils.getInstance().setRelationNumber(relationNumber);
     }
 
     @Override

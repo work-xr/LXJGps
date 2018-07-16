@@ -9,21 +9,16 @@ import android.util.Log;
 import com.hsf1002.sky.xljgps.R;
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import static android.content.Context.BATTERY_SERVICE;
 import static android.os.Build.MANUFACTURER;
 import static android.os.Build.MODEL;
-import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME;
-import static com.hsf1002.sky.xljgps.util.Const.RELATION_NAME_COUNT;
-import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER;
-import static com.hsf1002.sky.xljgps.util.Const.RELATION_NUMBER_COUNT;
+import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME;
+import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME_COUNT;
+import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER;
+import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
 
 /**
  * Created by hefeng on 18-6-11.
@@ -114,13 +109,15 @@ public class SprdCommonUtils {
         return numberString.toString();
     }
 
-    public void setRelationNumber(List<String> relationNumber)
+    public void setRelationNumber(String relationNumber)
     {
-        int count = relationNumber.size();
+        String[] list = relationNumber.split(",");
+        int count = list.length;
 
         for (int i=0; i<count; ++i)
         {
-            SharedPreUtils.getInstance().putString(RELATION_NUMBER + i, relationNumber.get(i));
+            Log.d(TAG, "setRelationNumber: list[" + i + "] = " + list[i]);
+            SharedPreUtils.getInstance().putString(RELATION_NUMBER + i, list[i]);
         }
 
         SharedPreUtils.getInstance().putInt(RELATION_NUMBER_COUNT, count);
@@ -149,13 +146,15 @@ public class SprdCommonUtils {
         return numberStringNames.toString();
     }
 
-    public void setRelationNumberNames(List<String> relationNames)
+    public void setRelationNumberNames(String relationNames)
     {
-        int count = relationNames.size();
+        String[] list = relationNames.split(",");
+        int count = list.length;
 
         for (int i=0; i<count; ++i)
         {
-            SharedPreUtils.getInstance().putString(RELATION_NAME + i, relationNames.get(i));
+            Log.d(TAG, "setRelationNumberNames: list[" + i + "] = " + list[i]);
+            SharedPreUtils.getInstance().putString(RELATION_NAME + i, list[i]);
         }
 
         SharedPreUtils.getInstance().putInt(RELATION_NAME_COUNT, count);
