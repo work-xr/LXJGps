@@ -9,11 +9,6 @@ import com.google.gson.GsonBuilder;
  */
 
 public class ReceiveParam {
-    private static final String JSON_IMEI = "imei";
-    private static final String JSON_COMPANY = "company";
-    private static final String JSON_TYPE = "type";
-    private static final String JSON_TIME = "time";
-
     private String imei;
     private String manufactory;
     private String model;

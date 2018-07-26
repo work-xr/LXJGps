@@ -9,9 +9,10 @@
     </string-array>
 
     <string-array name="relation_item_name" >
-        <item>center</item>
-        <item>number1</item>
-        <item>number2</item>
+        <item>孝老平台号码</item>
+        <item>亲情号码1</item>
+        <item>亲情号码2</item>
+        <item>亲情号码3</item>
     </string-array>
 
     <string name="sure">确定</string>

@@ -27,11 +27,6 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_UPDATE_TO_PLATFORM
  */
 
 public interface ApiService {
-    @GET("v2/book/1220562")
-    Observable<BookBean> getBook();
-
-    //http://healthdata.4000300659.com:8088/api/xiaobawangtest/sosPosition
-    //http://healthdata.4000300659.com:8088/api/xiaobawang/sosPosition
     @POST(RXJAVAHTTP_GPS)
     @FormUrlEncoded
     Observable<ResultMsg> reportInfo(/*
@@ -50,8 +45,6 @@ public interface ApiService {
             @Field("sign") String sign
     );
 
-    //http://healthdata.4000300659.com:8088/api/xiaobawangtest/updatePhone
-    //http://healthdata.4000300659.com:8088/api/xiaobawang/updatePhone
     @PUT(RXJAVAHTTP_UPDATE_TO_PLATFORM)
     @FormUrlEncoded
     Observable<ResultMsg> uploadInfo(/*
@@ -65,8 +58,6 @@ public interface ApiService {
             @Field("sign") String sign
     );
 
-    //http://healthdata.4000300659.com:8088/api/xiaobawangtest/familyNumber
-    //http://healthdata.4000300659.com:8088/api/xiaobawang/familyNumber
     @GET(RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM)
     Observable<ResultMsg<ReceiveMsgBean>> downloadInfo(/*
             @Field("imei") String imei,
@@ -77,20 +68,10 @@ public interface ApiService {
             @Query("sign") String sign
             );
 
-    //http://healthdata.4000300659.com:8088/api/xiaobawangtest/position
-    //http://healthdata.4000300659.com:8088/api/xiaobawang/position
     @POST(RXJAVAHTTP_REPORT_POSITION)
     @FormUrlEncoded
     Observable<ResultMsg> reportPosition(
-            @Field("imei") String imei,
             @Field("company") String company,
-            @Field("type") String type,
-            @Field("position_type") String positionType,
-            @Field("time") String time,
-            @Field("loc_type") String locType,
-            @Field("longitude") String longitude,
-            @Field("latitude") String lantitude,
-            @Field("power") String power,
             @Field("data") String data,
             @Field("sign") String sign
     );

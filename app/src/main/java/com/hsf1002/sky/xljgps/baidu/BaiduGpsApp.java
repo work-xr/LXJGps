@@ -6,18 +6,35 @@ import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.allen.library.RxHttpUtils;
+import com.allen.library.interceptor.Transformer;
+import com.allen.library.observer.CommonObserver;
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.hsf1002.sky.xljgps.ReturnMsg.ResultMsg;
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
+import com.hsf1002.sky.xljgps.http.ApiService;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
+import com.hsf1002.sky.xljgps.params.ReportParam;
+import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
+import com.hsf1002.sky.xljgps.util.MD5Utils;
+import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import static android.content.Context.WIFI_SERVICE;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_FIRST_SCAN_TIME_MAX;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_GPS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_LBS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_WIFI;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_GPS_URL_TEST;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_ENCODE_TYPE;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_SECRET_CODE;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_TIMING;
 
 /**
  * Created by hefeng on 18-6-6.
@@ -163,12 +180,13 @@ public class BaiduGpsApp {
             currentTime = System.currentTimeMillis();
             Log.d(TAG, "onReceiveLocation: startTimie = " + startTime + ", currentTime = " + currentTime);
             Log.d(TAG, "onReceiveLocation: getLocType = " + bdLocation.getLocType() + ", curPosition = " + curPosition);
-            if (currentTime - startTime >= BAIDU_GPS_FIRST_SCAN_TIME_MAX)
+            /*if (currentTime - startTime >= BAIDU_GPS_FIRST_SCAN_TIME_MAX)
             {
                 Log.d(TAG, "onReceiveLocation: cost too long(larger than) " + BAIDU_GPS_FIRST_SCAN_TIME_MAX/1000 + " seconds to locate, timeout, stop gps..........");
                 startTime = System.currentTimeMillis();
                 stopBaiduGps();
-            }
+                return;
+            }*/
 /*
 * http://lbsyun.baidu.com/index.php?title=android-locsdk/guide/addition-func/error-code
 *若返回值是162~167，请将错误码、IMEI、定位唯一标识（自v7.2版本起，通过BDLocation.getLocationID方法获取）和定位时间反馈至邮箱loc-bugs@baidu.com
@@ -181,13 +199,17 @@ public class BaiduGpsApp {
 *           505: AK不存在或者非法，请按照说明文档重新申请AK(1. 将申请的AK写入AndroidMenifest.xml 2. AS->Build中Generated Signed APK再进行安装)
 *  在应用内部, 断网, 还是会取到上次联网时的定位, 退出应用再进入则是断网 63 状态, 此时联网则可正常定位
 * */
-            else if (bdLocation.getLocType() == BDLocation.TypeGpsLocation || bdLocation.getLocType() == BDLocation.TypeNetWorkLocation)
+            if (bdLocation.getLocType() == BDLocation.TypeGpsLocation || bdLocation.getLocType() == BDLocation.TypeNetWorkLocation)
             {
                 Log.d(TAG, "onReceiveLocation: 0   get location success, stop gps service");
-                stopBaiduGps();
-            }
+                //stopBaiduGps();
 
-            setBaiduGpsStatus(locationType, locType, longitude, latitude);
+                setBaiduGpsStatus(locationType, locType, longitude, latitude);
+                reportPosition(RXJAVAHTTP_TYPE_TIMING);
+            }
+            else {
+                Log.d(TAG, "onReceiveLocation: 0   get location failed, stop gps service");
+            }
         }
 
         @Override
@@ -217,5 +239,69 @@ public class BaiduGpsApp {
         sBaiduGpsMsgBean.setLatitude("113.1122");
 
         return sBaiduGpsMsgBean;
+    }
+
+    public void reportPosition(String type) {
+        String imei = SprdCommonUtils.getInstance().getIMEI();
+        String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
+        String manufactory = SprdCommonUtils.getInstance().getManufactory();
+        String model = SprdCommonUtils.getInstance().getModel();
+        String capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
+        String data = null;
+        String sign = null;
+
+        BaiduGpsParam baiduGpsMsgBean = getBaiduGpsStatus();
+        String positionType = baiduGpsMsgBean.getPosition_type();
+        String locType = baiduGpsMsgBean.getLoc_type();
+        String latitude = baiduGpsMsgBean.getLatitude();
+        String longitude = baiduGpsMsgBean.getLongitude();
+
+        ReportParam reportParamBean = new ReportParam(imei,
+                manufactory,
+                model,
+                RXJAVAHTTP_COMPANY,
+                type,
+                positionType,
+                time,
+                locType,
+                longitude,
+                latitude,
+                capacity
+        );
+
+        String gsonString = ReportParam.getReportParamGson(reportParamBean);
+        Log.d(TAG, "reportPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
+        //String sortedGsonString = getSortedParam(gsonString);
+
+        try
+        {
+            data = URLEncoder.encode(gsonString, RXJAVAHTTP_ENCODE_TYPE);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+
+        sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
+        Log.d(TAG, "reportPosition: data = " + data + ", sign = " + sign);
+
+        RxHttpUtils.getSInstance()
+                .baseUrl(RXJAVAHTTP_BASE_GPS_URL_TEST)
+                .createSApi(ApiService.class)
+                .reportInfo(
+                        data,
+                        sign)
+                .compose(Transformer.<ResultMsg>switchSchedulers())
+                .subscribe(new CommonObserver<ResultMsg>() {
+                    @Override
+                    protected void onError(String s) {
+                        Log.d(TAG, "reportPosition onError: s = " + s);
+                    }
+
+                    @Override
+                    protected void onSuccess(ResultMsg resultMsg) {
+                        Log.d(TAG, "reportPosition onSuccess: resultMsg = " + resultMsg);
+                    }
+                });
     }
 }

@@ -6,12 +6,14 @@
         <item>upload info to platform</item>
         <item>download info from platform</item>
         <item>report SOS-GPS info</item>
+        <item>send msg to relation number</item>
     </string-array>
 
     <string-array name="relation_item_name" >
         <item>platform center number</item>
         <item>relation number 1</item>
         <item>relation number 2</item>
+        <item>relation number 3</item>
     </string-array>
 
     <string name="sure">sure</string>

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_GPS_URL_TEST;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_URL_TEST;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_ENCODE_TYPE;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_SECRET_CODE;
@@ -70,10 +71,7 @@ public class RxjavaHttpModel implements BaseModel {
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_GPS_URL_TEST)
                 .createSApi(ApiService.class)
-                .downloadInfo(/*imei,
-                        RXJAVAHTTP_COMPANY,
-                        RXJAVAHTTP_TYPE_DOWNLOAD,
-                        time,*/
+                .downloadInfo(
                         data,
                         sign)
                 .compose(Transformer.<ResultMsg<ReceiveMsgBean>>switchSchedulers())
@@ -125,12 +123,7 @@ public class RxjavaHttpModel implements BaseModel {
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_GPS_URL_TEST)
                 .createSApi(ApiService.class)
-                .uploadInfo(/*imei,
-                        RXJAVAHTTP_COMPANY,
-                        RXJAVAHTTP_TYPE_UPLOAD,
-                        sosPhones,
-                        encodedSosPhoneNames,
-                        time,*/
+                .uploadInfo(
                         data,
                         sign)
                 .compose(Transformer.<ResultMsg>switchSchedulers())
@@ -197,17 +190,7 @@ public class RxjavaHttpModel implements BaseModel {
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_GPS_URL_TEST)
                 .createSApi(ApiService.class)
-                .reportInfo(/*imei,
-                        manufactory,
-                        model,
-                        RXJAVAHTTP_COMPANY,
-                        RXJAVAHTTP_TYPE_REPORT,
-                        positionType,
-                        time,
-                        locType,
-                        longitude,
-                        latitude,
-                        capacity,*/
+                .reportInfo(
                         data,
                         sign)
                 .compose(Transformer.<ResultMsg>switchSchedulers())
@@ -272,19 +255,9 @@ public class RxjavaHttpModel implements BaseModel {
         Log.d(TAG, "reportPosition: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
-                .baseUrl(RXJAVAHTTP_BASE_GPS_URL_TEST)
+                .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
                 .createSApi(ApiService.class)
-                .reportInfo(/*imei,
-                        manufactory,
-                        model,
-                        RXJAVAHTTP_COMPANY,
-                        type,
-                        positionType,
-                        time,
-                        locType,
-                        longitude,
-                        latitude,
-                        capacity,*/
+                .reportPosition(RXJAVAHTTP_COMPANY,
                         data,
                         sign)
                 .compose(Transformer.<ResultMsg>switchSchedulers())
@@ -292,16 +265,21 @@ public class RxjavaHttpModel implements BaseModel {
                     @Override
                     protected void onError(String s) {
                         Log.d(TAG, "reportPosition onError: s = " + s);
-                        listener.reportInfoFailed(s);
+                        if (listener != null) {
+                            listener.reportInfoFailed(s);
+                        }
                     }
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
                         Log.d(TAG, "reportPosition onSuccess: resultMsg = " + resultMsg);
-                        listener.reportInfoSuccess(resultMsg);
+                        if (listener != null) {
+                            listener.reportInfoSuccess(resultMsg);
+                        }
                     }
                 });
     }
+
 /*
     public void getUserInfo() {
         Log.d(TAG, "getUserInfo: ");

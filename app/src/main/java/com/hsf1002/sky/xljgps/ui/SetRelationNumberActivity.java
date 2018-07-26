@@ -1,6 +1,8 @@
 package com.hsf1002.sky.xljgps.ui;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -37,7 +39,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
     private MainRecycleAdapter adapter;
     private List<String> items = new ArrayList<>();
     private List<String> relationNumbers = new ArrayList<>();
-    private List<String> relationNames = new ArrayList<>();
+    //private List<String> relationNames = new ArrayList<>();
 
     //private static final String RELATION_NUMBER_1 = "relation_number_1";
     //private static final String RELATION_NUMBER_2 = "relation_number_2";
@@ -66,7 +68,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
 
             @Override
             public void onItemLongClick(View view, int position) {
-
+                dialRelationNumber(position);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -105,6 +107,16 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         });
         builder.setCancelable(true).create();
         builder.show();
+    }
+
+    private void dialRelationNumber(int position)
+    {
+        String number = relationNumbers.get(position);
+
+        Intent intent = new Intent(Intent.ACTION_DIAL);  // ACTION_CALL -require user verify permission
+        Uri data = Uri.parse("tel:" + number);
+        intent.setData(data);
+        startActivity(intent);
     }
 
     private void getPresetRelationNumber()
@@ -181,7 +193,9 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         SharedPreUtils.getInstance().putString(RELATION_NUMBER + position, currentNumberStr);
 
         setDataUpdate();
-        Toast.makeText(SetRelationNumberActivity.this, getString(R.string.set_relation_number_success), Toast.LENGTH_SHORT).show();
+        if (!TextUtils.isEmpty(currentNumberStr)) {
+            Toast.makeText(SetRelationNumberActivity.this, getString(R.string.set_relation_number_success), Toast.LENGTH_SHORT).show();
+        }
         adapter.notifyItemChanged(position);
     }
 
@@ -189,7 +203,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
     {
         relationNumberCount = 0;
 
-        for (int i=0; i<3; ++i)
+        for (int i=0; i<4; ++i)
         {
             String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER + i, "");
 

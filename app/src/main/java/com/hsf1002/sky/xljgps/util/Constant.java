@@ -9,6 +9,7 @@ public class Constant {
     public static final int UPLOAD_INFO_TO_PLATFORM_INDEX = 1;
     public static final int DOWNLOAD_INFO_FROM_PLATFORM_INDEX = 2;
     public static final int REPORT_INFO_TO_PLATFORM_INDEX = 3;
+    public static final int SEND_MSG_TO_RELATION_NUMBER = 4;
 
     public static final String SHARED_PREFERENCE_NAME = "lxjgps_sp";
 

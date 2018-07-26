@@ -18,7 +18,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTE
  */
 
 public class GpsService extends Service {
-    private static final String TAG = "XLJGpsService";
+    private static final String TAG = "GpsService";
     private static int startServiceInterval = BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL;
 
     @Override
@@ -36,7 +36,7 @@ public class GpsService extends Service {
 
     public static void setServiceAlarm(Context context, boolean isOn)
     {
-        Intent intent = new Intent(context, XLJGpsService.class);
+        Intent intent = new Intent(context, GpsService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -54,7 +54,7 @@ public class GpsService extends Service {
 
     public static boolean isServiceAlarmOn(Context context)
     {
-        Intent intent = new Intent(context, XLJGpsService.class);
+        Intent intent = new Intent(context, GpsService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
 
         return pi != null;

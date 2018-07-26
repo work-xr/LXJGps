@@ -28,6 +28,7 @@ import java.util.List;
 
 import static com.hsf1002.sky.xljgps.util.Constant.DOWNLOAD_INFO_FROM_PLATFORM_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.REPORT_INFO_TO_PLATFORM_INDEX;
+import static com.hsf1002.sky.xljgps.util.Constant.SEND_MSG_TO_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.UPLOAD_INFO_TO_PLATFORM_INDEX;
 
@@ -65,6 +66,9 @@ public class MainActivity extends AppCompatActivity implements BaseView{
                     case REPORT_INFO_TO_PLATFORM_INDEX:
                         reportSosGpsInfoToPlatform();
                         break;
+                    case SEND_MSG_TO_RELATION_NUMBER:
+                        sendMsgToRelationNumber();
+                        break;
                     default:
                         break;
                 }
@@ -76,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements BaseView{
             }
         });
         recyclerView.setAdapter(adapter);
-        requestPermission();
+        //requestPermission();
     }
 
     private void requestPermission()
@@ -174,6 +178,11 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     private void reportSosGpsInfoToPlatform()
     {
         presenter.reportInfo();
+    }
+
+    private void sendMsgToRelationNumber()
+    {
+
     }
 
     @Override
