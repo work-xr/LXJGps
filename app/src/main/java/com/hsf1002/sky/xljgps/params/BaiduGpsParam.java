@@ -5,6 +5,7 @@ package com.hsf1002.sky.xljgps.params;
  */
 
 public class BaiduGpsParam {
+    //protected String address;       // 暂时不用
     protected String position_type;
     protected String loc_type;
     protected String longitude;
@@ -50,5 +51,24 @@ public class BaiduGpsParam {
 
     public void setLatitude(String latitude) {
         this.latitude = latitude;
+    }
+/*
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+*/
+    @Override
+    public String toString() {
+        return "BaiduGpsParam{" +
+                //"address='" + address + '\'' +
+                ", position_type='" + position_type + '\'' +
+                ", loc_type='" + loc_type + '\'' +
+                ", longitude='" + longitude + '\'' +
+                ", latitude='" + latitude + '\'' +
+                '}';
     }
 }

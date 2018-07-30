@@ -6,35 +6,17 @@ import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.allen.library.RxHttpUtils;
-import com.allen.library.interceptor.Transformer;
-import com.allen.library.observer.CommonObserver;
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.hsf1002.sky.xljgps.ReturnMsg.ResultMsg;
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
-import com.hsf1002.sky.xljgps.http.ApiService;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
-import com.hsf1002.sky.xljgps.params.ReportParam;
-import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
-import com.hsf1002.sky.xljgps.util.MD5Utils;
-import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 import static android.content.Context.WIFI_SERVICE;
-import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_FIRST_SCAN_TIME_MAX;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_GPS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_LBS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_WIFI;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_GPS_URL_TEST;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_ENCODE_TYPE;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_SECRET_CODE;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_TIMING;
 
 /**
  * Created by hefeng on 18-6-6.
@@ -45,13 +27,12 @@ public class BaiduGpsApp {
     private LocationClient client;
     private MyLocationLister myLocationLister;
     private LocationClientOption option;
-    private static long startTime = 0;
-    private static long currentTime = 0;
     private static BaiduGpsParam sBaiduGpsMsgBean;
 
     BaiduGpsApp()
     {
         sBaiduGpsMsgBean = new BaiduGpsParam();
+        setBaiduGpsStatus(/*null,*/ null, null, null, null);
     }
 
     public static BaiduGpsApp getInstance()
@@ -69,7 +50,6 @@ public class BaiduGpsApp {
         Log.d(TAG, "initBaiduSDK: ");
         myLocationLister = new MyLocationLister();
         client = new LocationClient(context);
-        startTime = System.currentTimeMillis();
         initLocation();
     }
 
@@ -130,29 +110,20 @@ public class BaiduGpsApp {
     {
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
-            StringBuilder curPosition = new StringBuilder();
             String latitude = String.valueOf(bdLocation.getLatitude());
             String longitude = String.valueOf(bdLocation.getLongitude());
             String locationType = BAIDU_GPS_LOCATION_TYPE_GPS;
-            String locType = "1";// 1->"Baidu" 2->"GaoDe";
+            String locType = getLocType(bdLocation.getLocType());// 1->"Baidu" 2->"GaoDe";
+            StringBuilder address = new StringBuilder();
 
-            curPosition.append("Lantitude: ").append(latitude).append(", ");
-            curPosition.append("Longtitude:").append(longitude).append(", ");
-            curPosition.append("Country: ").append(bdLocation.getCountry()).append(", ");
-            curPosition.append("City:").append(bdLocation.getCity()).append(", ");
-            curPosition.append("District: ").append(bdLocation.getDistrict()).append(", ");
-            curPosition.append("Street:").append(bdLocation.getStreet()).append(", ");
-            curPosition.append("location way: ");
+            address.append(bdLocation.getCountry()).append(bdLocation.getCity()).append(bdLocation.getDistrict()).append(bdLocation.getStreet());
 
             if (bdLocation.getLocType() == BDLocation.TypeGpsLocation)
             {
-                curPosition.append("GPS");
                 locationType = BAIDU_GPS_LOCATION_TYPE_GPS;
             }
             else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) 
             {
-                curPosition.append("NETWORK");
-
                 // wifi or ds
                 WifiManager wifiManager = (WifiManager)XLJGpsApplication.getAppContext().getSystemService(WIFI_SERVICE);
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -173,20 +144,12 @@ public class BaiduGpsApp {
             }
             else
             {
-                curPosition.append("null");
                 locationType = "null";
             }
             
-            currentTime = System.currentTimeMillis();
-            Log.d(TAG, "onReceiveLocation: startTimie = " + startTime + ", currentTime = " + currentTime);
-            Log.d(TAG, "onReceiveLocation: getLocType = " + bdLocation.getLocType() + ", curPosition = " + curPosition);
-            /*if (currentTime - startTime >= BAIDU_GPS_FIRST_SCAN_TIME_MAX)
-            {
-                Log.d(TAG, "onReceiveLocation: cost too long(larger than) " + BAIDU_GPS_FIRST_SCAN_TIME_MAX/1000 + " seconds to locate, timeout, stop gps..........");
-                startTime = System.currentTimeMillis();
-                stopBaiduGps();
-                return;
-            }*/
+            //currentTime = System.currentTimeMillis();
+            //Log.d(TAG, "onReceiveLocation: startTimie = " + startTime + ", currentTime = " + currentTime);
+            Log.d(TAG, "onReceiveLocation: latitude = " + latitude + ", longitude = " + longitude + ", address = " + address.toString() + ", locationType = " + locationType + ", getLocType = " + locType);
 /*
 * http://lbsyun.baidu.com/index.php?title=android-locsdk/guide/addition-func/error-code
 *若返回值是162~167，请将错误码、IMEI、定位唯一标识（自v7.2版本起，通过BDLocation.getLocationID方法获取）和定位时间反馈至邮箱loc-bugs@baidu.com
@@ -201,15 +164,14 @@ public class BaiduGpsApp {
 * */
             if (bdLocation.getLocType() == BDLocation.TypeGpsLocation || bdLocation.getLocType() == BDLocation.TypeNetWorkLocation)
             {
-                Log.d(TAG, "onReceiveLocation: 0   get location success, stop gps service");
-                //stopBaiduGps();
-
-                setBaiduGpsStatus(locationType, locType, longitude, latitude);
-                reportPosition(RXJAVAHTTP_TYPE_TIMING);
+                Log.d(TAG, "onReceiveLocation:  get location success, stop gps service");
+                setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locType, locationType);
             }
-            else {
-                Log.d(TAG, "onReceiveLocation: 0   get location failed, stop gps service");
+            else
+            {
+                Log.d(TAG, "onReceiveLocation:  get location failed, stop gps service");
             }
+            stopBaiduGps();
         }
 
         @Override
@@ -223,85 +185,77 @@ public class BaiduGpsApp {
         }
     }
 
-    private void setBaiduGpsStatus(String locationType, String locType, String longitude, String latitude)
+    private void setBaiduGpsStatus(/*String address,*/ String latitude, String longitude, String locType, String source_type)
     {
-        sBaiduGpsMsgBean.setPosition_type(locationType);
-        sBaiduGpsMsgBean.setLoc_type(locType);
-        sBaiduGpsMsgBean.setLongitude(longitude);
-        sBaiduGpsMsgBean.setLatitude(latitude);
+        /*
+        if (TextUtils.isEmpty(address))
+        {
+            sBaiduGpsMsgBean.setAddress("");
+        }
+        else
+        {
+            sBaiduGpsMsgBean.setAddress(address);
+        }*/
+
+        if (TextUtils.isEmpty(latitude))
+        {
+            sBaiduGpsMsgBean.setLatitude("");
+        }
+        else
+        {
+            sBaiduGpsMsgBean.setLatitude(latitude);
+        }
+
+        if (TextUtils.isEmpty(longitude))
+        {
+            sBaiduGpsMsgBean.setLongitude("");
+        }
+        else
+        {
+            sBaiduGpsMsgBean.setLongitude(longitude);
+        }
+
+        if (TextUtils.isEmpty(locType))
+        {
+            sBaiduGpsMsgBean.setLoc_type("");
+        }
+        else
+        {
+            sBaiduGpsMsgBean.setLoc_type(locType);
+        }
+
+        if (TextUtils.isEmpty(source_type))
+        {
+            sBaiduGpsMsgBean.setPosition_type("");
+        }
+        else
+        {
+            sBaiduGpsMsgBean.setPosition_type(source_type);
+        }
     }
 
     public BaiduGpsParam getBaiduGpsStatus()
     {
-        sBaiduGpsMsgBean.setPosition_type(BAIDU_GPS_LOCATION_TYPE_LBS);
-        sBaiduGpsMsgBean.setLoc_type("1");
-        sBaiduGpsMsgBean.setLongitude("22.3333");
-        sBaiduGpsMsgBean.setLatitude("113.1122");
-
         return sBaiduGpsMsgBean;
     }
 
-    public void reportPosition(String type) {
-        String imei = SprdCommonUtils.getInstance().getIMEI();
-        String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
-        String manufactory = SprdCommonUtils.getInstance().getManufactory();
-        String model = SprdCommonUtils.getInstance().getModel();
-        String capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
-        String data = null;
-        String sign = null;
+    private String getLocType(int type)
+    {
+        String locType = "0";
 
-        BaiduGpsParam baiduGpsMsgBean = getBaiduGpsStatus();
-        String positionType = baiduGpsMsgBean.getPosition_type();
-        String locType = baiduGpsMsgBean.getLoc_type();
-        String latitude = baiduGpsMsgBean.getLatitude();
-        String longitude = baiduGpsMsgBean.getLongitude();
-
-        ReportParam reportParamBean = new ReportParam(imei,
-                manufactory,
-                model,
-                RXJAVAHTTP_COMPANY,
-                type,
-                positionType,
-                time,
-                locType,
-                longitude,
-                latitude,
-                capacity
-        );
-
-        String gsonString = ReportParam.getReportParamGson(reportParamBean);
-        Log.d(TAG, "reportPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
-        //String sortedGsonString = getSortedParam(gsonString);
-
-        try
+        switch (type)
         {
-            data = URLEncoder.encode(gsonString, RXJAVAHTTP_ENCODE_TYPE);
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            e.printStackTrace();
+            case BDLocation.TypeGpsLocation:
+                locType = "1";
+                break;
+            case BDLocation.TypeNetWorkLocation:
+                locType = "3";
+                break;
+
+            default:
+                break;
         }
 
-        sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "reportPosition: data = " + data + ", sign = " + sign);
-
-        RxHttpUtils.getSInstance()
-                .baseUrl(RXJAVAHTTP_BASE_GPS_URL_TEST)
-                .createSApi(ApiService.class)
-                .reportInfo(
-                        data,
-                        sign)
-                .compose(Transformer.<ResultMsg>switchSchedulers())
-                .subscribe(new CommonObserver<ResultMsg>() {
-                    @Override
-                    protected void onError(String s) {
-                        Log.d(TAG, "reportPosition onError: s = " + s);
-                    }
-
-                    @Override
-                    protected void onSuccess(ResultMsg resultMsg) {
-                        Log.d(TAG, "reportPosition onSuccess: resultMsg = " + resultMsg);
-                    }
-                });
+        return locType;
     }
 }

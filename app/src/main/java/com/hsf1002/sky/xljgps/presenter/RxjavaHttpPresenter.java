@@ -1,7 +1,8 @@
 package com.hsf1002.sky.xljgps.presenter;
 
-import com.hsf1002.sky.xljgps.ReturnMsg.ReceiveMsgBean;
-import com.hsf1002.sky.xljgps.ReturnMsg.ResultMsg;
+import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
+import com.hsf1002.sky.xljgps.result.ResultMsg;
+import com.hsf1002.sky.xljgps.result.StatusInfoMsg;
 
 /**
  * Created by hefeng on 18-6-8.
@@ -10,22 +11,43 @@ import com.hsf1002.sky.xljgps.ReturnMsg.ResultMsg;
 public interface RxjavaHttpPresenter {
     interface OnDownloadListener
     {
-        void downloadInfo();
-        void downloadInfoSuccess(ResultMsg<ReceiveMsgBean> resultMsg);
-        void downloadInfoFailed(String failedMsg);
+        void downloadRelationNumber();
+        void downloadRelationNumberSuccess(ResultMsg<RelationNumberMsg> resultMsg);
+        void downloadRelationNumberFailed(String failedMsg);
     }
 
     interface OnUploadListener
     {
-        void uploadInfo();
-        void uploadInfoSuccess(ResultMsg resultMsg);
-        void uploadInfoFailed(String failedMsg);
+        void uploadRelationNumber();
+        void uploadRelationNumberSuccess(ResultMsg resultMsg);
+        void uploadRelationNumberFailed(String failedMsg);
     }
 
     interface OnReportListener
     {
-        void reportInfo();
-        void reportInfoSuccess(ResultMsg resultMsg);
-        void reportInfoFailed(String failedMsg);
+        void reportSosPosition();
+        void reportSosPositionSuccess(ResultMsg resultMsg);
+        void reportSosPositionFailed(String failedMsg);
+    }
+
+    interface OnIntervalListener
+    {
+        void reportModifyInterval();
+        void reportModifyIntervalSuccess(ResultMsg resultMsg);
+        void reportModifyIntervalFailed(String failedMsg);
+    }
+
+    interface OnOuterBarListener
+    {
+        void notifyOuterElectricBar();
+        void notifyOuterElectricBarSuccess(ResultMsg resultMsg);
+        void notifyOuterElectricBarFailed(String failedMsg);
+    }
+
+    interface OnStatusListener
+    {
+        void getStatusInfo();
+        void getStatusInfoSuccess(ResultMsg<StatusInfoMsg> resultMsg);
+        void getStatusInfoFailed(String failedMsg);
     }
 }

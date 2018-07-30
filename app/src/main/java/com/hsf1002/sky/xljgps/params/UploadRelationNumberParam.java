@@ -6,8 +6,7 @@ import com.google.gson.Gson;
  * Created by hefeng on 18-6-15.
  */
 
-public class SendParam {
-
+public class UploadRelationNumberParam {
     private String imei;
     private String manufactory;
     private String model;
@@ -17,7 +16,7 @@ public class SendParam {
     private String name;
     private String time;
 
-    public SendParam(String imei, String manufactory, String model, String company, String type, String sos_phone, String name, String time) {
+    public UploadRelationNumberParam(String imei, String manufactory, String model, String company, String type, String sos_phone, String name, String time) {
         this.imei = imei;
         this.manufactory = manufactory;
         this.model = model;
@@ -28,10 +27,10 @@ public class SendParam {
         this.time = time;
     }
 
-    public static String getSendParamGson(SendParam param)
+    public static String getSendParamGson(UploadRelationNumberParam param)
     {
         Gson gson = new Gson();
 
-        return gson.toJson(param, SendParam.class);
+        return gson.toJson(param, UploadRelationNumberParam.class);
     }
 }

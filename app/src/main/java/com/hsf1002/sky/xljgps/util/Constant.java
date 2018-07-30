@@ -13,15 +13,14 @@ public class Constant {
 
     public static final String SHARED_PREFERENCE_NAME = "lxjgps_sp";
 
-    public static final String RXJAVAHTTP_BASE_URL_DOUBAN = "https://api.douban.com/";
+    //public static final String RXJAVAHTTP_BASE_URL_DOUBAN = "https://api.douban.com/";
     public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaobawangtest/";
     public static final String RXJAVAHTTP_BASE_URL_FORMAL = "http://healthdata.4000300659.com:8088/api/xiaobawang/";
     public static final String RXJAVAHTTP_REPORT_SOSPOSITION = "sosPosition";
-    public static final String RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM ="phonelatest";//= "familyNumber";
-    public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "phone";
+    public static final String RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM = "familyNumber";
+    public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "updatePhone";
     public static final String RXJAVAHTTP_REPORT_POSITION = "position";
 
-    public static final String RXJAVAHTTP_BASE_PERSON_URL = "http://192.168.100.62:8081/api/test/";
     public static final String RXJAVAHTTP_PERSON_LIST = "person";
     public static final String RXJAVAHTTP_PERSON_ID = "person/{id}";
 
@@ -36,9 +35,12 @@ public class Constant {
     public static final String RXJAVAHTTP_TYPE_CURRENT = "101";
     public static final String RXJAVAHTTP_TYPE_POWERON = "100";
     public static final String RXJAVAHTTP_TYPE_TIMING = "201";
+    public static final String RXJAVAHTTP_TYPE_INTERVAL = "106";                // 代表设置定位上传频率
+    public static final String RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR = "107";      //代表电子围栏超出通知
+    public static final String RXJAVAHTTP_TYPE_GET_STATUS_INFO = "108";         //代表获取设备状态信息
 
     public static final String RXJAVAHTTP_COMPANY = "XUNRUI";
-    public static final String RXJAVAHTTP_SECRET_CODE = "iETOECQ9kiJw75AZ";//ab2342145acdf;    // iETOECQ9kiJw75AZ
+    public static final String RXJAVAHTTP_SECRET_CODE = "8s6HiyY0yGCLeZp5";//ab2342145acdf;    // iETOECQ9kiJw75AZ
     public static final String RXJAVAHTTP_ENCODE_TYPE = "UTF-8";
     public static final String RXJAVAHTTP_NAME = "xunrui";
 

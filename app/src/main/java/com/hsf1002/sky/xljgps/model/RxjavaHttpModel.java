@@ -6,15 +6,19 @@ import android.util.Log;
 import com.allen.library.RxHttpUtils;
 import com.allen.library.interceptor.Transformer;
 import com.allen.library.observer.CommonObserver;
-import com.hsf1002.sky.xljgps.ReturnMsg.ResultMsg;
+import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
+import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
-import com.hsf1002.sky.xljgps.ReturnMsg.ReceiveMsgBean;
-import com.hsf1002.sky.xljgps.params.ReceiveParam;
-import com.hsf1002.sky.xljgps.params.ReportParam;
-import com.hsf1002.sky.xljgps.params.SendParam;
+import com.hsf1002.sky.xljgps.params.DownloadRelationNumberParam;
+import com.hsf1002.sky.xljgps.params.GetStatusInfoParam;
+import com.hsf1002.sky.xljgps.params.OuterElectricBarParam;
+import com.hsf1002.sky.xljgps.params.ModifyIntervalParam;
+import com.hsf1002.sky.xljgps.params.SosPositionParam;
+import com.hsf1002.sky.xljgps.params.UploadRelationNumberParam;
 import com.hsf1002.sky.xljgps.http.ApiService;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
+import com.hsf1002.sky.xljgps.result.StatusInfoMsg;
 import com.hsf1002.sky.xljgps.util.MD5Utils;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
@@ -26,12 +30,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_GPS_URL_TEST;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_URL_TEST;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_ENCODE_TYPE;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_SECRET_CODE;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_DOWNLOAD;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_GET_STATUS_INFO;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_INTERVAL;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_REPORT;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_UPLOAD;
 
@@ -42,8 +48,16 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_UPLOAD;
 public class RxjavaHttpModel implements BaseModel {
     private static final String TAG = "RxjavaHttpModel";
 
+
+    /**
+    *  author:  hefeng
+    *  created: 18-7-30 下午2:37
+    *  desc:    客户端同步孝老平台的亲情号码到本地
+    *  param:   
+    *  return:  
+    */
     @Override
-    public void downloadInfo(final RxjavaHttpPresenter.OnDownloadListener listener) {
+    public void downloadRelationNumber(final RxjavaHttpPresenter.OnDownloadListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         String manufactory = SprdCommonUtils.getInstance().getManufactory();
@@ -51,9 +65,9 @@ public class RxjavaHttpModel implements BaseModel {
         String data = null;
         String sign = null;
 
-        ReceiveParam receiveParam = new ReceiveParam(imei, manufactory, model, RXJAVAHTTP_COMPANY, RXJAVAHTTP_TYPE_DOWNLOAD, time);
-        String gsonString = ReceiveParam.getReceiveParamGson(receiveParam);
-        Log.d(TAG, "downloadInfo: imei = " + imei + ", time = " + time + ", gson = " + gsonString);
+        DownloadRelationNumberParam receiveParam = new DownloadRelationNumberParam(imei, manufactory, model, RXJAVAHTTP_COMPANY, RXJAVAHTTP_TYPE_DOWNLOAD, time);
+        String gsonString = DownloadRelationNumberParam.getReceiveParamGson(receiveParam);
+        Log.d(TAG, "downloadRelationNumber: imei = " + imei + ", time = " + time + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -66,32 +80,40 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "downloadInfo: data = " + data + ", sign = " + sign);
+        Log.d(TAG, "downloadRelationNumber: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
-                .baseUrl(RXJAVAHTTP_BASE_GPS_URL_TEST)
+                .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
                 .createSApi(ApiService.class)
-                .downloadInfo(
+                .downloadRelationNumber(
+                        RXJAVAHTTP_COMPANY,
                         data,
                         sign)
-                .compose(Transformer.<ResultMsg<ReceiveMsgBean>>switchSchedulers())
-                .subscribe(new CommonObserver<ResultMsg<ReceiveMsgBean>>() {
+                .compose(Transformer.<ResultMsg<RelationNumberMsg>>switchSchedulers())
+                .subscribe(new CommonObserver<ResultMsg<RelationNumberMsg>>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "downloadInfo onError: s = " + s);
-                        listener.downloadInfoFailed(s);
+                        Log.d(TAG, "downloadRelationNumber onError: s = " + s);
+                        listener.downloadRelationNumberFailed(s);
                     }
 
                     @Override
-                    protected void onSuccess(ResultMsg<ReceiveMsgBean> receiveMsg) {
-                        Log.d(TAG, "downloadInfo onSuccess: receiveMsg = " + receiveMsg);
-                        listener.downloadInfoSuccess(receiveMsg);
+                    protected void onSuccess(ResultMsg<RelationNumberMsg> receiveMsg) {
+                        Log.d(TAG, "downloadRelationNumber onSuccess: receiveMsg = " + receiveMsg);
+                        listener.downloadRelationNumberSuccess(receiveMsg);
                     }
                 });
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-7-30 下午2:38
+    *  desc:    客户端修改亲情号码后同步至孝老平台
+    *  param:
+    *  return:
+    */
     @Override
-    public void uploadInfo(final RxjavaHttpPresenter.OnUploadListener listener) {
+    public void uploadRelationNumber(final RxjavaHttpPresenter.OnUploadListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         String manufactory = SprdCommonUtils.getInstance().getManufactory();
@@ -102,9 +124,9 @@ public class RxjavaHttpModel implements BaseModel {
         String data = null;
         String sign = null;
 
-        SendParam sendParam = new SendParam(imei, manufactory, model, RXJAVAHTTP_COMPANY, RXJAVAHTTP_TYPE_UPLOAD, sosPhones, sosPhoneNames,  time);
-        String gsonString = SendParam.getSendParamGson(sendParam);
-        Log.d(TAG, "uploadInfo: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
+        UploadRelationNumberParam sendParam = new UploadRelationNumberParam(imei, manufactory, model, RXJAVAHTTP_COMPANY, RXJAVAHTTP_TYPE_UPLOAD, sosPhones, sosPhoneNames,  time);
+        String gsonString = UploadRelationNumberParam.getSendParamGson(sendParam);
+        Log.d(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -118,32 +140,40 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "uploadInfo: data = " + data + ", encodedSosPhoneNames = " + encodedSosPhoneNames + ", sign = " + sign);
+        Log.d(TAG, "uploadRelationNumber: data = " + data + ", encodedSosPhoneNames = " + encodedSosPhoneNames + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
-                .baseUrl(RXJAVAHTTP_BASE_GPS_URL_TEST)
+                .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
                 .createSApi(ApiService.class)
-                .uploadInfo(
+                .uploadRelationNumber(
+                        RXJAVAHTTP_COMPANY,
                         data,
                         sign)
                 .compose(Transformer.<ResultMsg>switchSchedulers())
                 .subscribe(new CommonObserver<ResultMsg>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "uploadInfo onError: s = " + s);
-                        listener.uploadInfoFailed(s);
+                        Log.d(TAG, "uploadRelationNumber onError: s = " + s);
+                        listener.uploadRelationNumberFailed(s);
                     }
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
-                        Log.d(TAG, "uploadInfo onSuccess: resultMsg= " + resultMsg);
-                        listener.uploadInfoSuccess(resultMsg);
+                        Log.d(TAG, "uploadRelationNumber onSuccess: resultMsg= " + resultMsg);
+                        listener.uploadRelationNumberSuccess(resultMsg);
                     }
                 });
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-7-30 下午2:39
+    *  desc:    上报sos-position信息到孝老平台
+    *  param:
+    *  return:
+    */
     @Override
-    public void reportInfo(final RxjavaHttpPresenter.OnReportListener listener) {
+    public void reportSosPosition(final RxjavaHttpPresenter.OnReportListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         String manufactory = SprdCommonUtils.getInstance().getManufactory();
@@ -158,7 +188,7 @@ public class RxjavaHttpModel implements BaseModel {
         String latitude = baiduGpsMsgBean.getLatitude();
         String longitude = baiduGpsMsgBean.getLongitude();
 
-        ReportParam reportParamBean = new ReportParam(imei,
+        SosPositionParam reportParamBean = new SosPositionParam(imei,
                 manufactory,
                 model,
                 RXJAVAHTTP_COMPANY,
@@ -171,8 +201,8 @@ public class RxjavaHttpModel implements BaseModel {
                 capacity
                 );
 
-        String gsonString = ReportParam.getReportParamGson(reportParamBean);
-        Log.d(TAG, "reportInfo: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
+        String gsonString = SosPositionParam.getReportParamGson(reportParamBean);
+        Log.d(TAG, "reportSosPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -185,30 +215,38 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "reportInfo: data = " + data + ", sign = " + sign);
+        Log.d(TAG, "reportSosPosition: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
-                .baseUrl(RXJAVAHTTP_BASE_GPS_URL_TEST)
+                .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
                 .createSApi(ApiService.class)
-                .reportInfo(
+                .reportSosPosition(
+                        RXJAVAHTTP_COMPANY,
                         data,
                         sign)
                 .compose(Transformer.<ResultMsg>switchSchedulers())
                 .subscribe(new CommonObserver<ResultMsg>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "reportInfo onError: s = " + s);
-                        listener.reportInfoFailed(s);
+                        Log.d(TAG, "reportSosPosition onError: s = " + s);
+                        listener.reportSosPositionFailed(s);
                     }
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
-                        Log.d(TAG, "reportInfo onSuccess: resultMsg = " + resultMsg);
-                        listener.reportInfoSuccess(resultMsg);
+                        Log.d(TAG, "reportSosPosition onSuccess: resultMsg = " + resultMsg);
+                        listener.reportSosPositionSuccess(resultMsg);
                     }
                 });
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-7-30 下午2:40
+    *  desc:    上报position信息到孝老平台
+    *  param:
+    *  return:
+    */
     @Override
     public void reportPosition(String type, final RxjavaHttpPresenter.OnReportListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
@@ -225,7 +263,7 @@ public class RxjavaHttpModel implements BaseModel {
         String latitude = baiduGpsMsgBean.getLatitude();
         String longitude = baiduGpsMsgBean.getLongitude();
 
-        ReportParam reportParamBean = new ReportParam(imei,
+        SosPositionParam reportParamBean = new SosPositionParam(imei,
                 manufactory,
                 model,
                 RXJAVAHTTP_COMPANY,
@@ -238,7 +276,7 @@ public class RxjavaHttpModel implements BaseModel {
                 capacity
         );
 
-        String gsonString = ReportParam.getReportParamGson(reportParamBean);
+        String gsonString = SosPositionParam.getReportParamGson(reportParamBean);
         Log.d(TAG, "reportPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
@@ -266,7 +304,7 @@ public class RxjavaHttpModel implements BaseModel {
                     protected void onError(String s) {
                         Log.d(TAG, "reportPosition onError: s = " + s);
                         if (listener != null) {
-                            listener.reportInfoFailed(s);
+                            listener.reportSosPositionFailed(s);
                         }
                     }
 
@@ -274,99 +312,263 @@ public class RxjavaHttpModel implements BaseModel {
                     protected void onSuccess(ResultMsg resultMsg) {
                         Log.d(TAG, "reportPosition onSuccess: resultMsg = " + resultMsg);
                         if (listener != null) {
-                            listener.reportInfoSuccess(resultMsg);
+                            listener.reportSosPositionSuccess(resultMsg);
                         }
                     }
                 });
     }
 
-/*
-    public void getUserInfo() {
-        Log.d(TAG, "getUserInfo: ");
+    /**
+    *  author:  hefeng
+    *  created: 18-7-30 下午3:22
+    *  desc:    收到服务器下发的修改上报信息频率的指令后,修改定时服务的时间间隔
+    *  param:
+    *  return:
+    */
+    @Override
+    public void reportModifyInterval(final RxjavaHttpPresenter.OnIntervalListener listener) {
+        String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
+        String interval = "";
+        String data = null;
+        String sign = null;
+
+        ModifyIntervalParam modifyIntervalParam = new ModifyIntervalParam(interval, time, RXJAVAHTTP_TYPE_INTERVAL);
+
+        String gsonString = ModifyIntervalParam.getReportParamGson(modifyIntervalParam);
+        Log.d(TAG, "reportModifyInterval: time = " + time + ", interval = " + interval + ", gson = " + gsonString);
+        String sortedGsonString = getSortedParam(gsonString);
+
+        try
+        {
+            data = URLEncoder.encode(sortedGsonString, RXJAVAHTTP_ENCODE_TYPE);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+
+        sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
+        Log.d(TAG, "reportModifyInterval: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
-                .baseUrl(RXJAVAHTTP_BASE_URL_DOUBAN)
+                .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
                 .createSApi(ApiService.class)
-                .getBook()
-                .compose(Transformer.<BookBean>switchSchedulers())
-                .subscribe(new CommonObserver<BookBean>() {
+                .reportModifyInterval(
+                        RXJAVAHTTP_COMPANY,
+                        data,
+                        sign)
+                .compose(Transformer.<ResultMsg>switchSchedulers())
+                .subscribe(new CommonObserver<ResultMsg>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "onError: s = " + s);
+                        Log.d(TAG, "reportModifyInterval onError: s = " + s);
+                        listener.reportModifyIntervalFailed(s);
                     }
 
                     @Override
-                    protected void onSuccess(BookBean bookBean) {
-                        Log.d(TAG, "onSuccess: book = " + bookBean);
-                    }
-                });
-
-    }
-
-    public void getPersonList() {
-        Log.d(TAG, "getPersonList: ");
-
-        RxHttpUtils.getSInstance()
-                .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
-                .createSApi(ApiService.class)
-                .getPersonList()
-                .compose(Transformer.<List<PersonBean>>switchSchedulers())
-                .subscribe(new CommonObserver<List<PersonBean>>() {
-                    @Override
-                    protected void onError(String s) {
-                        Log.d(TAG, "onError: s = " + s);
-                    }
-
-                    @Override
-                    protected void onSuccess(List<PersonBean> personBeans) {
-                        Log.d(TAG, "onSuccess: personBeans = " + personBeans);
-                    }
-                });
-    }
-
-    public void getPersonById(Integer id) {
-        Log.d(TAG, "getPersonById: ");
-
-        RxHttpUtils.getSInstance()
-                .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
-                .createSApi(ApiService.class)
-                .getPersonById(id)
-                .compose(Transformer.<PersonBean>switchSchedulers())
-                .subscribe(new CommonObserver<PersonBean>() {
-                    @Override
-                    protected void onError(String s) {
-                        Log.d(TAG, "onError: s = " + s);
-                    }
-
-                    @Override
-                    protected void onSuccess(PersonBean personBean) {
-                        Log.d(TAG, "onSuccess: personBean = " + personBean);
+                    protected void onSuccess(ResultMsg resultMsg) {
+                        Log.d(TAG, "reportModifyInterval onSuccess: resultMsg = " + resultMsg);
+                        listener.reportModifyIntervalSuccess(resultMsg);
                     }
                 });
     }
 
-    public void addPerson(String name, Integer age) {
-        Log.d(TAG, "addPerson: ");
+    /**
+    *  author:  hefeng
+    *  created: 18-7-30 下午3:39
+    *  desc:    根据孝老平台设置的电子围栏，判断定位上传信息，如果超出电子围栏，并通知设备，设备接收到此消息后向亲情号码发送超出电子围栏手机信息
+    *  param:
+    *  return:  
+    */
+    @Override
+    public void notifyOuterElectricBar(final RxjavaHttpPresenter.OnOuterBarListener listener) {
+        String imei = SprdCommonUtils.getInstance().getIMEI();
+        String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
+        String data = null;
+        String sign = null;
+
+        OuterElectricBarParam outerElectricBarParam = new OuterElectricBarParam(imei, time, RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR);
+
+        String gsonString = OuterElectricBarParam.getReportParamGson(outerElectricBarParam);
+        Log.d(TAG, "notifyOuterElectricBar: time = " + time + ", imei = " + imei + ", gson = " + gsonString);
+        String sortedGsonString = getSortedParam(gsonString);
+
+        try
+        {
+            data = URLEncoder.encode(sortedGsonString, RXJAVAHTTP_ENCODE_TYPE);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+
+        sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
+        Log.d(TAG, "notifyOuterElectricBar: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
-                .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
+                .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
                 .createSApi(ApiService.class)
-                .addPerson(name, age)
-                .compose(Transformer.<PersonBean>switchSchedulers())
-                .subscribe(new CommonObserver<PersonBean>() {
+                .notifyOuterElectricBar(
+                        RXJAVAHTTP_COMPANY,
+                        data,
+                        sign)
+                .compose(Transformer.<ResultMsg>switchSchedulers())
+                .subscribe(new CommonObserver<ResultMsg>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "onError: s = " + s);
+                        Log.d(TAG, "notifyOuterElectricBar onError: s = " + s);
+                        listener.notifyOuterElectricBarFailed(s);
                     }
 
                     @Override
-                    protected void onSuccess(PersonBean personBean) {
-                        Log.d(TAG, "onSuccess: personBean = " + personBean);
+                    protected void onSuccess(ResultMsg resultMsg) {
+                        Log.d(TAG, "notifyOuterElectricBar onSuccess: resultMsg = " + resultMsg);
+                        listener.notifyOuterElectricBarSuccess(resultMsg);
                     }
                 });
     }
 
-*/
+    /**
+    *  author:  hefeng
+    *  created: 18-7-30 下午3:45
+    *  desc:    孝老平台下发获取设备相关状态信息
+    *  param:
+    *  return:  
+    */
+    @Override
+    public void getStatusInfo(final RxjavaHttpPresenter.OnStatusListener listener) {
+        String imei = SprdCommonUtils.getInstance().getIMEI();
+        String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
+        String data = null;
+        String sign = null;
+
+        GetStatusInfoParam statusInfoParam = new GetStatusInfoParam(imei, time, RXJAVAHTTP_TYPE_GET_STATUS_INFO);
+        String gsonString = GetStatusInfoParam.getReportParamGson(statusInfoParam);
+        Log.d(TAG, "getStatusInfo: time = " + time + ", imei = " + imei + ", gson = " + gsonString);
+        String sortedGsonString = getSortedParam(gsonString);
+
+        try
+        {
+            data = URLEncoder.encode(sortedGsonString, RXJAVAHTTP_ENCODE_TYPE);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+
+        sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
+        Log.d(TAG, "getStatusInfo: data = " + data + ", sign = " + sign);
+
+        RxHttpUtils.getSInstance()
+                .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
+                .createSApi(ApiService.class)
+                .getStatusInfo(
+                        RXJAVAHTTP_COMPANY,
+                        data,
+                        sign)
+                .compose(Transformer.<ResultMsg<StatusInfoMsg>>switchSchedulers())
+                .subscribe(new CommonObserver<ResultMsg<StatusInfoMsg>>() {
+                    @Override
+                    protected void onError(String s) {
+                        Log.d(TAG, "getStatusInfo onError: s = " + s);
+                        listener.getStatusInfoFailed(s);
+                    }
+
+                    @Override
+                    protected void onSuccess(ResultMsg<StatusInfoMsg> statusInfoMsgResultMsg) {
+                        Log.d(TAG, "getStatusInfo onSuccess: result = " + statusInfoMsgResultMsg);
+                        listener.getStatusInfoSuccess(statusInfoMsgResultMsg);
+                    }
+                });
+    }
+
+    /*
+        public void getUserInfo() {
+            Log.d(TAG, "getUserInfo: ");
+
+            RxHttpUtils.getSInstance()
+                    .baseUrl(RXJAVAHTTP_BASE_URL_DOUBAN)
+                    .createSApi(ApiService.class)
+                    .getBook()
+                    .compose(Transformer.<BookBean>switchSchedulers())
+                    .subscribe(new CommonObserver<BookBean>() {
+                        @Override
+                        protected void onError(String s) {
+                            Log.d(TAG, "onError: s = " + s);
+                        }
+
+                        @Override
+                        protected void onSuccess(BookBean bookBean) {
+                            Log.d(TAG, "onSuccess: book = " + bookBean);
+                        }
+                    });
+
+        }
+
+        public void getPersonList() {
+            Log.d(TAG, "getPersonList: ");
+
+            RxHttpUtils.getSInstance()
+                    .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
+                    .createSApi(ApiService.class)
+                    .getPersonList()
+                    .compose(Transformer.<List<PersonBean>>switchSchedulers())
+                    .subscribe(new CommonObserver<List<PersonBean>>() {
+                        @Override
+                        protected void onError(String s) {
+                            Log.d(TAG, "onError: s = " + s);
+                        }
+
+                        @Override
+                        protected void onSuccess(List<PersonBean> personBeans) {
+                            Log.d(TAG, "onSuccess: personBeans = " + personBeans);
+                        }
+                    });
+        }
+
+        public void getPersonById(Integer id) {
+            Log.d(TAG, "getPersonById: ");
+
+            RxHttpUtils.getSInstance()
+                    .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
+                    .createSApi(ApiService.class)
+                    .getPersonById(id)
+                    .compose(Transformer.<PersonBean>switchSchedulers())
+                    .subscribe(new CommonObserver<PersonBean>() {
+                        @Override
+                        protected void onError(String s) {
+                            Log.d(TAG, "onError: s = " + s);
+                        }
+
+                        @Override
+                        protected void onSuccess(PersonBean personBean) {
+                            Log.d(TAG, "onSuccess: personBean = " + personBean);
+                        }
+                    });
+        }
+
+        public void addPerson(String name, Integer age) {
+            Log.d(TAG, "addPerson: ");
+
+            RxHttpUtils.getSInstance()
+                    .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
+                    .createSApi(ApiService.class)
+                    .addPerson(name, age)
+                    .compose(Transformer.<PersonBean>switchSchedulers())
+                    .subscribe(new CommonObserver<PersonBean>() {
+                        @Override
+                        protected void onError(String s) {
+                            Log.d(TAG, "onError: s = " + s);
+                        }
+
+                        @Override
+                        protected void onSuccess(PersonBean personBean) {
+                            Log.d(TAG, "onSuccess: personBean = " + personBean);
+                        }
+                    });
+        }
+
+    */
     private String geSortedParam(String param)
     {
         StringBuilder sortedParam = new StringBuilder();
@@ -456,6 +658,13 @@ public class RxjavaHttpModel implements BaseModel {
         return sortedParam.toString();
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-7-30 下午4:59
+    *  desc:    对gson字符串按照键 key 的字典顺序进行排序
+    *  param:   参数的值 value 可以是"", 但是不能是 null, 必须用""包裹起来
+    *  return:
+    */
     private String getSortedParam(String params)
     {
         StringBuilder sortedParam = new StringBuilder();
@@ -471,7 +680,7 @@ public class RxjavaHttpModel implements BaseModel {
         params = params.substring(1);  // delete {
         String[] strSplits = params.split(":");
         length = strSplits.length - 1;
-        Log.d(TAG, "getSortedParam: before sorted paramNumber = " + length + ", params = " + params);
+        Log.e(TAG, "getSortedParam: before sorted paramNumber = " + length + ", params = " + params);
 
         for (int i=0; i<length; ++i)
         {
@@ -512,6 +721,13 @@ public class RxjavaHttpModel implements BaseModel {
         return sortedParam.toString();
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-7-30 下午5:15
+    *  desc:    截取单个的参数key-value
+    *  param:
+    *  return:
+    */
     private String getOneParam(String params, int position)
     {
         String param = null;
@@ -538,6 +754,8 @@ public class RxjavaHttpModel implements BaseModel {
         int valueEndPos = params.indexOf("\"", valueStartPos + 1);
         String key = null;
         String value = null;
+
+        //Log.e(TAG, "getOneParam: keyStartPos = " + keyStartPos + ", keyEndPos = " + keyEndPos + ", valueStartPos = " + valueStartPos + ", valueEndPos = " + valueEndPos);
 
         key = params.substring(keyStartPos + 1, keyEndPos);
         value = params.substring(valueStartPos + 1, valueEndPos);

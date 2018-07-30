@@ -1,4 +1,4 @@
-package com.hsf1002.sky.xljgps.ReturnMsg;
+package com.hsf1002.sky.xljgps.result;
 
 /**
  * Created by hefeng on 18-6-8.

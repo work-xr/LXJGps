@@ -7,9 +7,13 @@ import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
  */
 
 public interface BaseModel {
-    void downloadInfo(RxjavaHttpPresenter.OnDownloadListener listener);
-    void uploadInfo(RxjavaHttpPresenter.OnUploadListener listener);
-    void reportInfo(RxjavaHttpPresenter.OnReportListener listener);
+    void downloadRelationNumber(RxjavaHttpPresenter.OnDownloadListener listener);
+    void uploadRelationNumber(RxjavaHttpPresenter.OnUploadListener listener);
+    void reportSosPosition(RxjavaHttpPresenter.OnReportListener listener);
     //void reportGsonInfo(RxjavaHttpPresenter.OnReportListener listener);
     void reportPosition(String type, RxjavaHttpPresenter.OnReportListener listener);
+
+    void reportModifyInterval(RxjavaHttpPresenter.OnIntervalListener listener);
+    void notifyOuterElectricBar(RxjavaHttpPresenter.OnOuterBarListener listener);
+    void getStatusInfo(RxjavaHttpPresenter.OnStatusListener listener);
 }

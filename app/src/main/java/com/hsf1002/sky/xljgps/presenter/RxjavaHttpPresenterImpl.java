@@ -1,10 +1,12 @@
 package com.hsf1002.sky.xljgps.presenter;
 
-import com.hsf1002.sky.xljgps.ReturnMsg.ReceiveMsgBean;
-import com.hsf1002.sky.xljgps.ReturnMsg.ResultMsg;
+import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
+import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.model.BaseModel;
 import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
 import com.hsf1002.sky.xljgps.view.BaseView;
+
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_TIMING;
 
 /**
  * Created by hefeng on 18-6-8.
@@ -24,48 +26,48 @@ public class RxjavaHttpPresenterImpl implements RxjavaHttpPresenter.OnDownloadLi
     }
 
     @Override
-    public void downloadInfo() {
-        model.downloadInfo(this);
+    public void downloadRelationNumber() {
+        model.downloadRelationNumber(this);
     }
 
     @Override
-    public void downloadInfoSuccess(ResultMsg<ReceiveMsgBean> resultMsg) {
+    public void downloadRelationNumberSuccess(ResultMsg<RelationNumberMsg> resultMsg) {
         view.downloadSuccess(resultMsg);
     }
 
     @Override
-    public void downloadInfoFailed(String failedMsg) {
+    public void downloadRelationNumberFailed(String failedMsg) {
         view.downloadFailed(failedMsg);
     }
 
     @Override
-    public void uploadInfo() {
-        model.uploadInfo(this);
+    public void uploadRelationNumber() {
+        model.uploadRelationNumber(this);
     }
 
     @Override
-    public void uploadInfoSuccess(ResultMsg resultMsg) {
+    public void uploadRelationNumberSuccess(ResultMsg resultMsg) {
         view.uploadSuccess(resultMsg);
     }
 
     @Override
-    public void uploadInfoFailed(String failedMsg) {
+    public void uploadRelationNumberFailed(String failedMsg) {
         view.uploadFailed(failedMsg);
     }
 
     @Override
-    public void reportInfo() {
-        model.reportInfo(this);
+    public void reportSosPosition() {
+        model.reportPosition(RXJAVAHTTP_TYPE_TIMING, this);
         //model.reportGsonInfo(this);
     }
 
     @Override
-    public void reportInfoSuccess(ResultMsg resultMsg) {
+    public void reportSosPositionSuccess(ResultMsg resultMsg) {
         view.reportSuccess(resultMsg);
     }
 
     @Override
-    public void reportInfoFailed(String failedMsg) {
+    public void reportSosPositionFailed(String failedMsg) {
         view.reportFailed(failedMsg);
     }
 }

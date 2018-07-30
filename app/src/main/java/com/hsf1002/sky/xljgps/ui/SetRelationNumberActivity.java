@@ -33,6 +33,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
  * Created by hefeng on 18-6-6.
  */
 
+@Deprecated
 public class SetRelationNumberActivity extends AppCompatActivity {
     private static final String TAG = "SetRelationNumberActivity";
     private RecyclerView recyclerView;

@@ -27,7 +27,7 @@ public class XLJGpsApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Log.d(TAG, "onCreate: ");
+        Log.i(TAG, "onCreate: ");
         sContext = getApplicationContext();
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
         //XLJGpsService.setServiceAlarm(getApplicationContext(), true);

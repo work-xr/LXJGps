@@ -15,9 +15,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.hsf1002.sky.xljgps.*;
-import com.hsf1002.sky.xljgps.ReturnMsg.ResultMsg;
+import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
+import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
-import com.hsf1002.sky.xljgps.ReturnMsg.ReceiveMsgBean;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenterImpl;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
@@ -167,17 +167,17 @@ public class MainActivity extends AppCompatActivity implements BaseView{
 
     private void uploadInfo()
     {
-        presenter.uploadInfo();
+        presenter.uploadRelationNumber();
     }
 
     private void downloadInfo()
     {
-        presenter.downloadInfo();
+        presenter.downloadRelationNumber();
     }
 
     private void reportSosGpsInfoToPlatform()
     {
-        presenter.reportInfo();
+        presenter.reportSosPosition();
     }
 
     private void sendMsgToRelationNumber()
@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     }
 
     @Override
-    public void downloadSuccess(ResultMsg<ReceiveMsgBean> resultMsg) {
+    public void downloadSuccess(ResultMsg<RelationNumberMsg> resultMsg) {
         Toast.makeText(this, getString(R.string.download_success), Toast.LENGTH_SHORT).show();
 
         String relationName = resultMsg.getData().getRelationship();

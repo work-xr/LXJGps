@@ -82,11 +82,13 @@ public class SprdCommonUtils {
         return nowTimeString;
     }
 
+    @Deprecated
     private int getRelationNumberCount()
     {
         return SharedPreUtils.getInstance().getInt(RELATION_NUMBER_COUNT, 0);
     }
 
+    @Deprecated
     public String getRelationNumber()
     {
         StringBuilder numberString = new StringBuilder();
@@ -109,6 +111,7 @@ public class SprdCommonUtils {
         return numberString.toString();
     }
 
+    @Deprecated
     public void setRelationNumber(String relationNumber)
     {
         String[] list = relationNumber.split(",");
@@ -123,6 +126,7 @@ public class SprdCommonUtils {
         SharedPreUtils.getInstance().putInt(RELATION_NUMBER_COUNT, count);
     }
 
+    @Deprecated
     public String getRelationNumberNames()
     {
         StringBuilder numberStringNames = new StringBuilder();
@@ -146,6 +150,7 @@ public class SprdCommonUtils {
         return numberStringNames.toString();
     }
 
+    @Deprecated
     public void setRelationNumberNames(String relationNames)
     {
         String[] list = relationNames.split(",");
