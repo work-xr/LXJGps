@@ -32,15 +32,15 @@ public class XLJGpsApplication extends Application {
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
         //XLJGpsService.setServiceAlarm(getApplicationContext(), true);
         //startService(new Intent(this, GpsService.class));
-        GpsService.setServiceAlarm(getApplicationContext(), true);
-        SprdCommonUtils.getInstance().init(sContext);
+        //GpsService.setServiceAlarm(getApplicationContext(), true);
+
         rxjavaHttpInit();
 
         //RxjavaHttpModel.getInstance().getUserInfo();
         //RxjavaHttpModel.getInstance().getPersonList();
         //RxjavaHttpModel.getInstance().getPersonById(2);
         //RxjavaHttpModel.getInstance().addPerson("lili", 19);
-        RxjavaHttpModel.getInstance().reportPosition("10000", null);
+        //RxjavaHttpModel.getInstance().reportPosition("10000", null);
     }
 
     private void rxjavaHttpInit()

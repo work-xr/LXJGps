@@ -482,182 +482,6 @@ public class RxjavaHttpModel implements BaseModel {
                 });
     }
 
-    /*
-        public void getUserInfo() {
-            Log.d(TAG, "getUserInfo: ");
-
-            RxHttpUtils.getSInstance()
-                    .baseUrl(RXJAVAHTTP_BASE_URL_DOUBAN)
-                    .createSApi(ApiService.class)
-                    .getBook()
-                    .compose(Transformer.<BookBean>switchSchedulers())
-                    .subscribe(new CommonObserver<BookBean>() {
-                        @Override
-                        protected void onError(String s) {
-                            Log.d(TAG, "onError: s = " + s);
-                        }
-
-                        @Override
-                        protected void onSuccess(BookBean bookBean) {
-                            Log.d(TAG, "onSuccess: book = " + bookBean);
-                        }
-                    });
-
-        }
-
-        public void getPersonList() {
-            Log.d(TAG, "getPersonList: ");
-
-            RxHttpUtils.getSInstance()
-                    .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
-                    .createSApi(ApiService.class)
-                    .getPersonList()
-                    .compose(Transformer.<List<PersonBean>>switchSchedulers())
-                    .subscribe(new CommonObserver<List<PersonBean>>() {
-                        @Override
-                        protected void onError(String s) {
-                            Log.d(TAG, "onError: s = " + s);
-                        }
-
-                        @Override
-                        protected void onSuccess(List<PersonBean> personBeans) {
-                            Log.d(TAG, "onSuccess: personBeans = " + personBeans);
-                        }
-                    });
-        }
-
-        public void getPersonById(Integer id) {
-            Log.d(TAG, "getPersonById: ");
-
-            RxHttpUtils.getSInstance()
-                    .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
-                    .createSApi(ApiService.class)
-                    .getPersonById(id)
-                    .compose(Transformer.<PersonBean>switchSchedulers())
-                    .subscribe(new CommonObserver<PersonBean>() {
-                        @Override
-                        protected void onError(String s) {
-                            Log.d(TAG, "onError: s = " + s);
-                        }
-
-                        @Override
-                        protected void onSuccess(PersonBean personBean) {
-                            Log.d(TAG, "onSuccess: personBean = " + personBean);
-                        }
-                    });
-        }
-
-        public void addPerson(String name, Integer age) {
-            Log.d(TAG, "addPerson: ");
-
-            RxHttpUtils.getSInstance()
-                    .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
-                    .createSApi(ApiService.class)
-                    .addPerson(name, age)
-                    .compose(Transformer.<PersonBean>switchSchedulers())
-                    .subscribe(new CommonObserver<PersonBean>() {
-                        @Override
-                        protected void onError(String s) {
-                            Log.d(TAG, "onError: s = " + s);
-                        }
-
-                        @Override
-                        protected void onSuccess(PersonBean personBean) {
-                            Log.d(TAG, "onSuccess: personBean = " + personBean);
-                        }
-                    });
-        }
-
-    */
-    private String geSortedParam(String param)
-    {
-        StringBuilder sortedParam = new StringBuilder();
-        List<String> listString = new ArrayList<>();
-        int strSplitsLength = 0;
-
-        if (TextUtils.isEmpty(param) || param.length() == 0)
-        {
-            return null;
-        }
-
-        String[] strSplits = param.split(",");
-        strSplitsLength = strSplits.length;
-        Log.d(TAG, "geSortedParam: strSplits.length = " + strSplits.length);
-/*
-        //Map<String, String> map = new HashMap<>();
-
-        for (int i=0; i<strSplits.length; ++i)
-        {
-            String[] strOne = strSplits[i].split(":");
-
-            String key = strOne[0];
-            String value = strOne[1];
-
-            // key cannot be empty
-            if (TextUtils.isEmpty(key) || key.length() == 0)
-            {
-                break;
-            }
-
-            int keySize = key.length();
-            int valueSize = value.length();
-
-            key = key.substring(1, keySize - 2);
-            value = value.substring(1, valueSize - 2);
-            Log.d(TAG, "getOrderedParam: key = " + key + ", value = " + value);
-            map.put(key, value);
-        }
-
-        // sort the param 对所有传入参数按照字段名的 ASCII 码从小到大排序（字典序）
-        List<Map.Entry<String, String>> infoIds = new ArrayList<Map.Entry<String, String>>(map.entrySet());
-
-        Collections.sort(infoIds, new Comparator<Map.Entry<String, String>>()
-        {
-            @Override
-            public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2)
-            {
-                return (o1.getKey()).toString().compareTo(o2.getKey());
-            }
-        });*/
-        strSplits[0] = strSplits[0].substring(1);
-        strSplits[strSplitsLength-1] = strSplits[strSplitsLength-1].substring(0, strSplits[strSplitsLength-1].length() - 1);
-
-        for (int i=0; i<strSplitsLength; ++i)
-        {
-            listString.add(strSplits[i]);
-        }
-
-        Collections.sort(listString, new Comparator() {
-            @Override
-            public int compare(Object o1, Object o2) {
-                String str1=(String) o1;
-                String str2=(String) o2;
-                if (str1.compareToIgnoreCase(str2)<0){
-                    return -1;
-                }
-                return 1;
-            }
-        });
-
-        sortedParam.append("{");
-
-        for (int i=0; i<strSplitsLength; ++i)
-        {
-            //Log.d(TAG, "geSortedParam: listString[" + i + "]" + listString.get(i).toString());
-            sortedParam.append(listString.get(i).toString());
-
-            if (i != strSplitsLength - 1)
-            {
-                sortedParam.append(",");
-            }
-        }
-        sortedParam.append("}");
-
-        Log.d(TAG, "geSortedParam: sortedParam = " + sortedParam);
-
-        return sortedParam.toString();
-    }
-
     /**
     *  author:  hefeng
     *  created: 18-7-30 下午4:59
@@ -778,4 +602,92 @@ public class RxjavaHttpModel implements BaseModel {
     {
         private static RxjavaHttpModel instance = new RxjavaHttpModel();
     }
+
+    /*
+        public void getUserInfo() {
+            Log.d(TAG, "getUserInfo: ");
+
+            RxHttpUtils.getSInstance()
+                    .baseUrl(RXJAVAHTTP_BASE_URL_DOUBAN)
+                    .createSApi(ApiService.class)
+                    .getBook()
+                    .compose(Transformer.<BookBean>switchSchedulers())
+                    .subscribe(new CommonObserver<BookBean>() {
+                        @Override
+                        protected void onError(String s) {
+                            Log.d(TAG, "onError: s = " + s);
+                        }
+
+                        @Override
+                        protected void onSuccess(BookBean bookBean) {
+                            Log.d(TAG, "onSuccess: book = " + bookBean);
+                        }
+                    });
+
+        }
+
+        public void getPersonList() {
+            Log.d(TAG, "getPersonList: ");
+
+            RxHttpUtils.getSInstance()
+                    .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
+                    .createSApi(ApiService.class)
+                    .getPersonList()
+                    .compose(Transformer.<List<PersonBean>>switchSchedulers())
+                    .subscribe(new CommonObserver<List<PersonBean>>() {
+                        @Override
+                        protected void onError(String s) {
+                            Log.d(TAG, "onError: s = " + s);
+                        }
+
+                        @Override
+                        protected void onSuccess(List<PersonBean> personBeans) {
+                            Log.d(TAG, "onSuccess: personBeans = " + personBeans);
+                        }
+                    });
+        }
+
+        public void getPersonById(Integer id) {
+            Log.d(TAG, "getPersonById: ");
+
+            RxHttpUtils.getSInstance()
+                    .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
+                    .createSApi(ApiService.class)
+                    .getPersonById(id)
+                    .compose(Transformer.<PersonBean>switchSchedulers())
+                    .subscribe(new CommonObserver<PersonBean>() {
+                        @Override
+                        protected void onError(String s) {
+                            Log.d(TAG, "onError: s = " + s);
+                        }
+
+                        @Override
+                        protected void onSuccess(PersonBean personBean) {
+                            Log.d(TAG, "onSuccess: personBean = " + personBean);
+                        }
+                    });
+        }
+
+        public void addPerson(String name, Integer age) {
+            Log.d(TAG, "addPerson: ");
+
+            RxHttpUtils.getSInstance()
+                    .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
+                    .createSApi(ApiService.class)
+                    .addPerson(name, age)
+                    .compose(Transformer.<PersonBean>switchSchedulers())
+                    .subscribe(new CommonObserver<PersonBean>() {
+                        @Override
+                        protected void onError(String s) {
+                            Log.d(TAG, "onError: s = " + s);
+                        }
+
+                        @Override
+                        protected void onSuccess(PersonBean personBean) {
+                            Log.d(TAG, "onSuccess: personBean = " + personBean);
+                        }
+                    });
+        }
+
+    */
 }

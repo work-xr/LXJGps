@@ -29,11 +29,8 @@
     <application
         android:name=".app.XLJGpsApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+            >
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="n7z2OEn7BGuFpVEVnUndE6B67h8Eugrq" />
@@ -46,12 +43,18 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.SetRelationNumberActivity" >
+        <activity android:name=".ui.PlatformCenterActivity" >
         </activity>
 
         <receiver android:name=".receiver.StartupReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".receiver.SosReceiver" >
+            <intent-filter>
+                <action android:name="action.sos.report.position" />
             </intent-filter>
         </receiver>
 

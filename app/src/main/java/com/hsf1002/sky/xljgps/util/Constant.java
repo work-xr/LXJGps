@@ -11,6 +11,12 @@ public class Constant {
     public static final int REPORT_INFO_TO_PLATFORM_INDEX = 3;
     public static final int SEND_MSG_TO_RELATION_NUMBER = 4;
 
+    public static final String RELATION_NUMBER = "relation_number_";
+    public static final String RELATION_NUMBER_COUNT = "relation_number_count";
+    public static final String RELATION_NAME = "relation_name_";
+    public static final String RELATION_NAME_COUNT = "relation_name_count";
+    public static final String RELATION_NUMBER_DEFAULT = "12349";
+
     public static final String SHARED_PREFERENCE_NAME = "lxjgps_sp";
 
     //public static final String RXJAVAHTTP_BASE_URL_DOUBAN = "https://api.douban.com/";
@@ -21,17 +27,11 @@ public class Constant {
     public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "updatePhone";
     public static final String RXJAVAHTTP_REPORT_POSITION = "position";
 
-    public static final String RXJAVAHTTP_PERSON_LIST = "person";
-    public static final String RXJAVAHTTP_PERSON_ID = "person/{id}";
-
-    public static final String RXJAVAHTTP_BASE_GPS_URL = "http://192.168.100.62:8081/api/";
-    public static final String RXJAVAHTTP_BASE_GPS_URL_TEST = "http://192.168.100.62:8081/api/test/";
-    public static final String RXJAVAHTTP_GPS = "gps";
-
     public static final String RXJAVAHTTP_TYPE_DOWNLOAD = "103";
     public static final String RXJAVAHTTP_TYPE_UPLOAD = "203";
     public static final String RXJAVAHTTP_TYPE_REPORT = "202";
     //101:实时定位数据；100：开机；201：定时上传定位数据
+    public static final String RXJAVAHTTP_TYPE_SOS = "10111111";
     public static final String RXJAVAHTTP_TYPE_CURRENT = "101";
     public static final String RXJAVAHTTP_TYPE_POWERON = "100";
     public static final String RXJAVAHTTP_TYPE_TIMING = "201";
@@ -40,9 +40,8 @@ public class Constant {
     public static final String RXJAVAHTTP_TYPE_GET_STATUS_INFO = "108";         //代表获取设备状态信息
 
     public static final String RXJAVAHTTP_COMPANY = "XUNRUI";
-    public static final String RXJAVAHTTP_SECRET_CODE = "8s6HiyY0yGCLeZp5";//ab2342145acdf;    // iETOECQ9kiJw75AZ
+    public static final String RXJAVAHTTP_SECRET_CODE = "8s6HiyY0yGCLeZp5";     //ab2342145acdf;    // iETOECQ9kiJw75AZ
     public static final String RXJAVAHTTP_ENCODE_TYPE = "UTF-8";
-    public static final String RXJAVAHTTP_NAME = "xunrui";
 
     public static final int RXJAVAHTTP_READ_TIMEOUT = 100;
     public static final int RXJAVAHTTP_WRITE_TIMEOUT = 100;
@@ -56,8 +55,20 @@ public class Constant {
     public static final String BAIDU_GPS_LOCATION_TYPE_LBS = "lbs";
     public static final String BAIDU_GPS_LOCATION_TYPE_WIFI = "wifi";
 
-    public static final String RELATION_NUMBER = "relation_number_";
-    public static final String RELATION_NUMBER_COUNT = "relation_number_count";
-    public static final String RELATION_NAME = "relation_name_";
-    public static final String RELATION_NAME_COUNT = "relation_name_count";
+    // 按键sos后发此广播, 收到广播后,上传信息到平台
+    public static final String ANCTION_SOS_REPORT_POSITION = "action.sos.report.position";
+
+    // SOS包的名字
+    public static final String SOS_PACKAGE_NAME = "com.android.sos";
+    // SOS包的SharedPreferences的名字
+    public static final String SOS_NUM_PREFS_NAME = "sos_num_prefs";
+    public static final String SOS_NUM_PREFS_ = "sosNum";
+    // 第一个紧急呼叫号码的KEY
+    public static final String SOS_NUM_PREFS_1 = "sosNum1";
+    // 第二个紧急呼叫号码的KEY
+    public static final String SOS_NUM_PREFS_2 = "sosNum2";
+    // 第三个紧急呼叫号码的KEY
+    public static final String SOS_NUM_PREFS_3 = "sosNum3";
+
+    public static final int SOS_NUM_COUNT = 3;
 }

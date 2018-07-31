@@ -29,7 +29,7 @@ public class MainRecycleAdapter extends RecyclerView.Adapter<MainRecycleAdapter.
 
         public ViewHolder(View itemView) {
             super(itemView);
-            itemName = itemView.findViewById(R.id.list_item_tv);
+            itemName = (TextView)itemView.findViewById(R.id.list_item_tv);
         }
     }
 

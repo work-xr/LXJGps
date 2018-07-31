@@ -1,24 +1,21 @@
 package com.hsf1002.sky.xljgps.ui;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.*;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.hsf1002.sky.xljgps.*;
-import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
-import com.hsf1002.sky.xljgps.result.ResultMsg;
+import com.hsf1002.sky.xljgps.R;
 import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenterImpl;
+import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
+import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 import com.hsf1002.sky.xljgps.view.BaseView;
@@ -32,7 +29,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.SEND_MSG_TO_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.UPLOAD_INFO_TO_PLATFORM_INDEX;
 
-public class MainActivity extends AppCompatActivity implements BaseView{
+public class MainActivity extends Activity implements BaseView{
     private static final String TAG = "MainActivity";
     private RecyclerView recyclerView;
     private MainRecycleAdapter adapter;
@@ -44,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements BaseView{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        recyclerView = findViewById(R.id.main_rv);
+        recyclerView = (RecyclerView) findViewById(R.id.main_rv);
         initItems();
         recyclerView.addItemDecoration(new com.hsf1002.sky.xljgps.util.DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -55,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements BaseView{
                 switch (position)
                 {
                     case SET_RELATION_NUMBER_INDEX:
-                        startActivity(new Intent(MainActivity.this, SetRelationNumberActivity.class));
+                        startActivity(new Intent(MainActivity.this, PlatformCenterActivity.class));
                         break;
                     case UPLOAD_INFO_TO_PLATFORM_INDEX:
                         uploadInfoToPlatform();
@@ -81,34 +78,6 @@ public class MainActivity extends AppCompatActivity implements BaseView{
         });
         recyclerView.setAdapter(adapter);
         //requestPermission();
-    }
-
-    private void requestPermission()
-    {
-        List<String> permissionList = new ArrayList<>();
-
-        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
-            permissionList.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
-        {
-            permissionList.add(android.Manifest.permission.READ_PHONE_STATE);
-        }
-        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-        {
-            permissionList.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-
-        if (!permissionList.isEmpty())
-        {
-            String [] permissions = permissionList.toArray(new String[permissionList.size()]);
-            ActivityCompat.requestPermissions(MainActivity.this, permissions, 1);
-        }
-        else
-        {
-            //requestLocation();
-        }
     }
 
     private void initItems()
@@ -186,30 +155,6 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        switch (requestCode)
-        {
-            case 1:
-                if (grantResults.length > 0)
-                {
-                    for (int result:grantResults)
-                    {
-                        if (result != PackageManager.PERMISSION_GRANTED)
-                        {
-                            Toast.makeText(this, getString(R.string.get_gps_permission_fail), Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
     public void uploadSuccess(ResultMsg resultMsg) {
         Toast.makeText(this, getString(R.string.upload_success), Toast.LENGTH_SHORT).show();
     }
@@ -252,4 +197,60 @@ public class MainActivity extends AppCompatActivity implements BaseView{
     protected void onDestroy() {
         super.onDestroy();
     }
+
+
+/*
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode)
+        {
+            case 1:
+                if (grantResults.length > 0)
+                {
+                    for (int result:grantResults)
+                    {
+                        if (result != PackageManager.PERMISSION_GRANTED)
+                        {
+                            Toast.makeText(this, getString(R.string.get_gps_permission_fail), Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Deprecated
+    private void requestPermission()
+    {
+        List<String> permissionList = new ArrayList<>();
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            permissionList.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
+        {
+            permissionList.add(android.Manifest.permission.READ_PHONE_STATE);
+        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+        {
+            permissionList.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+
+        if (!permissionList.isEmpty())
+        {
+            String [] permissions = permissionList.toArray(new String[permissionList.size()]);
+            ActivityCompat.requestPermissions(MainActivity.this, permissions, 1);
+        }
+        else
+        {
+            //requestLocation();
+        }
+    }
+*/
 }

@@ -2,10 +2,7 @@ package com.hsf1002.sky.xljgps.http;
 
 import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
 import com.hsf1002.sky.xljgps.result.ResultMsg;
-import com.hsf1002.sky.xljgps.params.PersonBean;
 import com.hsf1002.sky.xljgps.result.StatusInfoMsg;
-
-import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -15,8 +12,6 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_PERSON_ID;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_PERSON_LIST;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_REPORT_POSITION;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_REPORT_SOSPOSITION;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_UPDATE_TO_PLATFORM;
@@ -40,7 +35,7 @@ public interface ApiService {
             @Field("longitude") String longitude,
             @Field("latitude") String latitude,
             @Field("power") String power,*/
-                                     @Field("company") String company,
+            @Field("company") String company,
             @Field("data") String data,
             @Field("sign") String sign
     );
@@ -54,7 +49,7 @@ public interface ApiService {
             @Field("sos_phone") String sosPhone,
             @Field("name") String name,
             @Field("time") String time,*/
-                                     @Field("company") String company,
+            @Field("company") String company,
             @Field("data") String data,
             @Field("sign") String sign
     );
@@ -65,9 +60,9 @@ public interface ApiService {
             @Field("company") String company,
             @Field("type") String type,
             @Field("time") String time,*/
-                                                       @Field("company") String company,
-                                                                    @Query("data") String data,
-                                                                    @Query("sign") String sign
+            @Field("company") String company,
+            @Query("data") String data,
+            @Query("sign") String sign
             );
 
     @POST(RXJAVAHTTP_REPORT_POSITION)
@@ -100,23 +95,5 @@ public interface ApiService {
             @Field("company") String company,
             @Field("data") String data,
             @Field("sign") String sign
-    );
-
-
-
-    @GET(RXJAVAHTTP_PERSON_LIST)
-    Observable<List<PersonBean>> getPersonList(
-    );
-
-    @GET(RXJAVAHTTP_PERSON_ID)
-    Observable<PersonBean> getPersonById(
-            @Query("id") Integer id
-    );
-
-    @POST(RXJAVAHTTP_PERSON_LIST)
-    @FormUrlEncoded
-    Observable<PersonBean> addPerson(
-            @Field("name") String name,
-            @Field("age") Integer age
     );
 }

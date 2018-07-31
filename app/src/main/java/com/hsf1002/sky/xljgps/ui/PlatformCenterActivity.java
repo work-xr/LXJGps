@@ -1,12 +1,12 @@
 package com.hsf1002.sky.xljgps.ui;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -15,10 +15,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.allen.library.utils.ToastUtils;
-import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
-import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
 import com.hsf1002.sky.xljgps.R;
+import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
+import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
 import com.hsf1002.sky.xljgps.util.SharedPreUtils;
 
 import java.util.ArrayList;
@@ -30,25 +29,19 @@ import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
 
 /**
- * Created by hefeng on 18-6-6.
- */
-
-@Deprecated
-public class SetRelationNumberActivity extends AppCompatActivity {
-    private static final String TAG = "SetRelationNumberActivity";
+*  author:  hefeng
+*  created: 18-7-31 下午2:07
+*  desc:   之前的设计是一个孝老平台中心号码+3个亲情号码, 现在3个亲情号码不在此地设置, 从SOS模块中获取
+*/
+public class PlatformCenterActivity extends Activity {
+    private static final String TAG = "RelationNumberActivity";
     private RecyclerView recyclerView;
     private MainRecycleAdapter adapter;
     private List<String> items = new ArrayList<>();
     private List<String> relationNumbers = new ArrayList<>();
-    //private List<String> relationNames = new ArrayList<>();
-
-    //private static final String RELATION_NUMBER_1 = "relation_number_1";
-    //private static final String RELATION_NUMBER_2 = "relation_number_2";
-    //private static final String RELATION_NUMBER_3 = "relation_number_3";
 
     private EditText relationNumberEt;
     private static int relationNumberCount = 0;
-    private static int relationNameCount = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,7 +49,8 @@ public class SetRelationNumberActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        recyclerView = findViewById(R.id.main_rv);
+        recyclerView = (RecyclerView) findViewById(R.id.main_rv);
+
         initItems();
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -79,14 +73,14 @@ public class SetRelationNumberActivity extends AppCompatActivity {
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.set_relation_number, null);
-        relationNumberEt = view.findViewById(R.id.relation_number_et);
+        relationNumberEt = (EditText) view.findViewById(R.id.relation_number_et);
 
         if (relationNumbers.get(position) != null)
         {
             relationNumberEt.setText(relationNumbers.get(position).toString());
             relationNumberEt.setSelection(relationNumbers.get(position).toString().length());
         }
-        builder.setTitle(getString(R.string.set_relation_number));
+        builder.setTitle(getString(R.string.set_number));
         builder.setView(view);
         builder.setPositiveButton(getString(R.string.sure), new DialogInterface.OnClickListener() {
             @Override
@@ -94,7 +88,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
 
                 if (position == 0 && TextUtils.isEmpty(relationNumberEt.getText().toString()))
                 {
-                    Toast.makeText(SetRelationNumberActivity.this, getString(R.string.center_number_cannot_empty), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PlatformCenterActivity.this, getString(R.string.center_number_cannot_empty), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 setRelationNumber(position);
@@ -134,7 +128,6 @@ public class SetRelationNumberActivity extends AppCompatActivity {
         if (nameCount == 0)
         {
             relationNumberCount = 0;
-            relationNameCount = 0;
             nameCount = names.length;
 
             for (int i=0; i<nameCount; ++i)
@@ -145,13 +138,11 @@ public class SetRelationNumberActivity extends AppCompatActivity {
 
                 if (!TextUtils.isEmpty(relationNumberStr))
                 {
-                    itemName += ":  " + relationNumberStr;
+                    itemName += " " + relationNumberStr;
                     relationNumberCount++;
                 }
                 relationNumbers.add(i, relationNumberStr);
                 items.add(itemName);
-
-                relationNameCount++;
             }
             SharedPreUtils.getInstance().putInt(RELATION_NAME_COUNT, nameCount);
         }
@@ -195,7 +186,7 @@ public class SetRelationNumberActivity extends AppCompatActivity {
 
         setDataUpdate();
         if (!TextUtils.isEmpty(currentNumberStr)) {
-            Toast.makeText(SetRelationNumberActivity.this, getString(R.string.set_relation_number_success), Toast.LENGTH_SHORT).show();
+            Toast.makeText(PlatformCenterActivity.this, getString(R.string.set_relation_number_success), Toast.LENGTH_SHORT).show();
         }
         adapter.notifyItemChanged(position);
     }
