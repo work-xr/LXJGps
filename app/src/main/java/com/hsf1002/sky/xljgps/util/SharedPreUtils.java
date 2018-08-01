@@ -12,12 +12,12 @@ import static com.hsf1002.sky.xljgps.util.Constant.SHARED_PREFERENCE_NAME;
  */
 
 public class SharedPreUtils {
-    private static final String SHARED_NAME = SHARED_PREFERENCE_NAME;
+    //private static final String SHARED_NAME = SHARED_PREFERENCE_NAME;
     private static SharedPreUtils sInstance;
     private static SharedPreferences sharedPreferences;
     private static SharedPreferences.Editor editor;
 
-    public SharedPreUtils() {
+    private SharedPreUtils() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(XLJGpsApplication.getAppContext());//XLJGpsApplication.getAppContext().getSharedPreferences(SHARED_NAME, Context.MODE_MULTI_PROCESS);
         editor = sharedPreferences.edit();
     }
@@ -72,6 +72,7 @@ public class SharedPreUtils {
     public void putString(String key, String value)
     {
         editor.putString(key, value);
-        editor.apply();
+        //editor.apply();
+        editor.commit();
     }
 }

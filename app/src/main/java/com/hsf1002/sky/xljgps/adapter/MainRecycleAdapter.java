@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hsf1002.sky.xljgps.R;
+import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
+import com.hsf1002.sky.xljgps.ui.MainActivity;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ import java.util.List;
 public class MainRecycleAdapter extends RecyclerView.Adapter<MainRecycleAdapter.ViewHolder> {
     private List<String> list;
     private onItemClickListener listener;
+    private int selectedPos = -1;
+    private int oldPos = -1;
 
     public MainRecycleAdapter(List<String> list)
     {
@@ -70,10 +74,36 @@ public class MainRecycleAdapter extends RecyclerView.Adapter<MainRecycleAdapter.
     public void onBindViewHolder(ViewHolder holder, int position) {
         String name = list.get(position);
         holder.itemName.setText(name);
+
+        if(selectedPos == holder.getPosition()) {
+            holder.itemName.setBackgroundColor(XLJGpsApplication.getAppContext().getResources().getColor(R.color.list_item_focuse));
+        } else {
+            holder.itemName.setBackgroundColor(XLJGpsApplication.getAppContext().getResources().getColor(R.color.background_holo_light));
+        }
     }
 
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-7-31 下午4:38
+    *  desc:    为了给list添加选中效果
+    *  param:
+    *  return:
+    */
+    public void refreshItem(int position) {
+        if (selectedPos != -1) {
+            oldPos  = selectedPos;
+        }
+
+        selectedPos = position;
+
+        if (oldPos != -1) {
+            notifyItemChanged(oldPos);
+        }
+        notifyItemChanged(selectedPos);
     }
 }

@@ -3,4 +3,10 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="actionbar_background_color">#e70033</color>
+    <color name="list_item_focuse">#fda6af</color>
+    <color name="sos_no_focus_color">#808080</color>
+    <color name="actionbar_text_color">#ffffff</color>
+    <color name="background_holo_light">#fff3f3f3</color>
 </resources>

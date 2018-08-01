@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
@@ -23,6 +24,9 @@ import com.hsf1002.sky.xljgps.view.BaseView;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
+import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
+import static android.view.KeyEvent.KEYCODE_DPAD_UP;
 import static com.hsf1002.sky.xljgps.util.Constant.DOWNLOAD_INFO_FROM_PLATFORM_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.REPORT_INFO_TO_PLATFORM_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.SEND_MSG_TO_RELATION_NUMBER;
@@ -35,6 +39,7 @@ public class MainActivity extends Activity implements BaseView{
     private MainRecycleAdapter adapter;
     private List<String> items = new ArrayList<>();
     private RxjavaHttpPresenterImpl presenter = new RxjavaHttpPresenterImpl(this);
+    private int currentPosition = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,29 +51,11 @@ public class MainActivity extends Activity implements BaseView{
         recyclerView.addItemDecoration(new com.hsf1002.sky.xljgps.util.DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MainRecycleAdapter(items);
+        adapter.refreshItem(currentPosition);
         adapter.setOnItemClickListener(new MainRecycleAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                switch (position)
-                {
-                    case SET_RELATION_NUMBER_INDEX:
-                        startActivity(new Intent(MainActivity.this, PlatformCenterActivity.class));
-                        break;
-                    case UPLOAD_INFO_TO_PLATFORM_INDEX:
-                        uploadInfoToPlatform();
-                        break;
-                    case DOWNLOAD_INFO_FROM_PLATFORM_INDEX:
-                        downloadInfoFromPlatform();
-                        break;
-                    case REPORT_INFO_TO_PLATFORM_INDEX:
-                        reportSosGpsInfoToPlatform();
-                        break;
-                    case SEND_MSG_TO_RELATION_NUMBER:
-                        sendMsgToRelationNumber();
-                        break;
-                    default:
-                        break;
-                }
+                handlePlatformItems(position);
             }
 
             @Override
@@ -87,6 +74,68 @@ public class MainActivity extends Activity implements BaseView{
         for (int i=0; i<names.length; ++i)
         {
             items.add(names[i]);
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        int count = getResources().getStringArray(R.array.main_item_name).length;
+
+        switch (keyCode)
+        {
+            case KEYCODE_DPAD_UP:
+                if (currentPosition == 0)
+                {
+                    currentPosition = count - 1;
+                }
+                else
+                {
+                    currentPosition--;
+                }
+                break;
+            case KEYCODE_DPAD_DOWN:
+                if (currentPosition == count - 1)
+                {
+                    currentPosition = 0;
+                }
+                else
+                {
+                    currentPosition++;
+                }
+                break;
+            case KEYCODE_DPAD_CENTER:
+                handlePlatformItems(currentPosition);
+                break;
+        }
+
+        adapter.refreshItem(currentPosition);
+        
+        Log.d(TAG, "onKeyDown: keyCode = " + keyCode + ", currentPosition = " + currentPosition);
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    private void handlePlatformItems(int position)
+    {
+        switch (position)
+        {
+            case SET_RELATION_NUMBER_INDEX:
+                startActivity(new Intent(MainActivity.this, PlatformCenterActivity.class));
+                break;
+            case UPLOAD_INFO_TO_PLATFORM_INDEX:
+                uploadInfoToPlatform();
+                break;
+            case DOWNLOAD_INFO_FROM_PLATFORM_INDEX:
+                downloadInfoFromPlatform();
+                break;
+            case REPORT_INFO_TO_PLATFORM_INDEX:
+                reportSosGpsInfoToPlatform();
+                break;
+            case SEND_MSG_TO_RELATION_NUMBER:
+                sendMsgToRelationNumber();
+                break;
+            default:
+                break;
         }
     }
 

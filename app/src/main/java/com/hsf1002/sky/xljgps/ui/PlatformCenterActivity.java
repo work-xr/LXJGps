@@ -11,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -23,10 +24,11 @@ import com.hsf1002.sky.xljgps.util.SharedPreUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME;
-import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
+import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_DEFAULT;
 
 /**
 *  author:  hefeng
@@ -41,6 +43,7 @@ public class PlatformCenterActivity extends Activity {
     private List<String> relationNumbers = new ArrayList<>();
 
     private EditText relationNumberEt;
+    @Deprecated
     private static int relationNumberCount = 0;
 
     @Override
@@ -55,6 +58,7 @@ public class PlatformCenterActivity extends Activity {
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MainRecycleAdapter(items);
+        adapter.refreshItem(0);
         adapter.setOnItemClickListener(new MainRecycleAdapter.onItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -67,6 +71,20 @@ public class PlatformCenterActivity extends Activity {
             }
         });
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode)
+        {
+            case KEYCODE_DPAD_CENTER:
+                setRelationNumberAlert(0);
+                break;
+        }
+
+        Log.d(TAG, "onKeyDown: keyCode = " + keyCode);
+
+        return super.onKeyDown(keyCode, event);
     }
 
     private void setRelationNumberAlert(final int position)
@@ -117,7 +135,7 @@ public class PlatformCenterActivity extends Activity {
     private void getPresetRelationNumber()
     {
         String[]  names = getResources().getStringArray(R.array.relation_item_name);
-        int nameCount = SharedPreUtils.getInstance().getInt(RELATION_NAME_COUNT, 0);
+        int nameCount = 0;//SharedPreUtils.getInstance().getInt(RELATION_NAME_COUNT, 0);
         int numberCount = SharedPreUtils.getInstance().getInt(RELATION_NUMBER_COUNT, 0);
 
         relationNumbers.clear();
@@ -133,18 +151,18 @@ public class PlatformCenterActivity extends Activity {
             for (int i=0; i<nameCount; ++i)
             {
                 String itemName = names[i];
-                String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER + i, "");
+                String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER, RELATION_NUMBER_DEFAULT);
                 SharedPreUtils.getInstance().putString(RELATION_NAME + i, itemName);
 
                 if (!TextUtils.isEmpty(relationNumberStr))
                 {
-                    itemName += " " + relationNumberStr;
+                    itemName += ": " + relationNumberStr;
                     relationNumberCount++;
                 }
                 relationNumbers.add(i, relationNumberStr);
                 items.add(itemName);
             }
-            SharedPreUtils.getInstance().putInt(RELATION_NAME_COUNT, nameCount);
+            //SharedPreUtils.getInstance().putInt(RELATION_NAME_COUNT, nameCount);
         }
         else
         {
@@ -154,15 +172,14 @@ public class PlatformCenterActivity extends Activity {
 
     private void setDataUpdate()
     {
-        int nameCount = SharedPreUtils.getInstance().getInt(RELATION_NAME_COUNT, 0);
-        //int numberCount = SharedPreUtils.getInstance().getInt(RELATION_NUMBER_COUNT, 0);
+        int nameCount = 1;// SharedPreUtils.getInstance().getInt(RELATION_NAME_COUNT, 0);
         relationNumbers.clear();
         items.clear();
 
         for (int i=0; i<nameCount; ++i)
         {
             String itemName = SharedPreUtils.getInstance().getString(RELATION_NAME + i, "");
-            String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER + i, "");
+            String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER, "");
 
             if (!TextUtils.isEmpty(relationNumberStr))
             {
@@ -182,7 +199,7 @@ public class PlatformCenterActivity extends Activity {
     {
         String currentNumberStr = relationNumberEt.getText().toString();
         relationNumbers.set(position, currentNumberStr);
-        SharedPreUtils.getInstance().putString(RELATION_NUMBER + position, currentNumberStr);
+        SharedPreUtils.getInstance().putString(RELATION_NUMBER, currentNumberStr);
 
         setDataUpdate();
         if (!TextUtils.isEmpty(currentNumberStr)) {
@@ -191,6 +208,7 @@ public class PlatformCenterActivity extends Activity {
         adapter.notifyItemChanged(position);
     }
 
+    @Deprecated
     private void saveRelationNumberCount()
     {
         relationNumberCount = 0;

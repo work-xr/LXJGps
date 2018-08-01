@@ -2,9 +2,9 @@ package com.hsf1002.sky.xljgps.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.BatteryManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -20,19 +20,17 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static android.content.Context.BATTERY_SERVICE;
+import static android.content.Context.MODE_MULTI_PROCESS;
 import static android.os.Build.MANUFACTURER;
 import static android.os.Build.MODEL;
+import static com.hsf1002.sky.xljgps.util.Constant.ACTION_SET_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME;
-import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_DEFAULT;
+import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_1;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_2;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_3;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_PACKAGE_NAME;
 
@@ -43,23 +41,8 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOS_PACKAGE_NAME;
 public class SprdCommonUtils {
     private static final String TAG = "SprdCommonUtils";
     private static final String BATTERY_CAPACITY_FILE_PATH = "/sys/class/power_supply/battery/capacity";
-    // SOS模块的context
-    private Context sosContext = null;
-    private int mode = Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE;
     private SharedPreferences sosSharedPreferences = null;
 
-    {
-        Context c = null;
-
-        try {
-            c = XLJGpsApplication.getAppContext().createPackageContext(SOS_PACKAGE_NAME, Context.CONTEXT_IGNORE_SECURITY);
-
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        sosSharedPreferences = c.getSharedPreferences(SOS_NUM_PREFS_NAME, mode);
-    }
 
     /**
     *  author:  hefeng
@@ -150,6 +133,27 @@ public class SprdCommonUtils {
 
     /**
     *  author:  hefeng
+    *  created: 18-8-1 上午9:55
+    *  desc:    每次必须重新调用,否则读取不到更新后的值
+    *  param:
+    *  return:
+    */
+    private void setSosContext()
+    {
+        Context sosContext = null;
+
+        try {
+            sosContext = XLJGpsApplication.getAppContext().createPackageContext(SOS_PACKAGE_NAME, Context.CONTEXT_IGNORE_SECURITY);
+            Log.d(TAG, "instance initializer: get sos context");
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        sosSharedPreferences = sosContext.getSharedPreferences(SOS_NUM_PREFS_NAME, MODE_MULTI_PROCESS);
+    }
+
+    /**
+    *  author:  hefeng
     *  created: 18-7-31 下午2:35
     *  desc:    获取本地孝老平台号码(从PlatformCenterActivity)和亲情号码(从SOS模块)
     *  param:
@@ -161,9 +165,10 @@ public class SprdCommonUtils {
         String platformCenterNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER, RELATION_NUMBER_DEFAULT);
         int count = SOS_NUM_COUNT + 1;//getRelationNumberCount();
 
+        setSosContext();
+
         for (int i=0; i<count; ++i)
         {
-            //String relationNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER + i, "");
             if (i == 0)
             {
                 numberString.append(platformCenterNumberStr);
@@ -171,7 +176,7 @@ public class SprdCommonUtils {
             else
             {
                 String relationNumberStr = sosSharedPreferences.getString(SOS_NUM_PREFS_ + i, "");
-                Log.d(TAG, "getRelationNumber  relationNumber[: " + i + "] = " + relationNumberStr);
+                Log.d(TAG, "getRelationNumber  relationNumber[" + i + "] = " + relationNumberStr);
 
                 //if (!TextUtils.isEmpty(relationNumberStr))    // 为空也添加
                 {
@@ -185,19 +190,6 @@ public class SprdCommonUtils {
         }
 
         Log.d(TAG, "getRelationNumber: numberString = " + numberString.toString());
-/*
-        // 没有没有设置紧急呼叫号码, 则不能设置为null, 要设置为""
-        String relationNumberStr1 = sosSharedPreferences.getString(SOS_NUM_PREFS_1, "");
-        String relationNumberStr2 = sosSharedPreferences.getString(SOS_NUM_PREFS_2, "");
-        String relationNumberStr3 = sosSharedPreferences.getString(SOS_NUM_PREFS_3, "");
-
-        numberString
-                .append(relationNumberStr1)
-                .append(",")
-                .append(relationNumberStr2)
-                .append(",")
-                .append(relationNumberStr3);
-        */
 
         return numberString.toString();
     }
@@ -205,31 +197,34 @@ public class SprdCommonUtils {
     /**
     *  author:  hefeng
     *  created: 18-7-31 下午2:32
-    *  desc:    从平台下载的号码设置到本地
+    *  desc:    从平台下载的号码设置到本地, 平台中心号码直接设置, 亲情号码发送广播到SOS去设置
     *  param:
     *  return:
     */
     public void setRelationNumber(String relationNumber)
     {
         String[] list = relationNumber.split(",");
-        int count = list.length;
 
-        for (int i=0; i<count; ++i)
-        {
-            Log.d(TAG, "setRelationNumber: list[" + i + "] = " + list[i]);
-            //SharedPreUtils.getInstance().putString(RELATION_NUMBER + i, list[i]);
-
-            if (i == 0)
-            {
-                SharedPreUtils.getInstance().putString(RELATION_NUMBER, list[i]);
-            }
-            else
-            {
-                sosSharedPreferences.edit().putString(SOS_NUM_PREFS_ + i, list[i]);
+        try {
+            if (list.length != SOS_NUM_COUNT + 1) {
+                throw new Exception("relation number length error");
             }
         }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
-        //SharedPreUtils.getInstance().putInt(RELATION_NUMBER_COUNT, count);
+        Log.d(TAG, "setRelationNumber: list[0] = " + list[0]);
+        SharedPreUtils.getInstance().putString(RELATION_NUMBER, list[0]);
+
+        Intent intent = new Intent();
+        relationNumber = relationNumber.substring(list[0].length() + 1);
+        intent.setAction(ACTION_SET_RELATION_NUMBER);
+        intent.putExtra(SET_RELATION_NUMBER, relationNumber);
+
+        Log.d(TAG, "setRelationNumber: relationNumber = " + relationNumber);
+        XLJGpsApplication.getAppContext().sendBroadcast(intent);
     }
 
     /**
@@ -249,7 +244,7 @@ public class SprdCommonUtils {
         {
             if (i == 0)
             {
-                numberStringNames.append(names);
+                numberStringNames.append(names[0]);
             }
             else
             {
@@ -282,7 +277,7 @@ public class SprdCommonUtils {
             SharedPreUtils.getInstance().putString(RELATION_NAME + i, list[i]);
         }
 
-        SharedPreUtils.getInstance().putInt(RELATION_NAME_COUNT, count);
+        //SharedPreUtils.getInstance().putInt(RELATION_NAME_COUNT, count);
     }
 
     @TargetApi(19)

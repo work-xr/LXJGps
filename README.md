@@ -62,7 +62,7 @@ catch (UnsupportedEncodingException e)
 ```
 sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
 ```
-
+### 问题汇总
 #### 问题1 自启动失败-接收不到BOOT_COMPLETED广播可能的原因  
 1. BOOT_COMPLETED对应的action和uses-permission没有一起添加
 2. 应用安装到了sd卡内，安装在sd卡内的应用是收不到BOOT_COMPLETED广播的
@@ -73,7 +73,10 @@ Android3.1之后，系统为了加强了安全性控制，应用程序安装后�
 2. 没有ui的程序必须通过其他应用激活才能启动，如它的Activity、Service、Content Provider被其他应用调用。
 存在一种例外，就是应用程序被adb push you.apk /system/app/下是会自动启动的，不处于stopped状态  
 
-#### 问题2 百度SDK定位功能, 申请KEY需提供APK签名文件JKS的HASH值
+#### 问题2 通过GPS基站或者Wifi MAC地址无法定位成功
+不管是GPS基站或者Wifi MAC地址,都需要连接谷歌服务器获取定位信息,由于众所周知的原因,目前无法实现
+
+#### 问题3 百度SDK定位功能, 申请KEY需提供APK签名文件JKS的HASH值
 1. 常用的android的签名工具有:jarsigner 和apksigner。jarsigner使用keystore文件，apksigner使用pk8+x509.pem,
 AndroidStudio可以简便的使用jarsigner方式对应用进行签名, 而编译整个工程可能是apksigner的方式
 2. 可以使用jarsigner方式对应用进行签名, 然后将整个apk以拷贝文件方式拷贝到system/app下(此时将不会再进行系统签名) , 如果要编译代码, 可配置Android.mk使用应用自带签名, 而不再进行系统签名    
@@ -108,6 +111,30 @@ signingConfigs {
       }
   }
 ```
+
+#### 问题4 获取其他应用SharedPreferences失败
+```
+private int mode = Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE;
+private SharedPreferences sosSharedPreferences = null;
+{
+    // SOS模块的context
+    Context sosContext = null;
+    try {
+        sosContext = XLJGpsApplication.getAppContext().createPackageContext(SOS_PACKAGE_NAME, Context.CONTEXT_IGNORE_SECURITY);
+        Log.d(TAG, "instance initializer: get sos context");
+    } catch (PackageManager.NameNotFoundException e) {
+        e.printStackTrace();
+    }
+    sosSharedPreferences = sosContext.getSharedPreferences(SOS_NUM_PREFS_NAME, mode);
+}
+```
+* 如果SOS模块的mode是默认或者`MODE_PRIVATE`,其他应用是无法读写的
+* 如果SOS模块的mode更改为读和写, 其他应用依然无法写数据
+* 第一次从SOS读取成功,但是当在SOS模块更改之后,再次读取则一直无法更新数据, mode需要改为`MODE_MULTI_PROCESS`  
+```
+sosContext.getSharedPreferences(SOS_NUM_PREFS_NAME, MODE_MULTI_PROCESS);
+```
+
 
 ### HTTP 协议基础
 #### GET请求的特点:
@@ -155,16 +182,16 @@ form的enctype属性为编码方式，常用有两种：application/x-www-form-u
 ```
 
 
-#### 信息摘要技术和算法
+### 信息摘要技术和算法
 信息摘要算法来源于CRC算法，最初是用来验证数据完整性，即我们常见的奇偶校验码、循环冗余校验，CRC比这些算法都要早，MD算法比SHA算法早，SHA算法是对MD算法的改进。再后来则发展出了可以带有密码的信息摘要算法-MAC算法. 消息摘要算法的主要特征是加密过程不需要密钥，并且经过加密的数据无法被解密，只有输入相同的明文数据经过相同的消息摘要算法才能得到相同的密文  
-##### 特点
+#### 特点
 1. 变长输入，定长输出, 无论输入的消息有多长，计算出来的消息摘要的长度总是固定的
 2. 消息摘要看起来是“随机的”，一般随机都是伪随机
 3. 一般只要输入的消息不同，对其进行摘要以后产生的摘要消息也必不相同；但相同的输入必会产生相同的输出. 理论上，不管使用什么样的摘要算法，必然存在2个不同的消息，对应同样的摘要。因为输入是一个无穷集合，而输出是一个有限集合，所以从数学上，必然存在多对一的关系。但是实际上，很难或者说根本不可能人为的造出具有同样摘要的2个不同消息
 4. 消息摘要是单向、不可逆的。消息摘要函数是无陷门的单向函数，即只能进行正向的信息摘要，而无法从摘要中恢复出任何的消息，甚至根本就找不到任何与原信息相关的信息
 5. 好的摘要算法，没有人能从中找到“碰撞”，但是“碰撞”是肯定存在的
 
-##### 选择
+#### 选择
 * CRC算法不属于加密场景，比较古老，但是在数据压缩领域被广泛使用作为完整性校验
 * MD算法中MD5算法最流行，也是目前最流行的信息摘要算法，是大部分系统的首选，虽然MD算法破解门槛越来越低，但是一般应用足够了
 * SHA算法枝繁叶茂，比MD算法安全性高，尝尝用在一些安全性系数要求较高的环境，目前也逐渐替代MD5算法，用在注册、登录模块，在数字证书的签名算法中，SHA算法更广泛

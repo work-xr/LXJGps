@@ -1,16 +1,16 @@
 <resources>
-    <string name="app_name">XLJGPS</string>
+    <string name="app_name">platform center</string>
 
     <string-array name="main_item_name" >
         <item>set platform center number</item>
         <item>upload info to platform</item>
         <item>download info from platform</item>
-        <item>report SOS-GPS info</item>
+        <item>report position to platform</item>
         <item>send msg to relation number</item>
     </string-array>
 
     <string-array name="relation_item_name" >
-        <item>platform center number: </item>
+        <item>platform center number</item>
         <!--item>relation number 1</item>
         <item>relation number 2</item>
         <item>relation number 3</item-->

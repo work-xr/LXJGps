@@ -14,7 +14,7 @@ public class Constant {
     public static final String RELATION_NUMBER = "relation_number_";
     public static final String RELATION_NUMBER_COUNT = "relation_number_count";
     public static final String RELATION_NAME = "relation_name_";
-    public static final String RELATION_NAME_COUNT = "relation_name_count";
+    //public static final String RELATION_NAME_COUNT = "relation_name_count";
     public static final String RELATION_NUMBER_DEFAULT = "12349";
 
     public static final String SHARED_PREFERENCE_NAME = "lxjgps_sp";
@@ -71,4 +71,7 @@ public class Constant {
     public static final String SOS_NUM_PREFS_3 = "sosNum3";
 
     public static final int SOS_NUM_COUNT = 3;
+
+    public static final String ACTION_SET_RELATION_NUMBER = "intent.action.SET_RELATION_NUMBER";
+    public static final String SET_RELATION_NUMBER = "com.hsf1002.sky.xljgps.setrelationnumber";
 }
