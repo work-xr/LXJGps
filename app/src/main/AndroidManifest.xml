@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hsf1002.sky.xljgps"
+    android:sharedUserId="com.android.sos"
     >
 
     <!-- 这个权限用于进行网络定位-->
@@ -23,8 +24,10 @@
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-
+    <!-- 长按平台中心号码可以呼出 -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <!-- 发送短信权限 -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
 
     <application
         android:name=".app.XLJGpsApplication"

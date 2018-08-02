@@ -70,6 +70,9 @@ public class Constant {
     // 第三个紧急呼叫号码的KEY
     public static final String SOS_NUM_PREFS_3 = "sosNum3";
 
+    public static final String SOS_SMS_PREFS_NAME = "sos_msg_prefs";
+    public static final String SOS_SMS_PREFS_MSG = "sosMsg";
+
     public static final int SOS_NUM_COUNT = 3;
 
     public static final String ACTION_SET_RELATION_NUMBER = "intent.action.SET_RELATION_NUMBER";

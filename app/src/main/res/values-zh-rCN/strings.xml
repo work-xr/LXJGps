@@ -36,6 +36,7 @@
 
     <string name="center_number_cannot_empty">孝老平台中心号码不能为空 !</string>
     <string name="sos_number">紧急呼叫号码</string>
+    <string name="sos_sms">我现在迫切需要你帮助 !</string>
 
     <string name="get_gps_permission_fail">获取权限失败 !</string>
 </resources>

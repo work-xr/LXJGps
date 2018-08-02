@@ -2,13 +2,14 @@ package com.hsf1002.sky.xljgps.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.hsf1002.sky.xljgps.R;
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
@@ -18,21 +19,24 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
-import static android.content.Context.MODE_MULTI_PROCESS;
 import static android.os.Build.MANUFACTURER;
 import static android.os.Build.MODEL;
-import static com.hsf1002.sky.xljgps.util.Constant.ACTION_SET_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_DEFAULT;
-import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_1;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_2;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_3;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_PACKAGE_NAME;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_SMS_PREFS_MSG;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_SMS_PREFS_NAME;
 
 /**
  * Created by hefeng on 18-6-11.
@@ -41,8 +45,8 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOS_PACKAGE_NAME;
 public class SprdCommonUtils {
     private static final String TAG = "SprdCommonUtils";
     private static final String BATTERY_CAPACITY_FILE_PATH = "/sys/class/power_supply/battery/capacity";
-    private SharedPreferences sosSharedPreferences = null;
-
+    private SharedPreferences sosNumSharedPreferences = null;
+    private SharedPreferences sosMsgSharedPreferences = null;
 
     /**
     *  author:  hefeng
@@ -134,11 +138,11 @@ public class SprdCommonUtils {
     /**
     *  author:  hefeng
     *  created: 18-8-1 上午9:55
-    *  desc:    每次必须重新调用,否则读取不到更新后的值
+    *  desc:    
     *  param:
     *  return:
     */
-    private void setSosContext()
+    //private void setSosContext()
     {
         Context sosContext = null;
 
@@ -149,7 +153,8 @@ public class SprdCommonUtils {
             e.printStackTrace();
         }
 
-        sosSharedPreferences = sosContext.getSharedPreferences(SOS_NUM_PREFS_NAME, MODE_MULTI_PROCESS);
+        sosNumSharedPreferences = sosContext.getSharedPreferences(SOS_NUM_PREFS_NAME, Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
+        sosMsgSharedPreferences = sosContext.getSharedPreferences(SOS_SMS_PREFS_NAME, Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
     }
 
     /**
@@ -165,7 +170,7 @@ public class SprdCommonUtils {
         String platformCenterNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER, RELATION_NUMBER_DEFAULT);
         int count = SOS_NUM_COUNT + 1;//getRelationNumberCount();
 
-        setSosContext();
+        //setSosContext();
 
         for (int i=0; i<count; ++i)
         {
@@ -175,7 +180,7 @@ public class SprdCommonUtils {
             }
             else
             {
-                String relationNumberStr = sosSharedPreferences.getString(SOS_NUM_PREFS_ + i, "");
+                String relationNumberStr = sosNumSharedPreferences.getString(SOS_NUM_PREFS_ + i, "");
                 Log.d(TAG, "getRelationNumber  relationNumber[" + i + "] = " + relationNumberStr);
 
                 //if (!TextUtils.isEmpty(relationNumberStr))    // 为空也添加
@@ -189,6 +194,9 @@ public class SprdCommonUtils {
             }
         }
 
+        sendSosSms();
+
+        setRelationNumber("5555, 9, 8, 7");
         Log.d(TAG, "getRelationNumber: numberString = " + numberString.toString());
 
         return numberString.toString();
@@ -218,13 +226,63 @@ public class SprdCommonUtils {
         Log.d(TAG, "setRelationNumber: list[0] = " + list[0]);
         SharedPreUtils.getInstance().putString(RELATION_NUMBER, list[0]);
 
-        Intent intent = new Intent();
+        for (int i=1; i<=SOS_NUM_COUNT; ++i)
+        {
+            sosNumSharedPreferences.edit().putString(SOS_NUM_PREFS_ + i, list[i]);
+        }
+        sosNumSharedPreferences.edit().commit();
+
+        /*Intent intent = new Intent();
         relationNumber = relationNumber.substring(list[0].length() + 1);
         intent.setAction(ACTION_SET_RELATION_NUMBER);
         intent.putExtra(SET_RELATION_NUMBER, relationNumber);
 
         Log.d(TAG, "setRelationNumber: relationNumber = " + relationNumber);
         XLJGpsApplication.getAppContext().sendBroadcast(intent);
+        */
+    }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-8-1 下午3:51
+     *  desc:    发送短信给亲情号码
+     *  param:
+     *  return:
+     */
+    public void sendSosSms()
+    {
+        SmsManager manager = SmsManager.getDefault();
+        String mSosMsg = sosMsgSharedPreferences.getString(SOS_SMS_PREFS_MSG, "");
+        ArrayList<String> mSosNum = new ArrayList<String>();
+
+        Log.e(TAG,"sendSosSms manager = " +manager);
+
+        mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_1, ""));
+        mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_2, ""));
+        mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_3, ""));
+
+        if(manager != null)
+        {
+            Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
+            if (TextUtils.isEmpty(mSosMsg))
+            {
+                mSosMsg = XLJGpsApplication.getAppContext().getResources().getString(R.string.sos_sms);
+            }
+            Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
+            ArrayList<String> list = manager.divideMessage(mSosMsg);
+
+            for (String num : mSosNum)
+            {
+                if (TextUtils.isEmpty(num))
+                {
+                    for (String text : list)
+                    {
+                        manager.sendTextMessage(num, null, text, null, null);
+                        Log.e(TAG,"sendSosSms  number = " + num + ", test = " + text);
+                    }
+                }
+            }
+        }
     }
 
     /**

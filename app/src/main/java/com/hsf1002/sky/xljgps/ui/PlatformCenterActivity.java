@@ -39,8 +39,8 @@ public class PlatformCenterActivity extends Activity {
     private static final String TAG = "RelationNumberActivity";
     private RecyclerView recyclerView;
     private MainRecycleAdapter adapter;
-    private List<String> items = new ArrayList<>();
-    private List<String> relationNumbers = new ArrayList<>();
+    private List<String> items = new ArrayList<String>();
+    private List<String> relationNumbers = new ArrayList<String>();
 
     private EditText relationNumberEt;
     @Deprecated

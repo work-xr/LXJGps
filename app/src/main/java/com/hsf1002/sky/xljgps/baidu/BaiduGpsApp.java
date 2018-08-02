@@ -125,7 +125,7 @@ public class BaiduGpsApp {
             else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) 
             {
                 // wifi or ds
-                WifiManager wifiManager = (WifiManager)XLJGpsApplication.getAppContext().getSystemService(WIFI_SERVICE);
+                WifiManager wifiManager = (WifiManager)XLJGpsApplication.getAppContext().getApplicationContext().getSystemService(WIFI_SERVICE);
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                 if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED && wifiInfo != null)
                 {

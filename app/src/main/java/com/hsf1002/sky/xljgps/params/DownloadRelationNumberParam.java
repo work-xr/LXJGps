@@ -10,17 +10,17 @@ import com.google.gson.GsonBuilder;
 
 public class DownloadRelationNumberParam {
     private String imei;
-    private String manufactory;
-    private String model;
-    private String company;
+    //private String manufactory;
+    //private String model;
+    //private String company;
     private String type;
     private String time;
 
-    public DownloadRelationNumberParam(String imei, String manufactory, String model, String company, String type, String time) {
+    public DownloadRelationNumberParam(String imei, /*String manufactory, String model, String company, */String type, String time) {
         this.imei = imei;
-        this.manufactory = manufactory;
-        this.model = model;
-        this.company = company;
+        //this.manufactory = manufactory;
+        //this.model = model;
+        //this.company = company;
         this.type = type;
         this.time = time;
     }

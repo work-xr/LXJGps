@@ -1,5 +1,6 @@
 package com.hsf1002.sky.xljgps.model;
 
+import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -60,12 +61,18 @@ public class RxjavaHttpModel implements BaseModel {
     public void downloadRelationNumber(final RxjavaHttpPresenter.OnDownloadListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
-        String manufactory = SprdCommonUtils.getInstance().getManufactory();
-        String model = SprdCommonUtils.getInstance().getModel();
+        //String manufactory = SprdCommonUtils.getInstance().getManufactory();
+        //String model = SprdCommonUtils.getInstance().getModel();
         String data = null;
         String sign = null;
 
-        DownloadRelationNumberParam receiveParam = new DownloadRelationNumberParam(imei, manufactory, model, RXJAVAHTTP_COMPANY, RXJAVAHTTP_TYPE_DOWNLOAD, time);
+        DownloadRelationNumberParam receiveParam = new DownloadRelationNumberParam(
+                imei,
+                //manufactory,
+                //model,
+                //RXJAVAHTTP_COMPANY,
+                RXJAVAHTTP_TYPE_DOWNLOAD,
+                time);
         String gsonString = DownloadRelationNumberParam.getReceiveParamGson(receiveParam);
         Log.d(TAG, "downloadRelationNumber: imei = " + imei + ", time = " + time + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
@@ -116,15 +123,23 @@ public class RxjavaHttpModel implements BaseModel {
     public void uploadRelationNumber(final RxjavaHttpPresenter.OnUploadListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
-        String manufactory = SprdCommonUtils.getInstance().getManufactory();
-        String model = SprdCommonUtils.getInstance().getModel();
+        //String manufactory = SprdCommonUtils.getInstance().getManufactory();
+        //String model = SprdCommonUtils.getInstance().getModel();
         String sosPhones = SprdCommonUtils.getInstance().getRelationNumber();
         String sosPhoneNames = SprdCommonUtils.getInstance().getRelationNumberNames();
         String encodedSosPhoneNames = null;
         String data = null;
         String sign = null;
 
-        UploadRelationNumberParam sendParam = new UploadRelationNumberParam(imei, manufactory, model, RXJAVAHTTP_COMPANY, RXJAVAHTTP_TYPE_UPLOAD, sosPhones, sosPhoneNames,  time);
+        UploadRelationNumberParam sendParam = new UploadRelationNumberParam(
+                imei,
+                //manufactory,
+                //model,
+                RXJAVAHTTP_COMPANY,
+                RXJAVAHTTP_TYPE_UPLOAD,
+                sosPhones,
+                sosPhoneNames,
+                time);
         String gsonString = UploadRelationNumberParam.getSendParamGson(sendParam);
         Log.d(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
@@ -176,8 +191,8 @@ public class RxjavaHttpModel implements BaseModel {
     public void reportSosPosition(final RxjavaHttpPresenter.OnReportListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
-        String manufactory = SprdCommonUtils.getInstance().getManufactory();
-        String model = SprdCommonUtils.getInstance().getModel();
+        //String manufactory = SprdCommonUtils.getInstance().getManufactory();
+        //String model = SprdCommonUtils.getInstance().getModel();
         String capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
         String data = null;
         String sign = null;
@@ -189,8 +204,8 @@ public class RxjavaHttpModel implements BaseModel {
         String longitude = baiduGpsMsgBean.getLongitude();
 
         SosPositionParam reportParamBean = new SosPositionParam(imei,
-                manufactory,
-                model,
+                //manufactory,
+                //model,
                 RXJAVAHTTP_COMPANY,
                 RXJAVAHTTP_TYPE_REPORT,
                 positionType,
@@ -251,8 +266,8 @@ public class RxjavaHttpModel implements BaseModel {
     public void reportPosition(String type, final RxjavaHttpPresenter.OnReportListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
-        String manufactory = SprdCommonUtils.getInstance().getManufactory();
-        String model = SprdCommonUtils.getInstance().getModel();
+        //String manufactory = SprdCommonUtils.getInstance().getManufactory();
+        //String model = SprdCommonUtils.getInstance().getModel();
         String capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
         String data = null;
         String sign = null;
@@ -263,9 +278,10 @@ public class RxjavaHttpModel implements BaseModel {
         String latitude = baiduGpsMsgBean.getLatitude();
         String longitude = baiduGpsMsgBean.getLongitude();
 
-        SosPositionParam reportParamBean = new SosPositionParam(imei,
-                manufactory,
-                model,
+        SosPositionParam reportParamBean = new SosPositionParam(
+                imei,
+                //manufactory,
+                //model,
                 RXJAVAHTTP_COMPANY,
                 type,
                 positionType,
@@ -332,7 +348,10 @@ public class RxjavaHttpModel implements BaseModel {
         String data = null;
         String sign = null;
 
-        ModifyIntervalParam modifyIntervalParam = new ModifyIntervalParam(interval, time, RXJAVAHTTP_TYPE_INTERVAL);
+        ModifyIntervalParam modifyIntervalParam = new ModifyIntervalParam(
+                interval,
+                time,
+                RXJAVAHTTP_TYPE_INTERVAL);
 
         String gsonString = ModifyIntervalParam.getReportParamGson(modifyIntervalParam);
         Log.d(TAG, "reportModifyInterval: time = " + time + ", interval = " + interval + ", gson = " + gsonString);
@@ -387,7 +406,10 @@ public class RxjavaHttpModel implements BaseModel {
         String data = null;
         String sign = null;
 
-        OuterElectricBarParam outerElectricBarParam = new OuterElectricBarParam(imei, time, RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR);
+        OuterElectricBarParam outerElectricBarParam = new OuterElectricBarParam(
+                imei,
+                time,
+                RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR);
 
         String gsonString = OuterElectricBarParam.getReportParamGson(outerElectricBarParam);
         Log.d(TAG, "notifyOuterElectricBar: time = " + time + ", imei = " + imei + ", gson = " + gsonString);
@@ -424,6 +446,9 @@ public class RxjavaHttpModel implements BaseModel {
                     protected void onSuccess(ResultMsg resultMsg) {
                         Log.d(TAG, "notifyOuterElectricBar onSuccess: resultMsg = " + resultMsg);
                         listener.notifyOuterElectricBarSuccess(resultMsg);
+
+                        // 短信通知亲情号码
+                        SprdCommonUtils.getInstance().sendSosSms();
                     }
                 });
     }
@@ -442,7 +467,10 @@ public class RxjavaHttpModel implements BaseModel {
         String data = null;
         String sign = null;
 
-        GetStatusInfoParam statusInfoParam = new GetStatusInfoParam(imei, time, RXJAVAHTTP_TYPE_GET_STATUS_INFO);
+        GetStatusInfoParam statusInfoParam = new GetStatusInfoParam(
+                imei,
+                time,
+                RXJAVAHTTP_TYPE_GET_STATUS_INFO);
         String gsonString = GetStatusInfoParam.getReportParamGson(statusInfoParam);
         Log.d(TAG, "getStatusInfo: time = " + time + ", imei = " + imei + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
@@ -492,7 +520,7 @@ public class RxjavaHttpModel implements BaseModel {
     private String getSortedParam(String params)
     {
         StringBuilder sortedParam = new StringBuilder();
-        List<String> listString = new ArrayList<>();
+        List<String> listString = new ArrayList<String>();
         int length = 0;
         int paramLen = 0;
 
@@ -583,7 +611,7 @@ public class RxjavaHttpModel implements BaseModel {
 
         key = params.substring(keyStartPos + 1, keyEndPos);
         value = params.substring(valueStartPos + 1, valueEndPos);
-        HashMap<String, String> hashMap = new HashMap<>();
+        HashMap<String, String> hashMap = new HashMap<String, String>();
         hashMap.put(key, value);
 
         /*Log.d(TAG, "getOneParam: key = " + key + ", value = " + value);

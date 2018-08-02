@@ -112,7 +112,7 @@ signingConfigs {
   }
 ```
 
-#### 问题4 获取其他应用SharedPreferences失败
+#### 问题4 读取其他应用SharedPreferences失败
 ```
 private int mode = Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE;
 private SharedPreferences sosSharedPreferences = null;
@@ -130,9 +130,14 @@ private SharedPreferences sosSharedPreferences = null;
 ```
 * 如果SOS模块的mode是默认或者`MODE_PRIVATE`,其他应用是无法读写的
 * 如果SOS模块的mode更改为读和写, 其他应用依然无法写数据
-* 第一次从SOS读取成功,但是当在SOS模块更改之后,再次读取则一直无法更新数据, mode需要改为`MODE_MULTI_PROCESS`  
+* 第一次从SOS读取成功,但是当在SOS模块更改之后,再次读取则一直无法更新数据, mode需要改为`MODE_MULTI_PROCESS`   
 ```
 sosContext.getSharedPreferences(SOS_NUM_PREFS_NAME, MODE_MULTI_PROCESS);
+```
+不过已经被废弃, Android建议使用ContentProvider进行跨进程读写数据
+```
+在某些Android版本上无法可靠工作, 并且不提供任何保证跨进程数据同步一致性的机制, 应该尽量避免使用, 建议使用ContentProvider进行跨进程读写数据
+does not work reliably in some versions of Android, and furthermore does not provide any mechanism for reconciling concurrent modifications across processes. Applications should not attempt to use it. Instead, they should use an explicit cross-process data management approach such as {@link android.content.ContentProvider ContentProvider}.
 ```
 
 

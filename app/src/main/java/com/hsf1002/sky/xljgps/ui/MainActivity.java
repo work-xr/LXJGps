@@ -37,7 +37,7 @@ public class MainActivity extends Activity implements BaseView{
     private static final String TAG = "MainActivity";
     private RecyclerView recyclerView;
     private MainRecycleAdapter adapter;
-    private List<String> items = new ArrayList<>();
+    private List<String> items = new ArrayList<String>();
     private RxjavaHttpPresenterImpl presenter = new RxjavaHttpPresenterImpl(this);
     private int currentPosition = 0;
 

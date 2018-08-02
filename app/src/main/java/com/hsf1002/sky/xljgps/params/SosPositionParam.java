@@ -10,19 +10,19 @@ import com.google.gson.GsonBuilder;
 
 public class SosPositionParam extends BaiduGpsParam {
     private String imei;
-    private String manufactory;
-    private String model;
+    //private String manufactory;
+    //private String model;
     private String company;
     private String type;
     private String time;
     private String power;
 
-    public SosPositionParam(String imei, String manufactory, String model, String company, String type, String position_type, String time, String loc_type, String longitude, String lantitude, String power) {
+    public SosPositionParam(String imei, /*String manufactory, String model, */String company, String type, String position_type, String time, String loc_type, String longitude, String lantitude, String power) {
         super(position_type, loc_type, longitude, lantitude);
 
         this.imei = imei;
-        this.manufactory = manufactory;
-        this.model = model;
+        //this.manufactory = manufactory;
+        //this.model = model;
         this.company = company;
         this.type = type;
         this.time = time;
