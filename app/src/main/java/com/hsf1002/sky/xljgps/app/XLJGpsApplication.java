@@ -40,7 +40,8 @@ public class XLJGpsApplication extends Application {
         //RxjavaHttpModel.getInstance().getPersonList();
         //RxjavaHttpModel.getInstance().getPersonById(2);
         //RxjavaHttpModel.getInstance().addPerson("lili", 19);
-        //RxjavaHttpModel.getInstance().reportPosition("10000", null);
+        RxjavaHttpModel.getInstance().reportSosPosition(null);
+
     }
 
     private void rxjavaHttpInit()

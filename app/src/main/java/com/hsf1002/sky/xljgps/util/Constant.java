@@ -20,8 +20,10 @@ public class Constant {
     public static final String SHARED_PREFERENCE_NAME = "lxjgps_sp";
 
     //public static final String RXJAVAHTTP_BASE_URL_DOUBAN = "https://api.douban.com/";
-    public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaobawangtest/";
-    public static final String RXJAVAHTTP_BASE_URL_FORMAL = "http://healthdata.4000300659.com:8088/api/xiaobawang/";
+    public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaolajiaotest/";
+    //public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaolajiaotest/updatePhone";
+
+    public static final String RXJAVAHTTP_BASE_URL_FORMAL = "http://healthdata.4000300659.com:8088/api/xiaolajiao/";
     public static final String RXJAVAHTTP_REPORT_SOSPOSITION = "sosPosition";
     public static final String RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM = "familyNumber";
     public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "updatePhone";
@@ -39,8 +41,8 @@ public class Constant {
     public static final String RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR = "107";      //代表电子围栏超出通知
     public static final String RXJAVAHTTP_TYPE_GET_STATUS_INFO = "108";         //代表获取设备状态信息
 
-    public static final String RXJAVAHTTP_COMPANY = "XUNRUI";
-    public static final String RXJAVAHTTP_SECRET_CODE = "8s6HiyY0yGCLeZp5";     //ab2342145acdf;    // iETOECQ9kiJw75AZ
+    public static final String RXJAVAHTTP_COMPANY = "xiaolajiao";
+    public static final String RXJAVAHTTP_SECRET_CODE = "ab2796145acdf";//"8s6HiyY0yGCLeZp5";     //ab2342145acdf;    // iETOECQ9kiJw75AZ
     public static final String RXJAVAHTTP_ENCODE_TYPE = "UTF-8";
 
     public static final int RXJAVAHTTP_READ_TIMEOUT = 100;

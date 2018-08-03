@@ -23,18 +23,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_UPDATE_TO_PLATFORM
 public interface ApiService {
     @POST(RXJAVAHTTP_REPORT_SOSPOSITION)
     @FormUrlEncoded
-    Observable<ResultMsg> reportSosPosition(/*
-            @Field("imei") String imei,
-            @Field("manufactory") String manufactory,
-            @Field("model") String model,
-            @Field("company") String company,
-            @Field("type") String type,
-            @Field("position_type") String positionType,
-            @Field("time") String time,
-            @Field("loc_type") String locType,
-            @Field("longitude") String longitude,
-            @Field("latitude") String latitude,
-            @Field("power") String power,*/
+    Observable<ResultMsg> reportSosPosition(
             @Field("company") String company,
             @Field("data") String data,
             @Field("sign") String sign
@@ -42,25 +31,15 @@ public interface ApiService {
 
     @POST(RXJAVAHTTP_UPDATE_TO_PLATFORM)
     @FormUrlEncoded
-    Observable<ResultMsg> uploadRelationNumber(/*
-            @Field("imei") String imei,
-            @Field("company") String company,
-            @Field("type") String type,
-            @Field("sos_phone") String sosPhone,
-            @Field("name") String name,
-            @Field("time") String time,*/
+    Observable<ResultMsg> uploadRelationNumber(
             @Field("company") String company,
             @Field("data") String data,
             @Field("sign") String sign
     );
 
     @GET(RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM)
-    Observable<ResultMsg<RelationNumberMsg>> downloadRelationNumber(/*
-            @Field("imei") String imei,
-            @Field("company") String company,
-            @Field("type") String type,
-            @Field("time") String time,*/
-            @Field("company") String company,
+    Observable<ResultMsg<RelationNumberMsg>> downloadRelationNumber(
+            @Query("company") String company,
             @Query("data") String data,
             @Query("sign") String sign
             );

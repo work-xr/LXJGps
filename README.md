@@ -63,6 +63,21 @@ catch (UnsupportedEncodingException e)
 sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
 ```
 ### 问题汇总
+#### 接口调试中的问题
+##### sos exits null
+服务器接口地址必须无误, 参数名字必须无误, 每个参数都不能传递空值
+
+##### company error
+company是客户名字,每个项目不一样
+
+##### sos error ID
+可能是sign有问题,需要检查双方的secretCode是否一致
+
+##### 没有任何提示信息
+`{"success":0,"imei":"867400020316620","time":"20180802104641"}`
+可能是IMEI没有入库, 需要第三方协助入库操作
+
+
 #### 问题1 自启动失败-接收不到BOOT_COMPLETED广播可能的原因  
 1. BOOT_COMPLETED对应的action和uses-permission没有一起添加
 2. 应用安装到了sd卡内，安装在sd卡内的应用是收不到BOOT_COMPLETED广播的

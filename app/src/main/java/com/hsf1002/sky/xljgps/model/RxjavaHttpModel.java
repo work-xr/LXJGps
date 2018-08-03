@@ -244,13 +244,13 @@ public class RxjavaHttpModel implements BaseModel {
                     @Override
                     protected void onError(String s) {
                         Log.d(TAG, "reportSosPosition onError: s = " + s);
-                        listener.reportSosPositionFailed(s);
+                        //listener.reportSosPositionFailed(s);
                     }
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
                         Log.d(TAG, "reportSosPosition onSuccess: resultMsg = " + resultMsg);
-                        listener.reportSosPositionSuccess(resultMsg);
+                        //listener.reportSosPositionSuccess(resultMsg);
                     }
                 });
     }

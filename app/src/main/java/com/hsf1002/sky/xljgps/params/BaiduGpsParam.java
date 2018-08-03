@@ -8,8 +8,8 @@ public class BaiduGpsParam {
     //protected String address;       // 暂时不用
     protected String position_type;
     protected String loc_type;
-    protected String longitude;
-    protected String latitude;
+    protected String lon;
+    protected String lat;
 
     public BaiduGpsParam() {
     }
@@ -17,8 +17,8 @@ public class BaiduGpsParam {
     public BaiduGpsParam(String position_type, String loc_type, String longitude, String latitude) {
         this.position_type = position_type;
         this.loc_type = loc_type;
-        this.longitude = longitude;
-        this.latitude = latitude;
+        this.lon = longitude;
+        this.lat = latitude;
     }
 
     public String getPosition_type() {
@@ -30,11 +30,11 @@ public class BaiduGpsParam {
     }
 
     public String getLongitude() {
-        return longitude;
+        return lon;
     }
 
     public String getLatitude() {
-        return latitude;
+        return lat;
     }
 
     public void setPosition_type(String position_type) {
@@ -46,11 +46,11 @@ public class BaiduGpsParam {
     }
 
     public void setLongitude(String longitude) {
-        this.longitude = longitude;
+        this.lon = longitude;
     }
 
     public void setLatitude(String latitude) {
-        this.latitude = latitude;
+        this.lat = latitude;
     }
 /*
     public String getAddress() {
@@ -67,8 +67,8 @@ public class BaiduGpsParam {
                 //"address='" + address + '\'' +
                 ", position_type='" + position_type + '\'' +
                 ", loc_type='" + loc_type + '\'' +
-                ", longitude='" + longitude + '\'' +
-                ", latitude='" + latitude + '\'' +
+                ", longitude='" + lon + '\'' +
+                ", latitude='" + lat + '\'' +
                 '}';
     }
 }
