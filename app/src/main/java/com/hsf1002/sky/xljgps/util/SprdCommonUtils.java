@@ -2,14 +2,14 @@ package com.hsf1002.sky.xljgps.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.hsf1002.sky.xljgps.R;
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
@@ -24,19 +24,18 @@ import java.util.Date;
 
 import static android.os.Build.MANUFACTURER;
 import static android.os.Build.MODEL;
+import static com.hsf1002.sky.xljgps.util.Constant.ACTION_SET_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_DEFAULT;
+import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_COUNT;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_1;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_2;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_3;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PREFS_NAME;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_PACKAGE_NAME;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_SMS_PREFS_MSG;
-import static com.hsf1002.sky.xljgps.util.Constant.SOS_SMS_PREFS_NAME;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_INVALID_VALUE;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PROPERTY_1;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PROPERTY_2;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PROPERTY_3;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_SMS_PROPERTY_MSG;
 
 /**
  * Created by hefeng on 18-6-11.
@@ -45,8 +44,8 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOS_SMS_PREFS_NAME;
 public class SprdCommonUtils {
     private static final String TAG = "SprdCommonUtils";
     private static final String BATTERY_CAPACITY_FILE_PATH = "/sys/class/power_supply/battery/capacity";
-    private SharedPreferences sosNumSharedPreferences = null;
-    private SharedPreferences sosMsgSharedPreferences = null;
+    //private SharedPreferences sosNumSharedPreferences = null;
+    //private SharedPreferences sosMsgSharedPreferences = null;
 
     /**
     *  author:  hefeng
@@ -142,7 +141,7 @@ public class SprdCommonUtils {
     *  param:
     *  return:
     */
-    //private void setSosContext()
+    /*private void setSosContext()
     {
         Context sosContext = null;
 
@@ -156,7 +155,7 @@ public class SprdCommonUtils {
         sosNumSharedPreferences = sosContext.getSharedPreferences(SOS_NUM_PREFS_NAME, Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
         sosMsgSharedPreferences = sosContext.getSharedPreferences(SOS_SMS_PREFS_NAME, Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
     }
-
+*/
     /**
     *  author:  hefeng
     *  created: 18-7-31 下午2:35
@@ -168,35 +167,39 @@ public class SprdCommonUtils {
     {
         StringBuilder numberString = new StringBuilder();
         String platformCenterNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER, RELATION_NUMBER_DEFAULT);
-        int count = SOS_NUM_COUNT + 1;//getRelationNumberCount();
+        ArrayList<String> list = new ArrayList<String>();
 
         //setSosContext();
 
-        for (int i=0; i<count; ++i)
+        /*for (int i=0; i<SOS_NUM_COUNT + 1; ++i)
         {
-            if (i == 0)
+            if (i == SOS_NUM_COUNT)
             {
-                numberString.append(platformCenterNumberStr);
+                numberString.append(platformCenterNumberStr.trim());
             }
             else
             {
-                String relationNumberStr = sosNumSharedPreferences.getString(SOS_NUM_PREFS_ + i, "");
+                String relationNumberStr = sosNumSharedPreferences.getString(SOS_NUM_PREFS_ + (i+1), "");
                 Log.d(TAG, "getRelationNumber  relationNumber[" + i + "] = " + relationNumberStr);
 
-                //if (!TextUtils.isEmpty(relationNumberStr))    // 为空也添加
+                //if (!TextUtils.isEmpty(relationNumberStr))
                 {
-                    //if (i != 0)   // 孝老平台号码是第一个了
-                    {
-                        numberString.append(",");
-                    }
-                    numberString.append(relationNumberStr);
+                    numberString.append(relationNumberStr.trim());
+                    numberString.append(",");
                 }
             }
-        }
+        }*/
+        verifyPropertyNumber(list);
 
-        sendSosSms();
+        numberString.
+                append(list.get(0))
+                .append(",")
+                .append(list.get(1))
+                .append(",")
+                .append(list.get(2))
+                .append(",")
+                .append(platformCenterNumberStr);
 
-        setRelationNumber("5555, 9, 8, 7");
         Log.d(TAG, "getRelationNumber: numberString = " + numberString.toString());
 
         return numberString.toString();
@@ -223,23 +226,27 @@ public class SprdCommonUtils {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "setRelationNumber: list[0] = " + list[0]);
-        SharedPreUtils.getInstance().putString(RELATION_NUMBER, list[0]);
-
-        for (int i=1; i<=SOS_NUM_COUNT; ++i)
+        for (int i=1; i<SOS_NUM_COUNT + 1; ++i)
         {
-            sosNumSharedPreferences.edit().putString(SOS_NUM_PREFS_ + i, list[i]);
-        }
-        sosNumSharedPreferences.edit().commit();
+            if (i == SOS_NUM_COUNT)
+            {
+                SharedPreUtils.getInstance().putString(RELATION_NUMBER, list[i]);
+            }
 
-        /*Intent intent = new Intent();
-        relationNumber = relationNumber.substring(list[0].length() + 1);
+            //else
+            //{
+                //sosNumSharedPreferences.edit().putString(SOS_NUM_PREFS_ + (i+1), list[i]);
+            //}
+        }
+        //sosNumSharedPreferences.edit().commit();
+
+        Intent intent = new Intent();
+        relationNumber = relationNumber.substring(0, relationNumber.length() - list[SOS_NUM_COUNT].length());
         intent.setAction(ACTION_SET_RELATION_NUMBER);
         intent.putExtra(SET_RELATION_NUMBER, relationNumber);
 
         Log.d(TAG, "setRelationNumber: relationNumber = " + relationNumber);
         XLJGpsApplication.getAppContext().sendBroadcast(intent);
-        */
     }
 
     /**
@@ -252,23 +259,28 @@ public class SprdCommonUtils {
     public void sendSosSms()
     {
         SmsManager manager = SmsManager.getDefault();
-        String mSosMsg = sosMsgSharedPreferences.getString(SOS_SMS_PREFS_MSG, "");
+        //String mSosMsg = sosMsgSharedPreferences.getString(SOS_SMS_PREFS_MSG, "");
+        String mSosMsg = null;
         ArrayList<String> mSosNum = new ArrayList<String>();
 
-        Log.e(TAG,"sendSosSms manager = " +manager);
+        Log.e(TAG,"sendSosSms manager = " + manager);
 
-        mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_1, ""));
-        mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_2, ""));
-        mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_3, ""));
+        //mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_1, ""));
+        //mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_2, ""));
+        //mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_3, ""));
+
+        mSosMsg = SystemProperties.get(SOS_SMS_PROPERTY_MSG, "");
+
+        if (mSosMsg.equals(SOS_NUM_INVALID_VALUE))
+        {
+            mSosMsg = XLJGpsApplication.getAppContext().getResources().getString(R.string.sos_sms);
+        }
+        Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
+
+        verifyPropertyNumber(mSosNum);
 
         if(manager != null)
         {
-            Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
-            if (TextUtils.isEmpty(mSosMsg))
-            {
-                mSosMsg = XLJGpsApplication.getAppContext().getResources().getString(R.string.sos_sms);
-            }
-            Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
             ArrayList<String> list = manager.divideMessage(mSosMsg);
 
             for (String num : mSosNum)
@@ -287,6 +299,49 @@ public class SprdCommonUtils {
 
     /**
     *  author:  hefeng
+    *  created: 18-8-3 下午8:00
+    *  desc:    先把从读取的数据判断一下,是不是无效值
+    *  param:
+    *  return:
+    */
+    private void verifyPropertyNumber(ArrayList<String> list)
+    {
+        String numStr1 = SystemProperties.get(SOS_NUM_PROPERTY_1, "");
+        String numStr2 = SystemProperties.get(SOS_NUM_PROPERTY_2, "");
+        String numStr3 = SystemProperties.get(SOS_NUM_PROPERTY_3, "");
+
+        Log.d(TAG, "verifyPropertyNumber: numStr1 = " + numStr1 + ", numStr2 = " + numStr2 + ", numStr3 = " + numStr3);
+
+        if (numStr1.equals(SOS_NUM_INVALID_VALUE))
+        {
+            list.add("");
+        }
+        else
+        {
+            list.add(numStr1);
+        }
+
+        if (numStr2.equals(SOS_NUM_INVALID_VALUE))
+        {
+            list.add("");
+        }
+        else
+        {
+            list.add(numStr2);
+        }
+
+        if (numStr3.equals(SOS_NUM_INVALID_VALUE))
+        {
+            list.add("");
+        }
+        else
+        {
+            list.add(numStr3);
+        }
+    }
+
+    /**
+    *  author:  hefeng
     *  created: 18-7-31 下午2:32
     *  desc:    获取孝老平台号码和亲情号码名称
     *  param:
@@ -296,19 +351,19 @@ public class SprdCommonUtils {
     {
         StringBuilder numberStringNames = new StringBuilder();
         String[]  names = XLJGpsApplication.getAppContext().getResources().getStringArray(R.array.relation_item_name);
-        int count = SOS_NUM_COUNT + 1;//getRelationNumberCount();
+        //int count = SOS_NUM_COUNT + 1;//getRelationNumberCount();
 
-        for (int i=0; i<count; ++i)
+        for (int i=0; i<SOS_NUM_COUNT + 1; ++i)
         {
-            if (i == 0)
+            if (i == SOS_NUM_COUNT)
             {
                 numberStringNames.append(names[0]);
             }
             else
             {
-                String itemName = XLJGpsApplication.getAppContext().getString(R.string.sos_number) + i;
-                numberStringNames.append(",");
+                String itemName = XLJGpsApplication.getAppContext().getString(R.string.sos_number) + (i + 1);
                 numberStringNames.append(itemName);
+                numberStringNames.append(",");
             }
         }
 

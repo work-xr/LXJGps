@@ -2,7 +2,7 @@ package com.hsf1002.sky.xljgps.presenter;
 
 import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
 import com.hsf1002.sky.xljgps.result.ResultMsg;
-import com.hsf1002.sky.xljgps.result.StatusInfoMsg;
+import com.hsf1002.sky.xljgps.result.StatusInfoSendMsg;
 
 /**
  * Created by hefeng on 18-6-8.
@@ -47,7 +47,7 @@ public interface RxjavaHttpPresenter {
     interface OnStatusListener
     {
         void getStatusInfo();
-        void getStatusInfoSuccess(ResultMsg<StatusInfoMsg> resultMsg);
+        void getStatusInfoSuccess(ResultMsg<StatusInfoSendMsg> resultMsg);
         void getStatusInfoFailed(String failedMsg);
     }
 }

@@ -29,7 +29,6 @@ import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
 import static android.view.KeyEvent.KEYCODE_DPAD_UP;
 import static com.hsf1002.sky.xljgps.util.Constant.DOWNLOAD_INFO_FROM_PLATFORM_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.REPORT_INFO_TO_PLATFORM_INDEX;
-import static com.hsf1002.sky.xljgps.util.Constant.SEND_MSG_TO_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.UPLOAD_INFO_TO_PLATFORM_INDEX;
 
@@ -131,9 +130,6 @@ public class MainActivity extends Activity implements BaseView{
             case REPORT_INFO_TO_PLATFORM_INDEX:
                 reportSosGpsInfoToPlatform();
                 break;
-            case SEND_MSG_TO_RELATION_NUMBER:
-                sendMsgToRelationNumber();
-                break;
             default:
                 break;
         }
@@ -196,11 +192,6 @@ public class MainActivity extends Activity implements BaseView{
     private void reportSosGpsInfoToPlatform()
     {
         presenter.reportSosPosition();
-    }
-
-    private void sendMsgToRelationNumber()
-    {
-
     }
 
     @Override

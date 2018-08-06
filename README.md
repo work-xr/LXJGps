@@ -74,7 +74,7 @@ company是客户名字,每个项目不一样
 可能是sign有问题,需要检查双方的secretCode是否一致
 
 ##### 没有任何提示信息
-`{"success":0,"imei":"867400020316620","time":"20180802104641"}`
+`{"success":0,"imei":"867400020316620","time":"20180802104641"}`  
 可能是IMEI没有入库, 需要第三方协助入库操作
 
 
@@ -155,6 +155,41 @@ sosContext.getSharedPreferences(SOS_NUM_PREFS_NAME, MODE_MULTI_PROCESS);
 does not work reliably in some versions of Android, and furthermore does not provide any mechanism for reconciling concurrent modifications across processes. Applications should not attempt to use it. Instead, they should use an explicit cross-process data management approach such as {@link android.content.ContentProvider ContentProvider}.
 ```
 
+#### 问题5 AS找不到`SystemProperties`
+在build.gradle的android标签里添加:  
+```
+String SDK_DIR = System.getenv("ANDROID_SDK_HOME")
+if(SDK_DIR == null) {
+    Properties props = new Properties()
+    props.load(new FileInputStream(project.rootProject.file("local.properties")))
+    SDK_DIR = props.get('sdk.dir');
+}
+dependencies {
+    provided files("${SDK_DIR}/platforms/android-24/data/layoutlib.jar")
+}
+```
+
+#### 问题6 生成的签名APK 内置到工程, 无法安装成功
+```
+01-01 08:01:51.094   576   620 E PackageParser: Package com.hsf1002.sky.xljgps has no certificates at entry AndroidManifest.xml; ignoring!
+```
+原因是当前Android系统是4.4, 还不支持V2(full APK signature)的方式, 以此方式签名, 系统无法识别  
+* 可以用系统的签名文件以方式进行签名
+```
+java -Djava.library.path=. -jar signapk.jar platform.x509.pem platform.pk8 app-release.apk  app-release_signed.apk  
+如果报错Exception in thread "main" java.lang.UnsatisfiedLinkError: no conscrypt_openjdk_jni in java.library.path  
+需要把./linux-x86/lib64/libconscrypt_openjdk_jni.so 拷贝过来
+```
+* Android 7.0 引入一项新的应用签名方案 APK Signature Scheme v2，它能提供更快的应用安装时间和更多针对未授权 APK 文件更改的保护; 在Generated Signed APK 这一步, 单独选择V1(jar Signature), 或者和V2(full APK Signature)一起选择, 如果单独选择V2则会报错, 也可以在build.gradle中禁止掉V2签名方式;   
+```
+signingConfigs{
+    releaseConfig{
+        keyAlias 'key'
+        keyPassword '123456'
+        storeFile file('/home/workspace1/workplace/android/common.jks')
+        storePassword '123456'
+        v2SigningEnabled false
+```
 
 ### HTTP 协议基础
 #### GET请求的特点:

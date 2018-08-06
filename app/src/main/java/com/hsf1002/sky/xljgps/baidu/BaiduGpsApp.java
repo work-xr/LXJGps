@@ -11,12 +11,14 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
+import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 
 import static android.content.Context.WIFI_SERVICE;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_GPS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_LBS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_WIFI;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_TIMING;
 
 /**
  * Created by hefeng on 18-6-6.
@@ -166,6 +168,8 @@ public class BaiduGpsApp {
             {
                 Log.d(TAG, "onReceiveLocation:  get location success, stop gps service");
                 setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locType, locationType);
+
+                RxjavaHttpModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_TIMING, null);
             }
             else
             {
@@ -185,7 +189,7 @@ public class BaiduGpsApp {
         }
     }
 
-    private void setBaiduGpsStatus(/*String address,*/ String latitude, String longitude, String locType, String source_type)
+    private void setBaiduGpsStatus(/*String address,*/ String latitude, String longitude, String locType, String position_type)
     {
         /*
         if (TextUtils.isEmpty(address))
@@ -199,7 +203,7 @@ public class BaiduGpsApp {
 
         if (TextUtils.isEmpty(latitude))
         {
-            sBaiduGpsMsgBean.setLatitude("111");
+            sBaiduGpsMsgBean.setLatitude("22.537702");
         }
         else
         {
@@ -208,7 +212,7 @@ public class BaiduGpsApp {
 
         if (TextUtils.isEmpty(longitude))
         {
-            sBaiduGpsMsgBean.setLongitude("222");
+            sBaiduGpsMsgBean.setLongitude("113.95717");
         }
         else
         {
@@ -217,20 +221,20 @@ public class BaiduGpsApp {
 
         if (TextUtils.isEmpty(locType))
         {
-            sBaiduGpsMsgBean.setLoc_type("333");
+            sBaiduGpsMsgBean.setLoc_type("3");
         }
         else
         {
             sBaiduGpsMsgBean.setLoc_type(locType);
         }
 
-        if (TextUtils.isEmpty(source_type))
+        if (TextUtils.isEmpty(position_type))
         {
-            sBaiduGpsMsgBean.setPosition_type("444");
+            sBaiduGpsMsgBean.setPosition_type("1");
         }
         else
         {
-            sBaiduGpsMsgBean.setPosition_type(source_type);
+            sBaiduGpsMsgBean.setPosition_type(position_type);
         }
     }
 

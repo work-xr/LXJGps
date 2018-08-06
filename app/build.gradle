@@ -10,10 +10,25 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    signingConfigs{
+        releaseConfig{
+            keyAlias 'key'
+            keyPassword '123456'
+            storeFile file('/home/workspace1/workplace/android/common.jks')
+            storePassword '123456'
+            v2SigningEnabled false
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.releaseConfig
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.releaseConfig
         }
     }
 
@@ -30,6 +45,16 @@ android {
             jniLibs.srcDir 'libs'
             jni.srcDirs = []
         }
+    }
+
+    String SDK_DIR = System.getenv("ANDROID_SDK_HOME")
+    if(SDK_DIR == null) {
+        Properties props = new Properties()
+        props.load(new FileInputStream(project.rootProject.file("local.properties")))
+        SDK_DIR = props.get('sdk.dir');
+    }
+    dependencies {
+        provided files("${SDK_DIR}/platforms/android-24/data/layoutlib.jar")
     }
 }
 

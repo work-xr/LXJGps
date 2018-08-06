@@ -9,7 +9,6 @@ public class Constant {
     public static final int UPLOAD_INFO_TO_PLATFORM_INDEX = 1;
     public static final int DOWNLOAD_INFO_FROM_PLATFORM_INDEX = 2;
     public static final int REPORT_INFO_TO_PLATFORM_INDEX = 3;
-    public static final int SEND_MSG_TO_RELATION_NUMBER = 4;
 
     public static final String RELATION_NUMBER = "relation_number_";
     public static final String RELATION_NUMBER_COUNT = "relation_number_count";
@@ -21,7 +20,6 @@ public class Constant {
 
     //public static final String RXJAVAHTTP_BASE_URL_DOUBAN = "https://api.douban.com/";
     public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaolajiaotest/";
-    //public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaolajiaotest/updatePhone";
 
     public static final String RXJAVAHTTP_BASE_URL_FORMAL = "http://healthdata.4000300659.com:8088/api/xiaolajiao/";
     public static final String RXJAVAHTTP_REPORT_SOSPOSITION = "sosPosition";
@@ -31,12 +29,11 @@ public class Constant {
 
     public static final String RXJAVAHTTP_TYPE_DOWNLOAD = "103";
     public static final String RXJAVAHTTP_TYPE_UPLOAD = "203";
-    public static final String RXJAVAHTTP_TYPE_REPORT = "202";
-    //101:实时定位数据；100：开机；201：定时上传定位数据
-    public static final String RXJAVAHTTP_TYPE_SOS = "10111111";
-    public static final String RXJAVAHTTP_TYPE_CURRENT = "101";
-    public static final String RXJAVAHTTP_TYPE_POWERON = "100";
-    public static final String RXJAVAHTTP_TYPE_TIMING = "201";
+    //public static final String RXJAVAHTTP_TYPE_REPORT = "202";
+    public static final String RXJAVAHTTP_TYPE_SOS = "202";         // 是通过按SOS键上报消息
+    public static final String RXJAVAHTTP_TYPE_CURRENT = "101";     // 收到服务器指令, 实时定位后上报消息
+    public static final String RXJAVAHTTP_TYPE_POWERON = "100";     // 开机上报消息
+    public static final String RXJAVAHTTP_TYPE_TIMING = "201";      // 定时定位后上报消息
     public static final String RXJAVAHTTP_TYPE_INTERVAL = "106";                // 代表设置定位上传频率
     public static final String RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR = "107";      //代表电子围栏超出通知
     public static final String RXJAVAHTTP_TYPE_GET_STATUS_INFO = "108";         //代表获取设备状态信息
@@ -52,7 +49,7 @@ public class Constant {
     // 每隔多久启动一次IntentService服务来开始定位,可由服务器端通过调用setStartServiceInterval进行设置更改
     public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
     // 每次启动百度地图服务XLJGpsService.setServiceAlarm(getApplicationContext(), true);, 如果3分钟内没有定位成功, 自动停止地图服务stopBaiduGps
-    public static final int BAIDU_GPS_FIRST_SCAN_TIME_MAX = 3 * 60 * 1000;
+    //public static final int BAIDU_GPS_FIRST_SCAN_TIME_MAX = 3 * 60 * 1000;
     public static final String BAIDU_GPS_LOCATION_TYPE_GPS = "gps";
     public static final String BAIDU_GPS_LOCATION_TYPE_LBS = "lbs";
     public static final String BAIDU_GPS_LOCATION_TYPE_WIFI = "wifi";
@@ -72,11 +69,30 @@ public class Constant {
     // 第三个紧急呼叫号码的KEY
     public static final String SOS_NUM_PREFS_3 = "sosNum3";
 
-    public static final String SOS_SMS_PREFS_NAME = "sos_msg_prefs";
-    public static final String SOS_SMS_PREFS_MSG = "sosMsg";
+    public static final String SOS_NUM_PROPERTY_1 = "persist.sos.num1";
+    public static final String SOS_NUM_PROPERTY_2 = "persist.sos.num2";
+    public static final String SOS_NUM_PROPERTY_3 = "persist.sos.num3";
+    public static final String SOS_SMS_PROPERTY_MSG = "persist.sos.msg";
+    public static final String SOS_NUM_INVALID_VALUE = "ff";
+
+    //public static final String SOS_SMS_PREFS_NAME = "sos_msg_prefs";
+    //public static final String SOS_SMS_PREFS_MSG = "sosMsg";
 
     public static final int SOS_NUM_COUNT = 3;
 
     public static final String ACTION_SET_RELATION_NUMBER = "intent.action.SET_RELATION_NUMBER";
     public static final String SET_RELATION_NUMBER = "com.hsf1002.sky.xljgps.setrelationnumber";
+
+    public static final String RESULT_SUCCESS_0 = "0";
+    public static final String RESULT_SUCCESS_1 = "1";
+    public static final String RESULT_MSG_FAILING = "failing";
+    public static final String RESULT_MSG_SUCCESS = "success";
+    public static final String RESULT_STATUS_POWERON = "1";
+    public static final String RESULT_STATUS_POWEROFF = "0";
+
+    public static final String RESULT_PARAM_IMEI = "imei";
+    public static final String RESULT_PARAM_INTERVAL = "interval";
+    public static final String RESULT_PARAM_TYPE = "type";
+    public static final String RESULT_PARAM_TIME = "time";
+
 }

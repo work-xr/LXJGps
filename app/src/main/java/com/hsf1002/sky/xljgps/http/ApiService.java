@@ -2,7 +2,7 @@ package com.hsf1002.sky.xljgps.http;
 
 import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
 import com.hsf1002.sky.xljgps.result.ResultMsg;
-import com.hsf1002.sky.xljgps.result.StatusInfoMsg;
+import com.hsf1002.sky.xljgps.result.StatusInfoSendMsg;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -70,7 +70,7 @@ public interface ApiService {
 
     @POST
     @FormUrlEncoded
-    Observable<ResultMsg<StatusInfoMsg>> getStatusInfo(
+    Observable<ResultMsg<StatusInfoSendMsg>> getStatusInfo(
             @Field("company") String company,
             @Field("data") String data,
             @Field("sign") String sign

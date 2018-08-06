@@ -1,25 +1,24 @@
 package com.hsf1002.sky.xljgps.model;
 
-import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.allen.library.RxHttpUtils;
 import com.allen.library.interceptor.Transformer;
 import com.allen.library.observer.CommonObserver;
-import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
-import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
+import com.hsf1002.sky.xljgps.http.ApiService;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 import com.hsf1002.sky.xljgps.params.DownloadRelationNumberParam;
 import com.hsf1002.sky.xljgps.params.GetStatusInfoParam;
-import com.hsf1002.sky.xljgps.params.OuterElectricBarParam;
 import com.hsf1002.sky.xljgps.params.ModifyIntervalParam;
+import com.hsf1002.sky.xljgps.params.OuterElectricBarParam;
 import com.hsf1002.sky.xljgps.params.SosPositionParam;
 import com.hsf1002.sky.xljgps.params.UploadRelationNumberParam;
-import com.hsf1002.sky.xljgps.http.ApiService;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
-import com.hsf1002.sky.xljgps.result.StatusInfoMsg;
+import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
+import com.hsf1002.sky.xljgps.result.ResultMsg;
+import com.hsf1002.sky.xljgps.result.StatusInfoSendMsg;
 import com.hsf1002.sky.xljgps.util.MD5Utils;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
@@ -39,7 +38,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_DOWNLOAD;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_GET_STATUS_INFO;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_INTERVAL;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_REPORT;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_SOS;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_UPLOAD;
 
 /**
@@ -53,7 +52,7 @@ public class RxjavaHttpModel implements BaseModel {
     /**
     *  author:  hefeng
     *  created: 18-7-30 下午2:37
-    *  desc:    客户端同步孝老平台的亲情号码到本地
+    *  desc:    客户端同步孝老平台的亲情号码到本地, 孝老平台中心号码必须是第四个, 前三个是亲情号码
     *  param:   
     *  return:  
     */
@@ -101,13 +100,17 @@ public class RxjavaHttpModel implements BaseModel {
                     @Override
                     protected void onError(String s) {
                         Log.d(TAG, "downloadRelationNumber onError: s = " + s);
-                        listener.downloadRelationNumberFailed(s);
+                        if (listener != null) {
+                            listener.downloadRelationNumberFailed(s);
+                        }
                     }
 
                     @Override
                     protected void onSuccess(ResultMsg<RelationNumberMsg> receiveMsg) {
                         Log.d(TAG, "downloadRelationNumber onSuccess: receiveMsg = " + receiveMsg);
-                        listener.downloadRelationNumberSuccess(receiveMsg);
+                        if (listener != null) {
+                            listener.downloadRelationNumberSuccess(receiveMsg);
+                        }
                     }
                 });
     }
@@ -115,7 +118,7 @@ public class RxjavaHttpModel implements BaseModel {
     /**
     *  author:  hefeng
     *  created: 18-7-30 下午2:38
-    *  desc:    客户端修改亲情号码后同步至孝老平台
+    *  desc:    客户端修改亲情号码后同步至孝老平台, 孝老平台中心号码必须是第四个, 前三个是亲情号码
     *  param:
     *  return:
     */
@@ -169,13 +172,17 @@ public class RxjavaHttpModel implements BaseModel {
                     @Override
                     protected void onError(String s) {
                         Log.d(TAG, "uploadRelationNumber onError: s = " + s);
-                        listener.uploadRelationNumberFailed(s);
+                        if (listener != null) {
+                            listener.uploadRelationNumberFailed(s);
+                        }
                     }
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
                         Log.d(TAG, "uploadRelationNumber onSuccess: resultMsg= " + resultMsg);
-                        listener.uploadRelationNumberSuccess(resultMsg);
+                        if (listener != null) {
+                            listener.uploadRelationNumberSuccess(resultMsg);
+                        }
                     }
                 });
     }
@@ -183,7 +190,7 @@ public class RxjavaHttpModel implements BaseModel {
     /**
     *  author:  hefeng
     *  created: 18-7-30 下午2:39
-    *  desc:    上报sos-position信息到孝老平台
+    *  desc:    上报sos-position信息到孝老平台, 只有当用户手动按SOS按键才会触发
     *  param:
     *  return:
     */
@@ -207,7 +214,7 @@ public class RxjavaHttpModel implements BaseModel {
                 //manufactory,
                 //model,
                 RXJAVAHTTP_COMPANY,
-                RXJAVAHTTP_TYPE_REPORT,
+                RXJAVAHTTP_TYPE_SOS,
                 positionType,
                 time,
                 locType,
@@ -244,13 +251,17 @@ public class RxjavaHttpModel implements BaseModel {
                     @Override
                     protected void onError(String s) {
                         Log.d(TAG, "reportSosPosition onError: s = " + s);
-                        //listener.reportSosPositionFailed(s);
+                        if (listener != null) {
+                            listener.reportSosPositionFailed(s);
+                        }
                     }
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
                         Log.d(TAG, "reportSosPosition onSuccess: resultMsg = " + resultMsg);
-                        //listener.reportSosPositionSuccess(resultMsg);
+                        if (listener != null) {
+                            listener.reportSosPositionSuccess(resultMsg);
+                        }
                     }
                 });
     }
@@ -381,13 +392,17 @@ public class RxjavaHttpModel implements BaseModel {
                     @Override
                     protected void onError(String s) {
                         Log.d(TAG, "reportModifyInterval onError: s = " + s);
-                        listener.reportModifyIntervalFailed(s);
+                        if (listener != null) {
+                            listener.reportModifyIntervalFailed(s);
+                        }
                     }
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
                         Log.d(TAG, "reportModifyInterval onSuccess: resultMsg = " + resultMsg);
-                        listener.reportModifyIntervalSuccess(resultMsg);
+                        if (listener != null) {
+                            listener.reportModifyIntervalSuccess(resultMsg);
+                        }
                     }
                 });
     }
@@ -439,13 +454,17 @@ public class RxjavaHttpModel implements BaseModel {
                     @Override
                     protected void onError(String s) {
                         Log.d(TAG, "notifyOuterElectricBar onError: s = " + s);
-                        listener.notifyOuterElectricBarFailed(s);
+                        if (listener != null) {
+                            listener.notifyOuterElectricBarFailed(s);
+                        }
                     }
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
                         Log.d(TAG, "notifyOuterElectricBar onSuccess: resultMsg = " + resultMsg);
-                        listener.notifyOuterElectricBarSuccess(resultMsg);
+                        if (listener != null) {
+                            listener.notifyOuterElectricBarSuccess(resultMsg);
+                        }
 
                         // 短信通知亲情号码
                         SprdCommonUtils.getInstance().sendSosSms();
@@ -494,18 +513,22 @@ public class RxjavaHttpModel implements BaseModel {
                         RXJAVAHTTP_COMPANY,
                         data,
                         sign)
-                .compose(Transformer.<ResultMsg<StatusInfoMsg>>switchSchedulers())
-                .subscribe(new CommonObserver<ResultMsg<StatusInfoMsg>>() {
+                .compose(Transformer.<ResultMsg<StatusInfoSendMsg>>switchSchedulers())
+                .subscribe(new CommonObserver<ResultMsg<StatusInfoSendMsg>>() {
                     @Override
                     protected void onError(String s) {
                         Log.d(TAG, "getStatusInfo onError: s = " + s);
-                        listener.getStatusInfoFailed(s);
+                        if (listener != null) {
+                            listener.getStatusInfoFailed(s);
+                        }
                     }
 
                     @Override
-                    protected void onSuccess(ResultMsg<StatusInfoMsg> statusInfoMsgResultMsg) {
+                    protected void onSuccess(ResultMsg<StatusInfoSendMsg> statusInfoMsgResultMsg) {
                         Log.d(TAG, "getStatusInfo onSuccess: result = " + statusInfoMsgResultMsg);
-                        listener.getStatusInfoSuccess(statusInfoMsgResultMsg);
+                        if (listener != null) {
+                            listener.getStatusInfoSuccess(statusInfoMsgResultMsg);
+                        }
                     }
                 });
     }

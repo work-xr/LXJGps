@@ -58,7 +58,6 @@ public class RxjavaHttpPresenterImpl implements RxjavaHttpPresenter.OnDownloadLi
     @Override
     public void reportSosPosition() {
         model.reportPosition(RXJAVAHTTP_TYPE_TIMING, this);
-        //model.reportGsonInfo(this);
     }
 
     @Override

@@ -6,9 +6,6 @@ import android.util.Log;
 
 import com.allen.library.RxHttpUtils;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
-import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
-import com.hsf1002.sky.xljgps.service.GpsService;
-import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_URL_TEST;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_CONNCET_TIMEOUT;
@@ -27,23 +24,20 @@ public class XLJGpsApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Log.i(TAG, "onCreate: ");
+        Log.i(TAG, "onCreate: ...................................");
         sContext = getApplicationContext();
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
-        //XLJGpsService.setServiceAlarm(getApplicationContext(), true);
-        //startService(new Intent(this, GpsService.class));
-        //GpsService.setServiceAlarm(getApplicationContext(), true);
 
         rxjavaHttpInit();
-
-        //RxjavaHttpModel.getInstance().getUserInfo();
-        //RxjavaHttpModel.getInstance().getPersonList();
-        //RxjavaHttpModel.getInstance().getPersonById(2);
-        //RxjavaHttpModel.getInstance().addPerson("lili", 19);
-        RxjavaHttpModel.getInstance().reportSosPosition(null);
-
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-3 上午11:40
+    *  desc:    初始化RXJava配置
+    *  param:
+    *  return:
+    */
     private void rxjavaHttpInit()
     {
         RxHttpUtils.init(this);
@@ -61,5 +55,23 @@ public class XLJGpsApplication extends Application {
     public static Context getAppContext()
     {
         return sContext;
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        Log.d(TAG, "onTerminate: ...................................");
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        Log.d(TAG, "onLowMemory: ...................................");
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Log.d(TAG, "onTrimMemory: ..................................");
     }
 }
