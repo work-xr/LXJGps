@@ -9,23 +9,32 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
+import com.hsf1002.sky.xljgps.util.SharedPreUtils;
 
-import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_VALUE;
 
 /**
  * Created by hefeng on 18-6-6.
  */
 
-public class XLJGpsService extends IntentService {
-    private static final String TAG = "XLJGpsService";
-    private static int startServiceInterval = BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL;
+public class GpsIntentService extends IntentService {
+    private static final String TAG = "GpsIntentService";
+    private static int startServiceInterval = SharedPreUtils.getInstance().getInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_VALUE);
 
-    public XLJGpsService()
+    /**
+    *  author:  hefeng
+    *  created: 18-8-7 上午9:26
+    *  desc:    不定义在AndroidManifest.xml会报错
+    *  param:
+    *  return:
+    */
+    public GpsIntentService()
     {
-        super("hello world");
+        super("GpsIntentService");
     }
 
-    public XLJGpsService(String name) {
+    public GpsIntentService(String name) {
         super(name);
     }
 
@@ -37,7 +46,7 @@ public class XLJGpsService extends IntentService {
 
     public static void setServiceAlarm(Context context, boolean isOn)
     {
-        Intent intent = new Intent(context, XLJGpsService.class);
+        Intent intent = new Intent(context, GpsIntentService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -55,14 +64,22 @@ public class XLJGpsService extends IntentService {
 
     public static boolean isServiceAlarmOn(Context context)
     {
-        Intent intent = new Intent(context, XLJGpsService.class);
+        Intent intent = new Intent(context, GpsIntentService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
 
         return pi != null;
     }
 
+    /**
+     *  author:  hefeng
+     *  created: 18-8-6 下午2:09
+     *  desc:    服务器下发指令的时候调用, 用于更改定位信息上报的时间间隔(正式版本默认是30分钟, 测试默认1分钟)
+     *  param:
+     *  return:
+     */
     public static void setStartServiceInterval(int interval)
     {
         startServiceInterval = interval;
+        SharedPreUtils.getInstance().putInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, interval);
     }
 }

@@ -2,10 +2,13 @@ package com.hsf1002.sky.xljgps.app;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import com.allen.library.RxHttpUtils;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
+import com.hsf1002.sky.xljgps.service.GpsService;
+import com.hsf1002.sky.xljgps.service.SocketService;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_URL_TEST;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_CONNCET_TIMEOUT;
@@ -26,7 +29,11 @@ public class XLJGpsApplication extends Application {
 
         Log.i(TAG, "onCreate: ...................................");
         sContext = getApplicationContext();
+
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
+
+        //GpsService.setServiceAlarm(sContext, true);
+        startService(new Intent(sContext, SocketService.class));
 
         rxjavaHttpInit();
     }

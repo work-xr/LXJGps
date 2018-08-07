@@ -1,6 +1,7 @@
 ### LXJGps
 * 使用MVP架构
 * 使用AlarmService开启定时服务
+* 使用StickyService打开socket连接
 * 使用百度SDK定位  
 * 使用RxJava访问网络
 
@@ -25,15 +26,21 @@
 主要流程：孝老平台下发获取设备相关状态信息
 
 ### 主要步骤
-1. 收到开机广播,开启定时服务
+1. 收到开机广播,同时开启定时服务和stick service(会打开socket连接,准备接收服务器数据)
 2. 每隔30分钟启动一次服务
 3. 后台服务会开始用百度进行定位
 4. 如果定位失败如超时,则停止定位服务
 5. 如果定位成功,将定位信息上传到服务器,并停止定位服务
 6. 将本地孝老平台设置号码上传到服务器
-7. 将服务器上设置的号码同步到本地
+7. 如果客户按了SOS键,则将SOS定位信息上传到服务器
+8. 对stick service的socket连接接收的数据进行解析
+> 如果是修改设备亲情号码的指令:将服务器上设置的号码同步到本地;   
+> 如果是查询位置指令，将目前定位信息上传到服务器;  
+> 如果是修改设备定位上传频率指令, 则修改定时服务的时间间隔;  
+> 如果是超出电子围栏指令,则向亲情号码发送短信;  
+> 如果是获取设备状态指令,则将终端目前设备相关信息上传到服务器;  
 
-对传递到服务器的参数data,先转成GSON格式,再排序,然后按照UTF-8编码  
+对传递到服务器的参数data,先转成JSON格式,再排序,然后按照UTF-8编码  
 ```
 ReportParamBean reportParamBean = new ReportParamBean(imei,
                 RXJAVAHTTP_COMPANY,
@@ -58,7 +65,7 @@ catch (UnsupportedEncodingException e)
     e.printStackTrace();
 }
 ```
-对传递到服务器的参数sign,需要进行MD5编码  
+对传递到服务器的参数sign,需要进行MD5编码, 服务器端会用同样步骤生成sign, 和本地传递过去的sign进行对比, 以确认数据在网络传输过程中是否被修改    
 ```
 sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
 ```
@@ -77,7 +84,6 @@ company是客户名字,每个项目不一样
 `{"success":0,"imei":"867400020316620","time":"20180802104641"}`  
 可能是IMEI没有入库, 需要第三方协助入库操作
 
-
 #### 问题1 自启动失败-接收不到BOOT_COMPLETED广播可能的原因  
 1. BOOT_COMPLETED对应的action和uses-permission没有一起添加
 2. 应用安装到了sd卡内，安装在sd卡内的应用是收不到BOOT_COMPLETED广播的
@@ -89,7 +95,7 @@ Android3.1之后，系统为了加强了安全性控制，应用程序安装后�
 存在一种例外，就是应用程序被adb push you.apk /system/app/下是会自动启动的，不处于stopped状态  
 
 #### 问题2 通过GPS基站或者Wifi MAC地址无法定位成功
-不管是GPS基站或者Wifi MAC地址,都需要连接谷歌服务器获取定位信息,由于众所周知的原因,目前无法实现
+不管是基站或者Wifi MAC地址,都需要连接谷歌服务器获取定位信息,由于众所周知的原因,目前无法实现; 现在方案是内置百度SDK, 百度内部已经实现了这三种定位方式,不过我们仅用基站网络(GPS不仅耗电,且与其性能有直接关系,暂不采用)来实现定位功能
 
 #### 问题3 百度SDK定位功能, 申请KEY需提供APK签名文件JKS的HASH值
 1. 常用的android的签名工具有:jarsigner 和apksigner。jarsigner使用keystore文件，apksigner使用pk8+x509.pem,
@@ -180,15 +186,21 @@ java -Djava.library.path=. -jar signapk.jar platform.x509.pem platform.pk8 app-r
 如果报错Exception in thread "main" java.lang.UnsatisfiedLinkError: no conscrypt_openjdk_jni in java.library.path  
 需要把./linux-x86/lib64/libconscrypt_openjdk_jni.so 拷贝过来
 ```
-* Android 7.0 引入一项新的应用签名方案 APK Signature Scheme v2，它能提供更快的应用安装时间和更多针对未授权 APK 文件更改的保护; 在Generated Signed APK 这一步, 单独选择V1(jar Signature), 或者和V2(full APK Signature)一起选择, 如果单独选择V2则会报错, 也可以在build.gradle中禁止掉V2签名方式;   
+* Android 7.0 引入一项新的应用签名方案 APK Signature Scheme v2，它能提供更快的应用安装时间和更多针对未授权 APK 文件更改的保护; 在Generated Signed APK 这一步, 单独选择V1(jar Signature), 或者和V2(full APK Signature)一起选择, 如果单独选择V2则会报错, 也可以在build.gradle中添加`v2SigningEnabled false`禁止掉V2签名方式;   
 ```
 signingConfigs{
     releaseConfig{
         keyAlias 'key'
         keyPassword '123456'
-        storeFile file('/home/workspace1/workplace/android/common.jks')
+        storeFile file('/home/workspace1/workplace/android/gps.jks')
         storePassword '123456'
         v2SigningEnabled false
+```
+
+#### 问题7 百度定位只有第一次成功,后面一直失败
+失败码是505,AK有误,需保证应用的AK正确无误,而AK只与包名和JKS文件的SHA1有关(AK 申请地址: http://lbsyun.baidu.com/apiconsole/key ), 获取APK的签名文件SHA1方法:  
+```
+keytool -list -keystore gps.jks
 ```
 
 ### HTTP 协议基础
@@ -219,6 +231,7 @@ form的enctype属性为编码方式，常用有两种：application/x-www-form-u
 当action为get时候，浏览器用x-www-form-urlencoded的编码方式把form数据转换成一个字串（name1=value1& amp; amp;name2=value2...），然后把这个字串append到url后面，用?分割，加载这个新的url。当action为post时候，浏览器把form数据封装到http body中，然后发送到server
 
 如果没有type=file，用默认的application/x-www-form-urlencoded就可以了。但是如果有 type=file的话，就要用到multipart/form-data了
+
 #### GET和POST传输长度的误区
 由于使用GET方法提交数据时，数据会以&符号作为分隔符的形式，在URL后面添加需要提交的参数，浏览器地址栏输入的参数是有限的，而POST不用再地址栏输入，所以POST就比GET可以提交更多的数据? HTTP协议明确地指出，HTTP头和Body都没有长度的要求。而对于URL长度上的限制, 主要是浏览器和服务器, 出于安全, 稳定, 性能的考虑做出的限制; 在HTTP规范中，没有对URL的长度和传输的数据大小进行限制。但是在实际开发过程中，对于GET特定的浏览器和服务器对URL的长度有限制。在使用GET请求时，传输数据会受到URL长度的限制。对于POST，由于不是URL传值，理论上是不会受限制的，但是实际上各个服务器会规定对POST提交数据大小进行限制，Apache、IIS都有各自的配置. HTTP没有要求，如果Method是POST数据就要放在BODY中, 也没有要求，如果Method是GET，数据（参数）就一定要放在URL中而不能放在BODY中  
 
@@ -235,7 +248,6 @@ form的enctype属性为编码方式，常用有两种：application/x-www-form-u
 ```
 相当于Content-Type:application/octet-stream,从字面意思得知，只可以上传二进制数据，通常用来上传文件，由于没有键值，所以，一次只能上传一个文件
 ```
-
 
 ### 信息摘要技术和算法
 信息摘要算法来源于CRC算法，最初是用来验证数据完整性，即我们常见的奇偶校验码、循环冗余校验，CRC比这些算法都要早，MD算法比SHA算法早，SHA算法是对MD算法的改进。再后来则发展出了可以带有密码的信息摘要算法-MAC算法. 消息摘要算法的主要特征是加密过程不需要密钥，并且经过加密的数据无法被解密，只有输入相同的明文数据经过相同的消息摘要算法才能得到相同的密文  

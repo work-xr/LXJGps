@@ -12,7 +12,7 @@ import io.reactivex.disposables.Disposable;
  * Created by hefeng on 18-6-15.
  */
 
-
+@Deprecated
 public abstract class RxObserver<T> extends BaseDataObserver<T> {
 
         public RxObserver() {

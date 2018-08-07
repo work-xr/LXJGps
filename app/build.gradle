@@ -10,12 +10,12 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-
+// key0, sky, xr, xr, sz, gd, cn
     signingConfigs{
         releaseConfig{
-            keyAlias 'key'
+            keyAlias 'key0'
             keyPassword '123456'
-            storeFile file('/home/workspace1/workplace/android/common.jks')
+            storeFile file('/home/workspace1/workplace/android/gps.jks')
             storePassword '123456'
             v2SigningEnabled false
         }

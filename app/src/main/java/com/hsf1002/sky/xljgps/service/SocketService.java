@@ -48,9 +48,16 @@ public class SocketService extends Service {
 
     private static final String TAG = "SocketService";
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "onCreate: ");
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind: ");
         return null;
     }
 
@@ -79,7 +86,7 @@ public class SocketService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-3 上午10:00
-    *  desc:    接收远程服务器的socket请求
+    *  desc:    基于TCP协议连接远程服务器的socket
     *  param:
     *  return:
     */
@@ -88,11 +95,12 @@ public class SocketService extends Service {
         Socket socket = null;
 
         try {
-            socket = new Socket("192.168.1.32", 1989);
+            socket = new Socket("192.168.100.62", 8080);
         }
         catch (IOException e)
         {
             e.printStackTrace();
+            return;
         }
 
         boolean isConnected = socket.isConnected();
@@ -154,20 +162,6 @@ public class SocketService extends Service {
                     socket.close();
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-            }
-        }
-        else {
-            Log.d(TAG, "connectServer: connected to server failed.");
-
-            while (true)
-            {
-                isConnected = socket.isConnected();
-
-                if (isConnected)
-                {
-                    Log.d(TAG, "connectServer: reconnected to server successfully.");
-                    break;
                 }
             }
         }

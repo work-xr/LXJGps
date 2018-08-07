@@ -24,6 +24,7 @@ public class SosReceiver extends BroadcastReceiver {
 
         Log.d(TAG, "onReceive: action = " + action);
 
+        // 用户按了SOS键之后, 会发送此广播, 本应用收到广播后上报SOS信息
         if (action.equals(ANCTION_SOS_REPORT_POSITION))
         {
             RxjavaHttpModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_SOS, null);

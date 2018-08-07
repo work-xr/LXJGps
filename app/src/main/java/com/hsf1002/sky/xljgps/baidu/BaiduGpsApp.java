@@ -15,6 +15,10 @@ import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 
 import static android.content.Context.WIFI_SERVICE;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_DEFAULT_LANTITUDE;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_DEFAULT_LOCTYPE;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_DEFAULT_POSITIONTYPE;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_GPS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_LBS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_WIFI;
@@ -31,7 +35,7 @@ public class BaiduGpsApp {
     private LocationClientOption option;
     private static BaiduGpsParam sBaiduGpsMsgBean;
 
-    BaiduGpsApp()
+    static
     {
         sBaiduGpsMsgBean = new BaiduGpsParam();
         setBaiduGpsStatus(/*null,*/ null, null, null, null);
@@ -39,14 +43,21 @@ public class BaiduGpsApp {
 
     public static BaiduGpsApp getInstance()
     {
-        return Holder.sInstance;
+        return Holder.instance;
     }
 
     private static class Holder
     {
-        private static final BaiduGpsApp sInstance = new BaiduGpsApp();
+        private static final BaiduGpsApp instance = new BaiduGpsApp();
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-7 上午9:30
+    *  desc:    初始化SDK, listener, client
+    *  param:
+    *  return:
+    */
     public void initBaiduSDK(Context context)
     {
         Log.d(TAG, "initBaiduSDK: ");
@@ -55,12 +66,19 @@ public class BaiduGpsApp {
         initLocation();
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-7 上午9:31
+    *  desc:    初始化配置
+    *  param:
+    *  return:
+    */
     private void initLocation()
     {
-        Log.d(TAG, "initLocation: ");
+        Log.d(TAG, "initOption: ");
         option = new LocationClientOption();
         // LocationMode.Hight_Accuracy：高精度； LocationMode. Battery_Saving：低功耗； LocationMode. Device_Sensors：仅使用设备；
-        option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        option.setLocationMode(LocationClientOption.LocationMode.Battery_Saving);
         //可选，设置返回经纬度坐标类型，默认gcj02, gcj02：国测局坐标； d09ll：百度经纬度坐标； bd09：百度墨卡托坐标； 海外地区定位，无需设置坐标类型，统一返回wgs84类型坐标
         //option.setCoorType("bd09ll");
         option.setIsNeedAddress(true);
@@ -76,6 +94,13 @@ public class BaiduGpsApp {
         client.setLocOption(option);
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-7 上午9:31
+    *  desc:    启动定位
+    *  param:
+    *  return:
+    */
     public void startBaiduGps()
     {
         Log.d(TAG, "startBaiduGps: isStarted = " + client.isStarted());
@@ -86,6 +111,13 @@ public class BaiduGpsApp {
         }
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-7 上午9:31
+    *  desc:    停止定位
+    *  param:
+    *  return:
+    */
     public void stopBaiduGps() {
         Log.d(TAG, "stopBaiduGps: isStarted = " + client.isStarted());
         if (client.isStarted()) 
@@ -95,6 +127,13 @@ public class BaiduGpsApp {
         }
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-7 上午9:32
+    *  desc:    重新启动定位,暂时不会调用
+    *  param:
+    *  return:
+    */
     public void restartBaiduGps()
     {
         Log.d(TAG, "restartBaiduGps: ");
@@ -102,33 +141,57 @@ public class BaiduGpsApp {
         client.restart();
     }
 
+    /**
+     *  author:  hefeng
+     *  created: 18-8-7 上午9:32
+     *  desc:    设置每次定位时间间隔,暂时不会调用
+     *  param:
+     *  return:
+     */
     public void setBaiduGpsScanSpan(int span)
     {
         Log.d(TAG, "setBaiduGpsScanSpan: ");
         option.setScanSpan(span);
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-6 上午9:58
+    *  desc:
+    * http://lbsyun.baidu.com/index.php?title=android-locsdk/guide/addition-func/error-code
+    * bdLocation.getLocType()
+    * 若返回值是162~167，请将错误码、IMEI、定位唯一标识（自v7.2版本起，通过BDLocation.getLocationID方法获取）和定位时间反馈至邮箱loc-bugs@baidu.com
+    *   61: GPS success
+    *   62: 无法获取有效定位依据，定位失败，请检查运营商网络或者WiFi网络是否正常开启，尝试重新请求定位
+    *   63: 网络异常，没有成功向服务器发起请求，请确认当前测试手机网络是否通畅，尝试重新请求定位
+    *   161: Network Success
+    *   162: 请求串密文解析失败，一般是由于客户端SO文件加载失败造成，请严格参照开发指南或demo开发，放入对应SO文件
+    *   167: 服务端定位失败，请您检查是否禁用获取位置信息权限，尝试重新请求定位
+    *   505: AK不存在或者非法，请按照说明文档重新申请AK(1. 将申请的AK写入AndroidMenifest.xml 2. AS->Build中Generated Signed APK再进行安装)
+    *  在应用内部, 断网, 还是会取到上次联网时的定位, 退出应用再进入则是断网 63 状态, 此时联网则可正常定位
+    */
     public class MyLocationLister extends BDAbstractLocationListener
     {
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
             String latitude = String.valueOf(bdLocation.getLatitude());
             String longitude = String.valueOf(bdLocation.getLongitude());
-            String locationType = BAIDU_GPS_LOCATION_TYPE_GPS;
-            String locType = getLocType(bdLocation.getLocType());// 1->"Baidu" 2->"GaoDe";
+            String locationType = BAIDU_GPS_LOCATION_TYPE_LBS;
+            int locType = bdLocation.getLocType();
+            String locTypeStr = "1";        // 1->"Baidu" 2->"GaoDe";
             StringBuilder address = new StringBuilder();
 
             address.append(bdLocation.getCountry()).append(bdLocation.getCity()).append(bdLocation.getDistrict()).append(bdLocation.getStreet());
 
-            if (bdLocation.getLocType() == BDLocation.TypeGpsLocation)
+            if (locType == BDLocation.TypeGpsLocation)
             {
                 locationType = BAIDU_GPS_LOCATION_TYPE_GPS;
             }
-            else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) 
+            else if (locType == BDLocation.TypeNetWorkLocation)
             {
-                // wifi or ds
                 WifiManager wifiManager = (WifiManager)XLJGpsApplication.getAppContext().getApplicationContext().getSystemService(WIFI_SERVICE);
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+
                 if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED && wifiInfo != null)
                 {
                     String ssid = wifiInfo.getSSID();
@@ -138,38 +201,24 @@ public class BaiduGpsApp {
                     {
                         locationType = BAIDU_GPS_LOCATION_TYPE_WIFI;
                     }
-                    else
-                    {
-                        locationType = BAIDU_GPS_LOCATION_TYPE_LBS;
-                    }
+                }
+                else
+                {
+                    locationType = BAIDU_GPS_LOCATION_TYPE_LBS;
                 }
             }
             else
             {
                 locationType = "null";
             }
-            
-            //currentTime = System.currentTimeMillis();
-            //Log.d(TAG, "onReceiveLocation: startTimie = " + startTime + ", currentTime = " + currentTime);
-            Log.d(TAG, "onReceiveLocation: latitude = " + latitude + ", longitude = " + longitude + ", address = " + address.toString() + ", locationType = " + locationType + ", getLocType = " + locType);
-/*
-* http://lbsyun.baidu.com/index.php?title=android-locsdk/guide/addition-func/error-code
-*若返回值是162~167，请将错误码、IMEI、定位唯一标识（自v7.2版本起，通过BDLocation.getLocationID方法获取）和定位时间反馈至邮箱loc-bugs@baidu.com
-*           61: GPS success
-*           62: 无法获取有效定位依据，定位失败，请检查运营商网络或者WiFi网络是否正常开启，尝试重新请求定位
-*           63: 网络异常，没有成功向服务器发起请求，请确认当前测试手机网络是否通畅，尝试重新请求定位
-*           161: Network Success
-*           162: 请求串密文解析失败，一般是由于客户端SO文件加载失败造成，请严格参照开发指南或demo开发，放入对应SO文件
-*           167: 服务端定位失败，请您检查是否禁用获取位置信息权限，尝试重新请求定位
-*           505: AK不存在或者非法，请按照说明文档重新申请AK(1. 将申请的AK写入AndroidMenifest.xml 2. AS->Build中Generated Signed APK再进行安装)
-*  在应用内部, 断网, 还是会取到上次联网时的定位, 退出应用再进入则是断网 63 状态, 此时联网则可正常定位
-* */
-            if (bdLocation.getLocType() == BDLocation.TypeGpsLocation || bdLocation.getLocType() == BDLocation.TypeNetWorkLocation)
+            Log.d(TAG, "onReceiveLocation: locType = " + locType + ", latitude = " + latitude + ", longitude = " + longitude + ", address = " + address.toString() + ", locationType = " + locationType + ", getLocType = " + locType);
+
+            if (locType == BDLocation.TypeGpsLocation || locType == BDLocation.TypeNetWorkLocation)
             {
                 Log.d(TAG, "onReceiveLocation:  get location success, stop gps service");
-                setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locType, locationType);
+                setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locTypeStr, locationType);
 
-                RxjavaHttpModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_TIMING, null);
+                //RxjavaHttpModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_TIMING, null);
             }
             else
             {
@@ -189,7 +238,14 @@ public class BaiduGpsApp {
         }
     }
 
-    private void setBaiduGpsStatus(/*String address,*/ String latitude, String longitude, String locType, String position_type)
+    /**
+    *  author:  hefeng
+    *  created: 18-8-6 上午11:23
+    *  desc:    需要保证上传的参数的值不为空, 否则上传失败, 如果定位失败, 给一个默认值
+    *  param:
+    *  return:
+    */
+    private static void setBaiduGpsStatus(/*String address,*/ String latitude, String longitude, String locType, String position_type)
     {
         /*
         if (TextUtils.isEmpty(address))
@@ -203,7 +259,7 @@ public class BaiduGpsApp {
 
         if (TextUtils.isEmpty(latitude))
         {
-            sBaiduGpsMsgBean.setLatitude("22.537702");
+            sBaiduGpsMsgBean.setLatitude(BAIDU_GPS_LOCATION_DEFAULT_LANTITUDE);
         }
         else
         {
@@ -212,7 +268,7 @@ public class BaiduGpsApp {
 
         if (TextUtils.isEmpty(longitude))
         {
-            sBaiduGpsMsgBean.setLongitude("113.95717");
+            sBaiduGpsMsgBean.setLongitude(BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE);
         }
         else
         {
@@ -221,7 +277,7 @@ public class BaiduGpsApp {
 
         if (TextUtils.isEmpty(locType))
         {
-            sBaiduGpsMsgBean.setLoc_type("3");
+            sBaiduGpsMsgBean.setLoc_type(BAIDU_GPS_LOCATION_DEFAULT_LOCTYPE);
         }
         else
         {
@@ -230,7 +286,7 @@ public class BaiduGpsApp {
 
         if (TextUtils.isEmpty(position_type))
         {
-            sBaiduGpsMsgBean.setPosition_type("1");
+            sBaiduGpsMsgBean.setPosition_type(BAIDU_GPS_LOCATION_DEFAULT_POSITIONTYPE);
         }
         else
         {
@@ -238,28 +294,15 @@ public class BaiduGpsApp {
         }
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-7 上午9:32
+    *  desc:    取得当前GPS定位信息
+    *  param:
+    *  return:
+    */
     public BaiduGpsParam getBaiduGpsStatus()
     {
         return sBaiduGpsMsgBean;
-    }
-
-    private String getLocType(int type)
-    {
-        String locType = "0";
-
-        switch (type)
-        {
-            case BDLocation.TypeGpsLocation:
-                locType = "1";
-                break;
-            case BDLocation.TypeNetWorkLocation:
-                locType = "3";
-                break;
-
-            default:
-                break;
-        }
-
-        return locType;
     }
 }

@@ -28,9 +28,9 @@ public class Constant {
     public static final String RXJAVAHTTP_REPORT_POSITION = "position";
 
     public static final String RXJAVAHTTP_TYPE_DOWNLOAD = "103";
-    public static final String RXJAVAHTTP_TYPE_UPLOAD = "203";
     //public static final String RXJAVAHTTP_TYPE_REPORT = "202";
     public static final String RXJAVAHTTP_TYPE_SOS = "202";         // 是通过按SOS键上报消息
+    public static final String RXJAVAHTTP_TYPE_UPLOAD = "203";
     public static final String RXJAVAHTTP_TYPE_CURRENT = "101";     // 收到服务器指令, 实时定位后上报消息
     public static final String RXJAVAHTTP_TYPE_POWERON = "100";     // 开机上报消息
     public static final String RXJAVAHTTP_TYPE_TIMING = "201";      // 定时定位后上报消息
@@ -47,12 +47,18 @@ public class Constant {
     public static final int RXJAVAHTTP_CONNCET_TIMEOUT = 100;
 
     // 每隔多久启动一次IntentService服务来开始定位,可由服务器端通过调用setStartServiceInterval进行设置更改
-    public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
+    public static final String BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME = "baidu_gps_scan_span_interval_name";
+    public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_VALUE = 1 * 60 * 1000;
     // 每次启动百度地图服务XLJGpsService.setServiceAlarm(getApplicationContext(), true);, 如果3分钟内没有定位成功, 自动停止地图服务stopBaiduGps
     //public static final int BAIDU_GPS_FIRST_SCAN_TIME_MAX = 3 * 60 * 1000;
     public static final String BAIDU_GPS_LOCATION_TYPE_GPS = "gps";
     public static final String BAIDU_GPS_LOCATION_TYPE_LBS = "lbs";
     public static final String BAIDU_GPS_LOCATION_TYPE_WIFI = "wifi";
+
+    public static final String BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE = "113.95717";
+    public static final String BAIDU_GPS_LOCATION_DEFAULT_LANTITUDE = "22.537702";
+    public static final String BAIDU_GPS_LOCATION_DEFAULT_LOCTYPE = "1";    // 1: baidu map  2: gaode map
+    public static final String BAIDU_GPS_LOCATION_DEFAULT_POSITIONTYPE = "lbs";
 
     // 按键sos后发此广播, 收到广播后,上传信息到平台
     public static final String ANCTION_SOS_REPORT_POSITION = "action.sos.report.position";
@@ -73,7 +79,7 @@ public class Constant {
     public static final String SOS_NUM_PROPERTY_2 = "persist.sos.num2";
     public static final String SOS_NUM_PROPERTY_3 = "persist.sos.num3";
     public static final String SOS_SMS_PROPERTY_MSG = "persist.sos.msg";
-    public static final String SOS_NUM_INVALID_VALUE = "ff";
+    public static final String SOS_NUM_INVALID_VALUE = "FFFF";
 
     //public static final String SOS_SMS_PREFS_NAME = "sos_msg_prefs";
     //public static final String SOS_SMS_PREFS_MSG = "sosMsg";
@@ -94,5 +100,4 @@ public class Constant {
     public static final String RESULT_PARAM_INTERVAL = "interval";
     public static final String RESULT_PARAM_TYPE = "type";
     public static final String RESULT_PARAM_TIME = "time";
-
 }
