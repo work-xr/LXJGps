@@ -40,12 +40,6 @@ android {
         exclude 'META-INF/rxjava.properties'
     }
 
-    sourceSets{
-        main{
-            jniLibs.srcDir 'libs'
-            jni.srcDirs = []
-        }
-    }
 
     String SDK_DIR = System.getenv("ANDROID_SDK_HOME")
     if(SDK_DIR == null) {

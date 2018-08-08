@@ -13,11 +13,11 @@ public class SosPositionParam extends BaiduGpsParam {
     //private String manufactory;
     //private String model;
     private String company;
-    private String type;
+    private int type;       // 202
     private String time;
-    private String power;
+    private int power;
 
-    public SosPositionParam(String imei, /*String manufactory, String model, */String company, String type, String position_type, String time, String loc_type, String longitude, String lantitude, String power) {
+    public SosPositionParam(String imei, /*String manufactory, String model, */String company, int type, String position_type, String time, String loc_type, String longitude, String lantitude, int power) {
         super(position_type, loc_type, longitude, lantitude);
 
         this.imei = imei;

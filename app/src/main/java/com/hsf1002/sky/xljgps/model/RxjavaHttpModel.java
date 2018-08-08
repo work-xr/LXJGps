@@ -10,9 +10,9 @@ import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.http.ApiService;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 import com.hsf1002.sky.xljgps.params.DownloadRelationNumberParam;
-import com.hsf1002.sky.xljgps.params.GetStatusInfoParam;
+import com.hsf1002.sky.xljgps.params.WriteStatusParam;
 import com.hsf1002.sky.xljgps.params.ModifyIntervalParam;
-import com.hsf1002.sky.xljgps.params.OuterElectricBarParam;
+import com.hsf1002.sky.xljgps.params.WriteOuterElectricParam;
 import com.hsf1002.sky.xljgps.params.SosPositionParam;
 import com.hsf1002.sky.xljgps.params.UploadRelationNumberParam;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
@@ -64,7 +64,7 @@ public class RxjavaHttpModel implements BaseModel {
         //String model = SprdCommonUtils.getInstance().getModel();
         String data = null;
         String sign = null;
-
+/*
         DownloadRelationNumberParam receiveParam = new DownloadRelationNumberParam(
                 imei,
                 //manufactory,
@@ -73,7 +73,7 @@ public class RxjavaHttpModel implements BaseModel {
                 RXJAVAHTTP_TYPE_DOWNLOAD,
                 time);
         String gsonString = DownloadRelationNumberParam.getReceiveParamGson(receiveParam);
-        Log.d(TAG, "downloadRelationNumber: imei = " + imei + ", time = " + time + ", gson = " + gsonString);
+        Log.i(TAG, "downloadRelationNumber: imei = " + imei + ", time = " + time + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -86,7 +86,7 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "downloadRelationNumber: data = " + data + ", sign = " + sign);
+        Log.i(TAG, "downloadRelationNumber: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
@@ -99,7 +99,7 @@ public class RxjavaHttpModel implements BaseModel {
                 .subscribe(new CommonObserver<ResultMsg<RelationNumberMsg>>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "downloadRelationNumber onError: s = " + s);
+                        Log.i(TAG, "downloadRelationNumber onError: s = " + s);
                         if (listener != null) {
                             listener.downloadRelationNumberFailed(s);
                         }
@@ -107,12 +107,12 @@ public class RxjavaHttpModel implements BaseModel {
 
                     @Override
                     protected void onSuccess(ResultMsg<RelationNumberMsg> receiveMsg) {
-                        Log.d(TAG, "downloadRelationNumber onSuccess: receiveMsg = " + receiveMsg);
+                        Log.i(TAG, "downloadRelationNumber onSuccess: receiveMsg = " + receiveMsg);
                         if (listener != null) {
                             listener.downloadRelationNumberSuccess(receiveMsg);
                         }
                     }
-                });
+                });*/
     }
 
     /**
@@ -144,7 +144,7 @@ public class RxjavaHttpModel implements BaseModel {
                 sosPhoneNames,
                 time);
         String gsonString = UploadRelationNumberParam.getSendParamGson(sendParam);
-        Log.d(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
+        Log.i(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -158,7 +158,7 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "uploadRelationNumber: data = " + data + ", encodedSosPhoneNames = " + encodedSosPhoneNames + ", sign = " + sign);
+        Log.i(TAG, "uploadRelationNumber: data = " + data + ", encodedSosPhoneNames = " + encodedSosPhoneNames + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
@@ -171,7 +171,7 @@ public class RxjavaHttpModel implements BaseModel {
                 .subscribe(new CommonObserver<ResultMsg>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "uploadRelationNumber onError: s = " + s);
+                        Log.i(TAG, "uploadRelationNumber onError: s = " + s);
                         if (listener != null) {
                             listener.uploadRelationNumberFailed(s);
                         }
@@ -179,7 +179,7 @@ public class RxjavaHttpModel implements BaseModel {
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
-                        Log.d(TAG, "uploadRelationNumber onSuccess: resultMsg= " + resultMsg);
+                        Log.i(TAG, "uploadRelationNumber onSuccess: resultMsg= " + resultMsg);
                         if (listener != null) {
                             listener.uploadRelationNumberSuccess(resultMsg);
                         }
@@ -200,7 +200,7 @@ public class RxjavaHttpModel implements BaseModel {
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         //String manufactory = SprdCommonUtils.getInstance().getManufactory();
         //String model = SprdCommonUtils.getInstance().getModel();
-        String capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
+        int capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
         String data = null;
         String sign = null;
 
@@ -224,7 +224,7 @@ public class RxjavaHttpModel implements BaseModel {
                 );
 
         String gsonString = SosPositionParam.getReportParamGson(reportParamBean);
-        Log.d(TAG, "reportSosPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
+        Log.i(TAG, "reportSosPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -237,7 +237,7 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "reportSosPosition: data = " + data + ", sign = " + sign);
+        Log.i(TAG, "reportSosPosition: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
@@ -250,7 +250,7 @@ public class RxjavaHttpModel implements BaseModel {
                 .subscribe(new CommonObserver<ResultMsg>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "reportSosPosition onError: s = " + s);
+                        Log.i(TAG, "reportSosPosition onError: s = " + s);
                         if (listener != null) {
                             listener.reportSosPositionFailed(s);
                         }
@@ -258,7 +258,7 @@ public class RxjavaHttpModel implements BaseModel {
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
-                        Log.d(TAG, "reportSosPosition onSuccess: resultMsg = " + resultMsg);
+                        Log.i(TAG, "reportSosPosition onSuccess: resultMsg = " + resultMsg);
                         if (listener != null) {
                             listener.reportSosPositionSuccess(resultMsg);
                         }
@@ -274,12 +274,12 @@ public class RxjavaHttpModel implements BaseModel {
     *  return:
     */
     @Override
-    public void reportPosition(String type, final RxjavaHttpPresenter.OnReportListener listener) {
+    public void reportPosition(int type, final RxjavaHttpPresenter.OnReportListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         //String manufactory = SprdCommonUtils.getInstance().getManufactory();
         //String model = SprdCommonUtils.getInstance().getModel();
-        String capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
+        int capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
         String data = null;
         String sign = null;
 
@@ -304,7 +304,7 @@ public class RxjavaHttpModel implements BaseModel {
         );
 
         String gsonString = SosPositionParam.getReportParamGson(reportParamBean);
-        Log.d(TAG, "reportPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
+        Log.i(TAG, "reportPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -317,7 +317,7 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "reportPosition: data = " + data + ", sign = " + sign);
+        Log.i(TAG, "reportPosition: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
@@ -329,7 +329,7 @@ public class RxjavaHttpModel implements BaseModel {
                 .subscribe(new CommonObserver<ResultMsg>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "reportPosition onError: s = " + s);
+                        Log.i(TAG, "reportPosition onError: s = " + s);
                         if (listener != null) {
                             listener.reportSosPositionFailed(s);
                         }
@@ -337,7 +337,7 @@ public class RxjavaHttpModel implements BaseModel {
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
-                        Log.d(TAG, "reportPosition onSuccess: resultMsg = " + resultMsg);
+                        Log.i(TAG, "reportPosition onSuccess: resultMsg = " + resultMsg);
                         if (listener != null) {
                             listener.reportSosPositionSuccess(resultMsg);
                         }
@@ -358,14 +358,14 @@ public class RxjavaHttpModel implements BaseModel {
         String interval = "";
         String data = null;
         String sign = null;
-
+/*
         ModifyIntervalParam modifyIntervalParam = new ModifyIntervalParam(
                 interval,
                 time,
                 RXJAVAHTTP_TYPE_INTERVAL);
 
         String gsonString = ModifyIntervalParam.getReportParamGson(modifyIntervalParam);
-        Log.d(TAG, "reportModifyInterval: time = " + time + ", interval = " + interval + ", gson = " + gsonString);
+        Log.i(TAG, "reportModifyInterval: time = " + time + ", interval = " + interval + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -378,7 +378,7 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "reportModifyInterval: data = " + data + ", sign = " + sign);
+        Log.i(TAG, "reportModifyInterval: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
@@ -391,7 +391,7 @@ public class RxjavaHttpModel implements BaseModel {
                 .subscribe(new CommonObserver<ResultMsg>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "reportModifyInterval onError: s = " + s);
+                        Log.i(TAG, "reportModifyInterval onError: s = " + s);
                         if (listener != null) {
                             listener.reportModifyIntervalFailed(s);
                         }
@@ -399,12 +399,12 @@ public class RxjavaHttpModel implements BaseModel {
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
-                        Log.d(TAG, "reportModifyInterval onSuccess: resultMsg = " + resultMsg);
+                        Log.i(TAG, "reportModifyInterval onSuccess: resultMsg = " + resultMsg);
                         if (listener != null) {
                             listener.reportModifyIntervalSuccess(resultMsg);
                         }
                     }
-                });
+                });*/
     }
 
     /**
@@ -420,14 +420,14 @@ public class RxjavaHttpModel implements BaseModel {
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         String data = null;
         String sign = null;
-
-        OuterElectricBarParam outerElectricBarParam = new OuterElectricBarParam(
+/*
+        WriteOuterElectricParam outerElectricBarParam = new WriteOuterElectricParam(
                 imei,
                 time,
                 RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR);
 
-        String gsonString = OuterElectricBarParam.getReportParamGson(outerElectricBarParam);
-        Log.d(TAG, "notifyOuterElectricBar: time = " + time + ", imei = " + imei + ", gson = " + gsonString);
+        String gsonString = WriteOuterElectricParam.getReportParamGson(outerElectricBarParam);
+        Log.i(TAG, "notifyOuterElectricBar: time = " + time + ", imei = " + imei + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -440,7 +440,7 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "notifyOuterElectricBar: data = " + data + ", sign = " + sign);
+        Log.i(TAG, "notifyOuterElectricBar: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
@@ -453,7 +453,7 @@ public class RxjavaHttpModel implements BaseModel {
                 .subscribe(new CommonObserver<ResultMsg>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "notifyOuterElectricBar onError: s = " + s);
+                        Log.i(TAG, "notifyOuterElectricBar onError: s = " + s);
                         if (listener != null) {
                             listener.notifyOuterElectricBarFailed(s);
                         }
@@ -461,7 +461,7 @@ public class RxjavaHttpModel implements BaseModel {
 
                     @Override
                     protected void onSuccess(ResultMsg resultMsg) {
-                        Log.d(TAG, "notifyOuterElectricBar onSuccess: resultMsg = " + resultMsg);
+                        Log.i(TAG, "notifyOuterElectricBar onSuccess: resultMsg = " + resultMsg);
                         if (listener != null) {
                             listener.notifyOuterElectricBarSuccess(resultMsg);
                         }
@@ -469,7 +469,7 @@ public class RxjavaHttpModel implements BaseModel {
                         // 短信通知亲情号码
                         SprdCommonUtils.getInstance().sendSosSms();
                     }
-                });
+                });*/
     }
 
     /**
@@ -485,13 +485,13 @@ public class RxjavaHttpModel implements BaseModel {
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         String data = null;
         String sign = null;
-
-        GetStatusInfoParam statusInfoParam = new GetStatusInfoParam(
+/*
+        WriteStatusParam statusInfoParam = new WriteStatusParam(
                 imei,
                 time,
                 RXJAVAHTTP_TYPE_GET_STATUS_INFO);
-        String gsonString = GetStatusInfoParam.getReportParamGson(statusInfoParam);
-        Log.d(TAG, "getStatusInfo: time = " + time + ", imei = " + imei + ", gson = " + gsonString);
+        String gsonString = WriteStatusParam.getReportParamGson(statusInfoParam);
+        Log.i(TAG, "getStatusInfo: time = " + time + ", imei = " + imei + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
@@ -504,7 +504,7 @@ public class RxjavaHttpModel implements BaseModel {
         }
 
         sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
-        Log.d(TAG, "getStatusInfo: data = " + data + ", sign = " + sign);
+        Log.i(TAG, "getStatusInfo: data = " + data + ", sign = " + sign);
 
         RxHttpUtils.getSInstance()
                 .baseUrl(RXJAVAHTTP_BASE_URL_TEST)
@@ -517,7 +517,7 @@ public class RxjavaHttpModel implements BaseModel {
                 .subscribe(new CommonObserver<ResultMsg<StatusInfoSendMsg>>() {
                     @Override
                     protected void onError(String s) {
-                        Log.d(TAG, "getStatusInfo onError: s = " + s);
+                        Log.i(TAG, "getStatusInfo onError: s = " + s);
                         if (listener != null) {
                             listener.getStatusInfoFailed(s);
                         }
@@ -525,12 +525,12 @@ public class RxjavaHttpModel implements BaseModel {
 
                     @Override
                     protected void onSuccess(ResultMsg<StatusInfoSendMsg> statusInfoMsgResultMsg) {
-                        Log.d(TAG, "getStatusInfo onSuccess: result = " + statusInfoMsgResultMsg);
+                        Log.i(TAG, "getStatusInfo onSuccess: result = " + statusInfoMsgResultMsg);
                         if (listener != null) {
                             listener.getStatusInfoSuccess(statusInfoMsgResultMsg);
                         }
                     }
-                });
+                });*/
     }
 
     /**
@@ -561,7 +561,7 @@ public class RxjavaHttpModel implements BaseModel {
         {
             String param = getOneParam(params, paramLen + i);
             paramLen += param.length();
-            //Log.d(TAG, "getSortedParam: param = " + param + ", param.length() = " + param.length());
+            //Log.i(TAG, "getSortedParam: param = " + param + ", param.length() = " + param.length());
             listString.add(param);
         }
 
@@ -581,7 +581,7 @@ public class RxjavaHttpModel implements BaseModel {
 
         for (int i=0; i<length; ++i)
         {
-            //Log.d(TAG, "geSortedParam: listString[" + i + "]" + listString.get(i).toString());
+            //Log.i(TAG, "geSortedParam: listString[" + i + "]" + listString.get(i).toString());
             sortedParam.append(listString.get(i).toString());
 
             if (i != length - 1)
@@ -591,7 +591,7 @@ public class RxjavaHttpModel implements BaseModel {
         }
         sortedParam.append("}");
 
-        Log.d(TAG, "getSortedParam: after sorted sortedParam = " + sortedParam);
+        Log.i(TAG, "getSortedParam: after sorted sortedParam = " + sortedParam);
 
         return sortedParam.toString();
     }
@@ -614,7 +614,7 @@ public class RxjavaHttpModel implements BaseModel {
         endPos = params.indexOf("\"", endPos + 1 );
         endPos = params.indexOf("\"", endPos + 1);
 
-        //Log.d(TAG, "getOneParam: startPos = " + startPos + ", endPos = " + endPos);
+        //Log.i(TAG, "getOneParam: startPos = " + startPos + ", endPos = " + endPos);
         try {
             param = params.substring(startPos, endPos + 1);
         }
@@ -637,9 +637,9 @@ public class RxjavaHttpModel implements BaseModel {
         HashMap<String, String> hashMap = new HashMap<String, String>();
         hashMap.put(key, value);
 
-        /*Log.d(TAG, "getOneParam: key = " + key + ", value = " + value);
-        Log.d(TAG, "getOneParam: key = " + hashMap.keySet() + ", value = " + hashMap.get(key));
-        Log.d(TAG, "getOneParam: hashMap = " + hashMap);
+        /*Log.i(TAG, "getOneParam: key = " + key + ", value = " + value);
+        Log.i(TAG, "getOneParam: key = " + hashMap.keySet() + ", value = " + hashMap.get(key));
+        Log.i(TAG, "getOneParam: hashMap = " + hashMap);
 */
         return param;
     }
@@ -656,7 +656,7 @@ public class RxjavaHttpModel implements BaseModel {
 
     /*
         public void getUserInfo() {
-            Log.d(TAG, "getUserInfo: ");
+            Log.i(TAG, "getUserInfo: ");
 
             RxHttpUtils.getSInstance()
                     .baseUrl(RXJAVAHTTP_BASE_URL_DOUBAN)
@@ -666,19 +666,19 @@ public class RxjavaHttpModel implements BaseModel {
                     .subscribe(new CommonObserver<BookBean>() {
                         @Override
                         protected void onError(String s) {
-                            Log.d(TAG, "onError: s = " + s);
+                            Log.i(TAG, "onError: s = " + s);
                         }
 
                         @Override
                         protected void onSuccess(BookBean bookBean) {
-                            Log.d(TAG, "onSuccess: book = " + bookBean);
+                            Log.i(TAG, "onSuccess: book = " + bookBean);
                         }
                     });
 
         }
 
         public void getPersonList() {
-            Log.d(TAG, "getPersonList: ");
+            Log.i(TAG, "getPersonList: ");
 
             RxHttpUtils.getSInstance()
                     .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
@@ -688,18 +688,18 @@ public class RxjavaHttpModel implements BaseModel {
                     .subscribe(new CommonObserver<List<PersonBean>>() {
                         @Override
                         protected void onError(String s) {
-                            Log.d(TAG, "onError: s = " + s);
+                            Log.i(TAG, "onError: s = " + s);
                         }
 
                         @Override
                         protected void onSuccess(List<PersonBean> personBeans) {
-                            Log.d(TAG, "onSuccess: personBeans = " + personBeans);
+                            Log.i(TAG, "onSuccess: personBeans = " + personBeans);
                         }
                     });
         }
 
         public void getPersonById(Integer id) {
-            Log.d(TAG, "getPersonById: ");
+            Log.i(TAG, "getPersonById: ");
 
             RxHttpUtils.getSInstance()
                     .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
@@ -709,18 +709,18 @@ public class RxjavaHttpModel implements BaseModel {
                     .subscribe(new CommonObserver<PersonBean>() {
                         @Override
                         protected void onError(String s) {
-                            Log.d(TAG, "onError: s = " + s);
+                            Log.i(TAG, "onError: s = " + s);
                         }
 
                         @Override
                         protected void onSuccess(PersonBean personBean) {
-                            Log.d(TAG, "onSuccess: personBean = " + personBean);
+                            Log.i(TAG, "onSuccess: personBean = " + personBean);
                         }
                     });
         }
 
         public void addPerson(String name, Integer age) {
-            Log.d(TAG, "addPerson: ");
+            Log.i(TAG, "addPerson: ");
 
             RxHttpUtils.getSInstance()
                     .baseUrl(RXJAVAHTTP_BASE_PERSON_URL)
@@ -730,12 +730,12 @@ public class RxjavaHttpModel implements BaseModel {
                     .subscribe(new CommonObserver<PersonBean>() {
                         @Override
                         protected void onError(String s) {
-                            Log.d(TAG, "onError: s = " + s);
+                            Log.i(TAG, "onError: s = " + s);
                         }
 
                         @Override
                         protected void onSuccess(PersonBean personBean) {
-                            Log.d(TAG, "onSuccess: personBean = " + personBean);
+                            Log.i(TAG, "onSuccess: personBean = " + personBean);
                         }
                     });
         }

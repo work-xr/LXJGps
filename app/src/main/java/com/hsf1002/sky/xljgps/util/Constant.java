@@ -26,7 +26,8 @@ public class Constant {
     public static final String RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM = "familyNumber";
     public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "updatePhone";
     public static final String RXJAVAHTTP_REPORT_POSITION = "position";
-
+    public static final String RXJAVAHTTP_IMEI = "867400020316620";
+/*
     public static final String RXJAVAHTTP_TYPE_DOWNLOAD = "103";
     //public static final String RXJAVAHTTP_TYPE_REPORT = "202";
     public static final String RXJAVAHTTP_TYPE_SOS = "202";         // 是通过按SOS键上报消息
@@ -37,7 +38,17 @@ public class Constant {
     public static final String RXJAVAHTTP_TYPE_INTERVAL = "106";                // 代表设置定位上传频率
     public static final String RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR = "107";      //代表电子围栏超出通知
     public static final String RXJAVAHTTP_TYPE_GET_STATUS_INFO = "108";         //代表获取设备状态信息
-
+*/
+    public static final int RXJAVAHTTP_TYPE_BEATHEART = 301;
+    public static final int RXJAVAHTTP_TYPE_DOWNLOAD = 103;
+    public static final int RXJAVAHTTP_TYPE_SOS = 202;         // 是通过按SOS键上报消息
+    public static final int RXJAVAHTTP_TYPE_UPLOAD = 203;
+    public static final int RXJAVAHTTP_TYPE_CURRENT = 101;     // 收到服务器指令, 实时定位后上报消息
+    public static final int RXJAVAHTTP_TYPE_POWERON = 100;     // 开机上报消息
+    public static final int RXJAVAHTTP_TYPE_TIMING = 201;      // 定时定位后上报消息
+    public static final int RXJAVAHTTP_TYPE_INTERVAL = 106;                // 代表设置定位上传频率
+    public static final int RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR = 107;      //代表电子围栏超出通知
+    public static final int RXJAVAHTTP_TYPE_GET_STATUS_INFO = 108;         //代表获取设备状态信息
     public static final String RXJAVAHTTP_COMPANY = "xiaolajiao";
     public static final String RXJAVAHTTP_SECRET_CODE = "ab2796145acdf";//"8s6HiyY0yGCLeZp5";     //ab2342145acdf;    // iETOECQ9kiJw75AZ
     public static final String RXJAVAHTTP_ENCODE_TYPE = "UTF-8";
@@ -55,7 +66,7 @@ public class Constant {
     public static final String BAIDU_GPS_LOCATION_TYPE_LBS = "lbs";
     public static final String BAIDU_GPS_LOCATION_TYPE_WIFI = "wifi";
 
-    public static final String BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE = "113.95717";
+    public static final String BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE = "113.957178";
     public static final String BAIDU_GPS_LOCATION_DEFAULT_LANTITUDE = "22.537702";
     public static final String BAIDU_GPS_LOCATION_DEFAULT_LOCTYPE = "1";    // 1: baidu map  2: gaode map
     public static final String BAIDU_GPS_LOCATION_DEFAULT_POSITIONTYPE = "lbs";
@@ -75,10 +86,10 @@ public class Constant {
     // 第三个紧急呼叫号码的KEY
     public static final String SOS_NUM_PREFS_3 = "sosNum3";
 
-    public static final String SOS_NUM_PROPERTY_1 = "persist.sos.num1";
-    public static final String SOS_NUM_PROPERTY_2 = "persist.sos.num2";
-    public static final String SOS_NUM_PROPERTY_3 = "persist.sos.num3";
-    public static final String SOS_SMS_PROPERTY_MSG = "persist.sos.msg";
+    public static final String SOS_NUM_PROPERTY_1 = "persist.sys.sos.num1";
+    public static final String SOS_NUM_PROPERTY_2 = "persist.sys.sos.num2";
+    public static final String SOS_NUM_PROPERTY_3 = "persist.sys.sos.num3";
+    public static final String SOS_SMS_PROPERTY_MSG = "persist.sys.sos.msg";
     public static final String SOS_NUM_INVALID_VALUE = "FFFF";
 
     //public static final String SOS_SMS_PREFS_NAME = "sos_msg_prefs";
@@ -100,4 +111,8 @@ public class Constant {
     public static final String RESULT_PARAM_INTERVAL = "interval";
     public static final String RESULT_PARAM_TYPE = "type";
     public static final String RESULT_PARAM_TIME = "time";
+
+    public static final String SOCKET_SERVER_ADDRESS_URL = "healthdata.4000300659.com";
+    public static final int SOCKET_SERVER_ADDRESS_PORT = 12004;
+
 }

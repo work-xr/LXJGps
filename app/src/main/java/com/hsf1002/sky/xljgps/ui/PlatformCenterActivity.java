@@ -82,7 +82,7 @@ public class PlatformCenterActivity extends Activity {
                 break;
         }
 
-        Log.d(TAG, "onKeyDown: keyCode = " + keyCode);
+        Log.i(TAG, "onKeyDown: keyCode = " + keyCode);
 
         return super.onKeyDown(keyCode, event);
     }
@@ -141,7 +141,7 @@ public class PlatformCenterActivity extends Activity {
         relationNumbers.clear();
         items.clear();
 
-        Log.d(TAG, "getPresetRelationNumber: nameCount = " + nameCount + ", numberCount = " + numberCount);
+        Log.i(TAG, "getPresetRelationNumber: nameCount = " + nameCount + ", numberCount = " + numberCount);
 
         if (nameCount == 0)
         {
@@ -223,19 +223,19 @@ public class PlatformCenterActivity extends Activity {
             }
         }
         SharedPreUtils.getInstance().putInt(RELATION_NUMBER_COUNT, relationNumberCount);
-        Log.d(TAG, "saveRelationNumberCount: relationNumberCount = " + relationNumberCount);
+        Log.i(TAG, "saveRelationNumberCount: relationNumberCount = " + relationNumberCount);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause: save real number count............");
+        Log.i(TAG, "onPause: save real number count............");
         saveRelationNumberCount();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume: refreshing.......................");
+        Log.i(TAG, "onResume: refreshing.......................");
     }
 }

@@ -33,7 +33,10 @@ public class XLJGpsApplication extends Application {
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
 
         //GpsService.setServiceAlarm(sContext, true);
-        startService(new Intent(sContext, SocketService.class));
+        //startService(new Intent(sContext, SocketService.class));
+
+        startService(new Intent(XLJGpsApplication.getAppContext(), SocketService.class));
+
 
         rxjavaHttpInit();
     }
@@ -67,18 +70,18 @@ public class XLJGpsApplication extends Application {
     @Override
     public void onTerminate() {
         super.onTerminate();
-        Log.d(TAG, "onTerminate: ...................................");
+        Log.i(TAG, "onTerminate: ...................................");
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        Log.d(TAG, "onLowMemory: ...................................");
+        Log.i(TAG, "onLowMemory: ...................................");
     }
 
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        Log.d(TAG, "onTrimMemory: ..................................");
+        Log.i(TAG, "onTrimMemory: ..................................");
     }
 }

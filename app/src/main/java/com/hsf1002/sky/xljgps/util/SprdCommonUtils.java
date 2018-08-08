@@ -60,7 +60,7 @@ public class SprdCommonUtils {
         String deviceId = null;
         //int phoneCount = telephonyManager.getPhoneCount();    // Android4.4 不支持此方法
 
-        Log.d(TAG, "getIMEI: start " );
+        Log.i(TAG, "getIMEI: start " );
 
         //for (int slot = 0; slot < phoneCount; slot++)
         {
@@ -73,7 +73,7 @@ public class SprdCommonUtils {
 
             if (!TextUtils.isEmpty(deviceId))
             {
-                Log.d(TAG, "getIMEI: imei = " + deviceId );
+                Log.i(TAG, "getIMEI: imei = " + deviceId );
                // break;
             }
         }
@@ -147,7 +147,7 @@ public class SprdCommonUtils {
 
         try {
             sosContext = XLJGpsApplication.getAppContext().createPackageContext(SOS_PACKAGE_NAME, Context.CONTEXT_IGNORE_SECURITY);
-            Log.d(TAG, "instance initializer: get sos context");
+            Log.i(TAG, "instance initializer: get sos context");
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -180,7 +180,7 @@ public class SprdCommonUtils {
             else
             {
                 String relationNumberStr = sosNumSharedPreferences.getString(SOS_NUM_PREFS_ + (i+1), "");
-                Log.d(TAG, "getRelationNumber  relationNumber[" + i + "] = " + relationNumberStr);
+                Log.i(TAG, "getRelationNumber  relationNumber[" + i + "] = " + relationNumberStr);
 
                 //if (!TextUtils.isEmpty(relationNumberStr))
                 {
@@ -200,7 +200,7 @@ public class SprdCommonUtils {
                 .append(",")
                 .append(platformCenterNumberStr);
 
-        Log.d(TAG, "getRelationNumber: numberString = " + numberString.toString());
+        Log.i(TAG, "getRelationNumber: numberString = " + numberString.toString());
 
         return numberString.toString();
     }
@@ -245,7 +245,7 @@ public class SprdCommonUtils {
         intent.setAction(ACTION_SET_RELATION_NUMBER);
         intent.putExtra(SET_RELATION_NUMBER, relationNumber);
 
-        Log.d(TAG, "setRelationNumber: relationNumber = " + relationNumber);
+        Log.i(TAG, "setRelationNumber: relationNumber = " + relationNumber);
         XLJGpsApplication.getAppContext().sendBroadcast(intent);
     }
 
@@ -310,7 +310,7 @@ public class SprdCommonUtils {
         String numStr2 = SystemProperties.get(SOS_NUM_PROPERTY_2, "");
         String numStr3 = SystemProperties.get(SOS_NUM_PROPERTY_3, "");
 
-        Log.d(TAG, "verifyPropertyNumber: numStr1 = " + numStr1 + ", numStr2 = " + numStr2 + ", numStr3 = " + numStr3);
+        Log.i(TAG, "verifyPropertyNumber: numStr1 = " + numStr1 + ", numStr2 = " + numStr2 + ", numStr3 = " + numStr3);
 
         if (numStr1.equals(SOS_NUM_INVALID_VALUE))
         {
@@ -367,7 +367,7 @@ public class SprdCommonUtils {
             }
         }
 
-        Log.d(TAG, "getRelationNumberNames: = " + numberStringNames.toString());
+        Log.i(TAG, "getRelationNumberNames: = " + numberStringNames.toString());
         return numberStringNames.toString();
     }
 
@@ -386,7 +386,7 @@ public class SprdCommonUtils {
 
         for (int i=0; i<count; ++i)
         {
-            Log.d(TAG, "setRelationNumberNames: list[" + i + "] = " + list[i]);
+            Log.i(TAG, "setRelationNumberNames: list[" + i + "] = " + list[i]);
             SharedPreUtils.getInstance().putString(RELATION_NAME + i, list[i]);
         }
 
@@ -394,7 +394,7 @@ public class SprdCommonUtils {
     }
 
     @TargetApi(19)
-    public String getCurrentBatteryCapacity()
+    public /*String */ int getCurrentBatteryCapacity()
     {
         int percent = 0;
 
@@ -423,9 +423,9 @@ public class SprdCommonUtils {
             //percent = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
         }
 
-        Log.d(TAG, "getCurrentBatteryCapacity: battery = " + percent);
+        Log.i(TAG, "getCurrentBatteryCapacity: battery = " + percent);
 
-        return String.valueOf(percent);
+        return /*String.valueOf(percent)*/ percent;
     }
 
     public static SprdCommonUtils getInstance()

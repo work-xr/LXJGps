@@ -23,7 +23,7 @@ public class StatusInfoSendMsg {
     public StatusInfoSendMsg() {
         this.imei = SprdCommonUtils.getInstance().getIMEI();
         this.status = RESULT_STATUS_POWEROFF;
-        this.power = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
+        //this.power = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
         this.time = SprdCommonUtils.getInstance().getFormatCurrentTime();
     }
 

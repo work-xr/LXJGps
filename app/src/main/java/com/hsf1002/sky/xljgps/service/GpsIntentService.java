@@ -40,7 +40,7 @@ public class GpsIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d(TAG, "onHandleIntent: ");
+        Log.i(TAG, "onHandleIntent: ");
         BaiduGpsApp.getInstance().startBaiduGps();
     }
 

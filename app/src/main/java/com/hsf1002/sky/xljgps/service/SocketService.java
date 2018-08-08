@@ -4,9 +4,11 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
+import com.hsf1002.sky.xljgps.params.BeatHeartParam;
 import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.result.StatusInfoSendMsg;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
@@ -17,8 +19,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.Inet4Address;
 import java.net.Socket;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_SUCCESS;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_IMEI;
@@ -27,13 +33,17 @@ import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_TIME;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_TYPE;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_STATUS_POWERON;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_SUCCESS_1;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_ENCODE_TYPE;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_IMEI;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_BEATHEART;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_CURRENT;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_DOWNLOAD;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_GET_STATUS_INFO;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_INTERVAL;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR;
-
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_ADDRESS_PORT;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_ADDRESS_URL;
 
 
 /**
@@ -47,19 +57,51 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_OUTER_ELECTRI
 public class SocketService extends Service {
 
     private static final String TAG = "SocketService";
+    private ExecutorService threadPool;
+    private static Socket socket = null;
+
+    private InputStream is = null;
+    private StringBuilder sb = new StringBuilder();
+    private BufferedReader br = null;
+
+    private OutputStream os = null;
+
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate: ");
+        Log.i(TAG, "onCreate: ");
+
+        threadPool = Executors.newCachedThreadPool();
+
+
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind: ");
+        Log.i(TAG, "onBind: ");
         return null;
     }
+
+    private static final class Holder
+    {
+        private static final SocketService instance = new SocketService();
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-8 下午4:06
+    *  desc:    获取单例
+    *  param:
+    *  return:
+    */
+    public static SocketService getInstance()
+    {
+        return Holder.instance;
+    }
+
+
 
     /**
     *  author:  hefeng
@@ -70,7 +112,7 @@ public class SocketService extends Service {
     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand: start service...............");
+        Log.i(TAG, "onStartCommand: start service...............");
 
         // 这个方法运行在主线程,必须重新开启子线程
         new Thread(new Runnable() {
@@ -79,6 +121,12 @@ public class SocketService extends Service {
                 connectServer();
             }
         }).start();
+
+        BeatHeartParam beatHeartParam = new BeatHeartParam(RXJAVAHTTP_IMEI, RXJAVAHTTP_COMPANY, RXJAVAHTTP_TYPE_BEATHEART);
+        String gson = BeatHeartParam.getBeatHeartParamGson(beatHeartParam);
+        Log.i(TAG, "onStartCommand: gson = " + gson);
+
+        writeDataToServer(gson);
 
         return START_STICKY;// super.onStartCommand(intent, flags, startId);
     }
@@ -92,79 +140,169 @@ public class SocketService extends Service {
     */
     private void connectServer()
     {
-        Socket socket = null;
-
-        try {
-            socket = new Socket("192.168.100.62", 8080);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            return;
-        }
-
-        boolean isConnected = socket.isConnected();
-
-        if (isConnected) {
-            Log.d(TAG, "connectServer: connected to server successfully.");
-
-            while (true) {
-                InputStream is = null;
-                StringBuilder sb = new StringBuilder();
-
+        threadPool.execute(new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    is = socket.getInputStream();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    socket = new Socket(SOCKET_SERVER_ADDRESS_URL, SOCKET_SERVER_ADDRESS_PORT);
                 }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        });
+    }
 
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
+    /**
+    *  author:  hefeng
+    *  created: 18-8-8 下午5:53
+    *  desc:    socket是否处于连接状态
+    *  param:
+    *  return:
+    */
+    private boolean isSocketConnected()
+    {
+        return socket.isConnected();
+    }
 
-                try {
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        Log.d(TAG, "connectServer: read line = " + line);
-                        sb.append(line);
+    /**
+    *  author:  hefeng
+    *  created: 18-8-8 下午1:26
+    *  desc:    接收从服务器端下发的指令或者从服务器返回的数据
+    *  param:
+    *  return:
+    */
+    public void readDataFromServer()
+    {
+        threadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (isSocketConnected()) {
+                    Log.i(TAG, "readDataFromServer: connected to server successfully.");
+
+                    try {
+                        is = socket.getInputStream();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
+
+                    if (is != null)
+                    {
+                        InputStreamReader isr = new InputStreamReader(is);
+                        br = new BufferedReader(isr);
+
+                        Log.i(TAG, "readDataFromServer: isr = " + isr);
+                        Log.i(TAG, "readDataFromServer: br = " + br);
+
+                        try {
+                            String line;
+
+                            if (br != null && br.readLine() != null)
+                            {
+                                while ((line = br.readLine()) != null) {
+                                    Log.i(TAG, "readDataFromServer: read line = " + line);
+                                    sb.append(line);
+                                }
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        Log.i(TAG, "readDataFromServer: read sb = " + sb.toString());
+
+                        if (!TextUtils.isEmpty(sb)) {
+                            parseServerMsg(sb.toString());
+                        }
+/*
+                    try {
+                        br.close();
+                        //socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }*/
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-8 下午1:26
+    *  desc:    发送数据给服务器端
+    *  param:
+    *  return:
+    */
+    public void writeDataToServer(final String data)
+    {
+        threadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                String completedStr = data;
+                String encodedData = null;
+
+                try {
+                    Thread.sleep(500);
+                }
+                catch (InterruptedException e)
+                {
                     e.printStackTrace();
                 }
 
-                Log.d(TAG, "connectServer: read sb = " + sb.toString());
+                completedStr = data.length() + data;
 
-                String gsonStr = parseServerMsg(sb.toString());
-
-                OutputStream os = null;
+                Log.i(TAG, "writeDataToServer: completedStr = " + completedStr);
 
                 try
                 {
-                    os = socket.getOutputStream();
-                    // 特别注意：数据的结尾加上换行符才可让服务器端的readline()停止阻塞
-                    os.write((gsonStr + "\n").getBytes(RXJAVAHTTP_ENCODE_TYPE));
+                    encodedData = URLEncoder.encode(completedStr, RXJAVAHTTP_ENCODE_TYPE);
                 }
-                catch (IOException e)
+                catch (UnsupportedEncodingException e)
                 {
                     e.printStackTrace();
                 }
 
-                try {
-                    os.flush();
-                }
-                catch (IOException e)
+                if (!isSocketConnected())
                 {
-                      e.printStackTrace();
+                    Log.i(TAG, "writeDataToServer: connected to server failed.");
                 }
+                else
+                {
+                    Log.i(TAG, "writeDataToServer: connected to server successfully.");
 
-                try {
-                    os.close();
-                    br.close();
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    //String gsonStr = parseServerMsg(null);
+
+                    try
+                    {
+                        os = socket.getOutputStream();
+                        // 特别注意：数据的结尾加上换行符才可让服务器端的readline()停止阻塞
+                        os.write((encodedData + "\n").getBytes(RXJAVAHTTP_ENCODE_TYPE));
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                    try {
+                        os.flush();
+                        //socket.shutdownOutput();
+                        Log.i(TAG, "writeDataToServer: write data to server successfully.");
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
+        });
     }
 
     /**
@@ -181,7 +319,7 @@ public class SocketService extends Service {
     *  param:
     *  return:
     */
-    public static String parseServerMsg(String msg)
+    public String parseServerMsg(String msg)
     {
         StatusInfoSendMsg statusInfoSendMsg = new StatusInfoSendMsg();
         ResultMsg<StatusInfoSendMsg> resultMsg = new ResultMsg();
@@ -211,7 +349,7 @@ public class SocketService extends Service {
             if (dataList[i].contains(RESULT_PARAM_TYPE))
             {
                 paramType = dataList[i];
-                Log.d(TAG, "parseServerMsg: param = " + paramType);
+                Log.i(TAG, "parseServerMsg: param = " + paramType);
             }
             else if (dataList[i].contains(RESULT_PARAM_INTERVAL))
             {
@@ -227,6 +365,19 @@ public class SocketService extends Service {
             }
         }
 
+        int type = Integer.valueOf(paramType);
+
+        switch (type)
+        {
+            case RXJAVAHTTP_TYPE_INTERVAL:
+                break;
+            case RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR:
+                break;
+            case RXJAVAHTTP_TYPE_BEATHEART:
+
+                break;
+        }
+/*
         // 设置定时服务的时间间隔
         if (paramType.contains(RXJAVAHTTP_TYPE_INTERVAL))
         {
@@ -265,10 +416,10 @@ public class SocketService extends Service {
             resultMsg.setSuccess(RESULT_SUCCESS_1);
             resultMsg.setMessage(RESULT_MSG_SUCCESS);
         }
-
+*/
         String gsonStr = ResultMsg.getResultMsgGson(resultMsg);
-        Log.d(TAG, "parseServerMsg: resultMsg = " + resultMsg);
-        Log.d(TAG, "parseServerMsg: gsonStr = " + gsonStr);
+        Log.i(TAG, "parseServerMsg: resultMsg = " + resultMsg);
+        Log.i(TAG, "parseServerMsg: gsonStr = " + gsonStr);
 
         return gsonStr;
     }
@@ -276,19 +427,19 @@ public class SocketService extends Service {
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        Log.d(TAG, "onLowMemory: .........................");
+        Log.i(TAG, "onLowMemory: .........................");
     }
 
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        Log.d(TAG, "onTrimMemory: ........................");
+        Log.i(TAG, "onTrimMemory: ........................");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy: ...........................");
+        Log.i(TAG, "onDestroy: ...........................");
     }
 }
 

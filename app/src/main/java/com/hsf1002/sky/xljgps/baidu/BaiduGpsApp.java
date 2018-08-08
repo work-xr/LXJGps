@@ -60,7 +60,7 @@ public class BaiduGpsApp {
     */
     public void initBaiduSDK(Context context)
     {
-        Log.d(TAG, "initBaiduSDK: ");
+        Log.i(TAG, "initBaiduSDK: ");
         myLocationLister = new MyLocationLister();
         client = new LocationClient(context);
         initLocation();
@@ -75,7 +75,7 @@ public class BaiduGpsApp {
     */
     private void initLocation()
     {
-        Log.d(TAG, "initOption: ");
+        Log.i(TAG, "initOption: ");
         option = new LocationClientOption();
         // LocationMode.Hight_Accuracy：高精度； LocationMode. Battery_Saving：低功耗； LocationMode. Device_Sensors：仅使用设备；
         option.setLocationMode(LocationClientOption.LocationMode.Battery_Saving);
@@ -103,7 +103,7 @@ public class BaiduGpsApp {
     */
     public void startBaiduGps()
     {
-        Log.d(TAG, "startBaiduGps: isStarted = " + client.isStarted());
+        Log.i(TAG, "startBaiduGps: isStarted = " + client.isStarted());
         if (!client.isStarted())
         {
             client.registerLocationListener(myLocationLister);
@@ -119,7 +119,7 @@ public class BaiduGpsApp {
     *  return:
     */
     public void stopBaiduGps() {
-        Log.d(TAG, "stopBaiduGps: isStarted = " + client.isStarted());
+        Log.i(TAG, "stopBaiduGps: isStarted = " + client.isStarted());
         if (client.isStarted()) 
         {
             client.unRegisterLocationListener(myLocationLister);
@@ -136,7 +136,7 @@ public class BaiduGpsApp {
     */
     public void restartBaiduGps()
     {
-        Log.d(TAG, "restartBaiduGps: ");
+        Log.i(TAG, "restartBaiduGps: ");
         client.registerLocationListener(myLocationLister);
         client.restart();
     }
@@ -150,7 +150,7 @@ public class BaiduGpsApp {
      */
     public void setBaiduGpsScanSpan(int span)
     {
-        Log.d(TAG, "setBaiduGpsScanSpan: ");
+        Log.i(TAG, "setBaiduGpsScanSpan: ");
         option.setScanSpan(span);
     }
 
@@ -195,7 +195,7 @@ public class BaiduGpsApp {
                 if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED && wifiInfo != null)
                 {
                     String ssid = wifiInfo.getSSID();
-                    Log.d(TAG, "onReceiveLocation: ssid = " + ssid);
+                    Log.i(TAG, "onReceiveLocation: ssid = " + ssid);
 
                     if (!TextUtils.isEmpty(ssid))
                     {
@@ -211,18 +211,18 @@ public class BaiduGpsApp {
             {
                 locationType = "null";
             }
-            Log.d(TAG, "onReceiveLocation: locType = " + locType + ", latitude = " + latitude + ", longitude = " + longitude + ", address = " + address.toString() + ", locationType = " + locationType + ", getLocType = " + locType);
+            Log.i(TAG, "onReceiveLocation: locType = " + locType + ", latitude = " + latitude + ", longitude = " + longitude + ", address = " + address.toString() + ", locationType = " + locationType + ", getLocType = " + locType);
 
             if (locType == BDLocation.TypeGpsLocation || locType == BDLocation.TypeNetWorkLocation)
             {
-                Log.d(TAG, "onReceiveLocation:  get location success, stop gps service");
+                Log.i(TAG, "onReceiveLocation:  get location success, stop gps service");
                 setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locTypeStr, locationType);
 
                 //RxjavaHttpModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_TIMING, null);
             }
             else
             {
-                Log.d(TAG, "onReceiveLocation:  get location failed, stop gps service");
+                Log.i(TAG, "onReceiveLocation:  get location failed, stop gps service");
             }
             stopBaiduGps();
         }

@@ -109,7 +109,7 @@ public class MainActivity extends Activity implements BaseView{
 
         adapter.refreshItem(currentPosition);
         
-        Log.d(TAG, "onKeyDown: keyCode = " + keyCode + ", currentPosition = " + currentPosition);
+        Log.i(TAG, "onKeyDown: keyCode = " + keyCode + ", currentPosition = " + currentPosition);
 
         return super.onKeyDown(keyCode, event);
     }
@@ -211,8 +211,8 @@ public class MainActivity extends Activity implements BaseView{
         String relationName = resultMsg.getData().getRelationship();
         String relationNumber = resultMsg.getData().getPhone();
 
-        Log.d(TAG, "downloadSuccess: relationName = " + relationName);
-        Log.d(TAG, "downloadSuccess: relationNumber = " + relationNumber);
+        Log.i(TAG, "downloadSuccess: relationName = " + relationName);
+        Log.i(TAG, "downloadSuccess: relationNumber = " + relationNumber);
 
         SprdCommonUtils.getInstance().setRelationNumberNames(relationName);
         SprdCommonUtils.getInstance().setRelationNumber(relationNumber);

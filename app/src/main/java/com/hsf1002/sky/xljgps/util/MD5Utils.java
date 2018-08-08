@@ -1,10 +1,5 @@
 package com.hsf1002.sky.xljgps.util;
 
-import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
-
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -51,48 +46,8 @@ public class MD5Utils {
             return null;
         }
     }
-/*
-    public static String EncoderByMd5(final String str, final String encodeType) {
-        if (str == null) {
-            return null;
-        }
 
-        try {
-            // 确定计算方法
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            BASE64Encoder base64en = new BASE64Encoder();
-            // 加密后的字符串
-            return base64en.encode(md5.digest(str.getBytes(encodeType)));
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            return null;
-        }
-    }
-
-    public static String makeUidToBase64(long uid){
-        Log.d(TAG,"makeUidToBase64 uid = "+uid);
-        String strUid = String.valueOf(uid);
-        String enUid = new String(Base64.encode(strUid.getBytes(), Base64.DEFAULT));
-        Log.d(TAG,"makeUidToBase64 enUid = "+enUid);
-
-        return enUid;
-    }
-
-    public static long getUidFromBase64(String base64Id){
-        long uid = -1L;
-
-        if(!TextUtils.isEmpty(base64Id)){
-            Log.d(TAG,"getUidFromBase64 enUID = "+base64Id);
-            String result ="";
-            if(!TextUtils.isEmpty(base64Id)){
-                result = new String(Base64.decode(base64Id.getBytes(),Base64.DEFAULT));
-                uid = Long.parseLong(result);
-            }
-        }
-        Log.d(TAG,"getUidFromBase64 uid = "+uid);
-
-        return uid;
-    }
-*/
+    @Deprecated
     public static String encrypt1(String str) {
         try {
             // 生成一个MD5加密计算摘要
@@ -116,7 +71,7 @@ public class MD5Utils {
         return md5.length()==32?md5:fillMD5("0"+md5);
     }
 
-
+    @Deprecated
     public static String encrypt2(String plainText) {
         String re_md5 = new String();
         try {
@@ -146,5 +101,4 @@ public class MD5Utils {
 
         return re_md5;
     }
-
 }

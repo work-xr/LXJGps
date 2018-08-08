@@ -32,7 +32,7 @@ public class GpsService extends Service {
     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand: ");
+        Log.i(TAG, "onStartCommand: ");
         BaiduGpsApp.getInstance().startBaiduGps();
         return super.onStartCommand(intent, flags, startId);
     }

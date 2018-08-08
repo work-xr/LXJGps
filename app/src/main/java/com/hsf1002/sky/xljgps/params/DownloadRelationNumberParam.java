@@ -8,6 +8,8 @@ import com.google.gson.GsonBuilder;
  * Created by hefeng on 18-6-15.
  */
 
+
+@Deprecated
 public class DownloadRelationNumberParam {
     private String imei;
     //private String manufactory;

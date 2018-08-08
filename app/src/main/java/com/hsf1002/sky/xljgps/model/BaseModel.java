@@ -11,7 +11,7 @@ public interface BaseModel {
     void uploadRelationNumber(RxjavaHttpPresenter.OnUploadListener listener);
     void reportSosPosition(RxjavaHttpPresenter.OnReportListener listener);
     //void reportGsonInfo(RxjavaHttpPresenter.OnReportListener listener);
-    void reportPosition(String type, RxjavaHttpPresenter.OnReportListener listener);
+    void reportPosition(int type, RxjavaHttpPresenter.OnReportListener listener);
 
     void reportModifyInterval(RxjavaHttpPresenter.OnIntervalListener listener);
     void notifyOuterElectricBar(RxjavaHttpPresenter.OnOuterBarListener listener);
