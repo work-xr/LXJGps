@@ -7,8 +7,8 @@ package com.hsf1002.sky.xljgps.util;
 public class Constant {
     public static final int SET_RELATION_NUMBER_INDEX = 0;
     public static final int UPLOAD_INFO_TO_PLATFORM_INDEX = 1;
-    public static final int DOWNLOAD_INFO_FROM_PLATFORM_INDEX = 2;
-    public static final int REPORT_INFO_TO_PLATFORM_INDEX = 3;
+    //public static final int DOWNLOAD_INFO_FROM_PLATFORM_INDEX = 2;
+    public static final int REPORT_INFO_TO_PLATFORM_INDEX = 2;
 
     public static final String RELATION_NUMBER = "relation_number_";
     public static final String RELATION_NUMBER_COUNT = "relation_number_count";
@@ -26,7 +26,7 @@ public class Constant {
     public static final String RXJAVAHTTP_DOWNLOAD_FROM_PLATFORM = "familyNumber";
     public static final String RXJAVAHTTP_UPDATE_TO_PLATFORM = "updatePhone";
     public static final String RXJAVAHTTP_REPORT_POSITION = "position";
-    public static final String RXJAVAHTTP_IMEI = "867400020316620";
+    public static final String RXJAVAHTTP_IMEI = "867400088889999"; //867400020316620
 /*
     public static final String RXJAVAHTTP_TYPE_DOWNLOAD = "103";
     //public static final String RXJAVAHTTP_TYPE_REPORT = "202";
@@ -104,15 +104,20 @@ public class Constant {
     public static final String RESULT_SUCCESS_1 = "1";
     public static final String RESULT_MSG_FAILING = "failing";
     public static final String RESULT_MSG_SUCCESS = "success";
-    public static final String RESULT_STATUS_POWERON = "1";
-    public static final String RESULT_STATUS_POWEROFF = "0";
+    public static final int RESULT_STATUS_POWERON = 1;
+    public static final int RESULT_STATUS_POWEROFF = 0;
 
     public static final String RESULT_PARAM_IMEI = "imei";
     public static final String RESULT_PARAM_INTERVAL = "interval";
     public static final String RESULT_PARAM_TYPE = "type";
     public static final String RESULT_PARAM_TIME = "time";
+    public static final String RESULT_PARAM_COMMAND = "command";
+    public static final String RESULT_PARAM_NAME = "e_order";
+    public static final String RESULT_PARAM_NUMBER = "sos_phone";
 
     public static final String SOCKET_SERVER_ADDRESS_URL = "healthdata.4000300659.com";
     public static final int SOCKET_SERVER_ADDRESS_PORT = 12004;
+
+    public static final int BEATHEART_SERVICE_INTERVAL = 10 * 60 * 1000;
 
 }

@@ -11,8 +11,8 @@ public interface BaseView {
     void uploadSuccess(ResultMsg resultMsg);
     void uploadFailed(String resultMsg);
 
-    void downloadSuccess(ResultMsg<RelationNumberMsg> resultMsg);
-    void downloadFailed(String resultMsg);
+    //void downloadSuccess(ResultMsg<RelationNumberMsg> resultMsg);
+    //void downloadFailed(String resultMsg);
 
     void reportSuccess(ResultMsg resultMsg);
     void reportFailed(String resultMsg);

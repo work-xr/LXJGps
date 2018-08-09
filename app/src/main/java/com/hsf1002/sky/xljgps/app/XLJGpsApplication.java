@@ -37,7 +37,6 @@ public class XLJGpsApplication extends Application {
 
         startService(new Intent(XLJGpsApplication.getAppContext(), SocketService.class));
 
-
         rxjavaHttpInit();
     }
 

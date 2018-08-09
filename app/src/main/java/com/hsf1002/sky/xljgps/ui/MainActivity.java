@@ -15,10 +15,8 @@ import android.widget.Toast;
 import com.hsf1002.sky.xljgps.R;
 import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenterImpl;
-import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
 import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
-import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 import com.hsf1002.sky.xljgps.view.BaseView;
 
 import java.util.ArrayList;
@@ -27,7 +25,6 @@ import java.util.List;
 import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
 import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
 import static android.view.KeyEvent.KEYCODE_DPAD_UP;
-import static com.hsf1002.sky.xljgps.util.Constant.DOWNLOAD_INFO_FROM_PLATFORM_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.REPORT_INFO_TO_PLATFORM_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.UPLOAD_INFO_TO_PLATFORM_INDEX;
@@ -124,9 +121,6 @@ public class MainActivity extends Activity implements BaseView{
             case UPLOAD_INFO_TO_PLATFORM_INDEX:
                 uploadInfoToPlatform();
                 break;
-            case DOWNLOAD_INFO_FROM_PLATFORM_INDEX:
-                downloadInfoFromPlatform();
-                break;
             case REPORT_INFO_TO_PLATFORM_INDEX:
                 reportSosGpsInfoToPlatform();
                 break;
@@ -157,37 +151,11 @@ public class MainActivity extends Activity implements BaseView{
         builder.show();
     }
 
-    private void downloadInfoFromPlatform()
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setTitle(getString(R.string.download_title));
-        builder.setMessage(getString(R.string.download_content));
-        builder.setPositiveButton(getString(R.string.sure), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                downloadInfo();
-            }
-        });
-        builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.setCancelable(true).create();
-        builder.show();
-    }
-
     private void uploadInfo()
     {
         presenter.uploadRelationNumber();
     }
 
-    private void downloadInfo()
-    {
-        presenter.downloadRelationNumber();
-    }
 
     private void reportSosGpsInfoToPlatform()
     {
@@ -202,25 +170,6 @@ public class MainActivity extends Activity implements BaseView{
     @Override
     public void uploadFailed(String resultMsg) {
         Toast.makeText(this, getString(R.string.upload_failed), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void downloadSuccess(ResultMsg<RelationNumberMsg> resultMsg) {
-        Toast.makeText(this, getString(R.string.download_success), Toast.LENGTH_SHORT).show();
-
-        String relationName = resultMsg.getData().getRelationship();
-        String relationNumber = resultMsg.getData().getPhone();
-
-        Log.i(TAG, "downloadSuccess: relationName = " + relationName);
-        Log.i(TAG, "downloadSuccess: relationNumber = " + relationNumber);
-
-        SprdCommonUtils.getInstance().setRelationNumberNames(relationName);
-        SprdCommonUtils.getInstance().setRelationNumber(relationNumber);
-    }
-
-    @Override
-    public void downloadFailed(String resultMsg) {
-        Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -4,9 +4,7 @@
     <string-array name="main_item_name" >
         <item>set platform center number</item>
         <item>upload info to platform</item>
-        <item>download info from platform</item>
         <item>report position to platform</item>
-        <item>send msg to relation number</item>
     </string-array>
 
     <string-array name="relation_item_name" >

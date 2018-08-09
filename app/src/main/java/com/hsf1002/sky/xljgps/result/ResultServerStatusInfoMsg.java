@@ -6,7 +6,10 @@ package com.hsf1002.sky.xljgps.result;
 
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
+import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_FAILING;
+import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_SUCCESS;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_STATUS_POWEROFF;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_GET_STATUS_INFO;
 
 /**
 *  author:  hefeng
@@ -14,38 +17,34 @@ import static com.hsf1002.sky.xljgps.util.Constant.RESULT_STATUS_POWEROFF;
 *  desc: 根据平台发送的指令把设备状态上报到平台
  *
 */
-public class StatusInfoSendMsg {
+public class ResultServerStatusInfoMsg{
+    private String message;         // success or failing
     private String imei;
-    private String status;      // 1代表开机、0代表关机
-    private String power;
+    private int status;             // 1代表开机、0代表关机
+    private int power;
     private String time;
+    private int type;               // 108
 
-    public StatusInfoSendMsg() {
+    public ResultServerStatusInfoMsg() {
+        this.message = RESULT_MSG_FAILING;
         this.imei = SprdCommonUtils.getInstance().getIMEI();
         this.status = RESULT_STATUS_POWEROFF;
-        //this.power = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
+        this.power = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
         this.time = SprdCommonUtils.getInstance().getFormatCurrentTime();
+        this.type = RXJAVAHTTP_TYPE_GET_STATUS_INFO;
     }
 
-    public void setImei(String imei) {
-        this.imei = imei;
-    }
-
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
-    public void setPower(String power) {
-        this.power = power;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     @Override
     public String toString() {
-        return "StatusInfoSendMsg{" +
+        return "ResultServerStatusInfoMsg{" +
                 ", imei='" + imei + '\'' +
                 ", status='" + status + '\'' +
                 ", power='" + power + '\'' +

@@ -4,7 +4,6 @@
     <string-array name="main_item_name" >
         <item>设置孝老平台中心号码</item>
         <item>上传信息到孝老平台</item>
-        <item>从孝老平台下载信息</item>
         <item>上报位置信息到孝老平台</item>
     </string-array>
 
