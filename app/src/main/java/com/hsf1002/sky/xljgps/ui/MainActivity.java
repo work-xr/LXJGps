@@ -108,7 +108,7 @@ public class MainActivity extends Activity implements BaseView{
         
         Log.i(TAG, "onKeyDown: keyCode = " + keyCode + ", currentPosition = " + currentPosition);
 
-        return super.onKeyDown(keyCode, event);
+        return true;// super.onKeyDown(keyCode, event);
     }
 
     private void handlePlatformItems(int position)

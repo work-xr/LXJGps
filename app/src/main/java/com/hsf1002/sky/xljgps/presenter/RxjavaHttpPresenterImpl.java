@@ -7,6 +7,8 @@ import com.hsf1002.sky.xljgps.model.BaseModel;
 import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
 import com.hsf1002.sky.xljgps.view.BaseView;
 
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_CURRENT;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_POWERON;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_TIMING;
 
 /**

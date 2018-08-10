@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
+import com.hsf1002.sky.xljgps.model.SocketModel;
 
 import static com.hsf1002.sky.xljgps.util.Constant.ANCTION_SOS_REPORT_POSITION;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_SOS;
@@ -28,6 +29,7 @@ public class SosReceiver extends BroadcastReceiver {
         if (action.equals(ANCTION_SOS_REPORT_POSITION))
         {
             RxjavaHttpModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_SOS, null);
+            SocketModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_SOS, null);
         }
     }
 }

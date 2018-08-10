@@ -11,7 +11,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RESULT_SUCCESS_0;
  */
 
 public class ResultMsg<T> {
-    protected String success;
+    protected int success;
     protected String message;
     protected T data;
 
@@ -30,11 +30,11 @@ public class ResultMsg<T> {
         return gson.toJson(param, ResultMsg.class);
     }
 
-    public String getSuccess() {
+    public int getSuccess() {
         return success;
     }
 
-    public void setSuccess(String success) {
+    public void setSuccess(int success) {
         this.success = success;
     }
 

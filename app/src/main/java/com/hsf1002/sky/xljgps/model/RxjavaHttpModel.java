@@ -34,6 +34,12 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_UPLOAD;
  * Created by hefeng on 18-6-8.
  */
 
+/**
+*  author:  hefeng
+*  created: 18-8-10 上午8:44
+*  desc:    改为socket通信后,该文件没用了
+*/
+@Deprecated
 public class RxjavaHttpModel implements BaseModel {
     private static final String TAG = "RxjavaHttpModel";
 

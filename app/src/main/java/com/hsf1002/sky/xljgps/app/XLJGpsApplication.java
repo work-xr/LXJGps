@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.allen.library.RxHttpUtils;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
+import com.hsf1002.sky.xljgps.model.SocketModel;
+import com.hsf1002.sky.xljgps.service.BeatHeartService;
 import com.hsf1002.sky.xljgps.service.GpsService;
 import com.hsf1002.sky.xljgps.service.SocketService;
 
@@ -33,9 +35,11 @@ public class XLJGpsApplication extends Application {
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
 
         //GpsService.setServiceAlarm(sContext, true);
-        //startService(new Intent(sContext, SocketService.class));
 
-        startService(new Intent(XLJGpsApplication.getAppContext(), SocketService.class));
+        startService(new Intent(sContext, SocketService.class));
+
+        //BeatHeartService.setServiceAlarm(sContext, true);
+
 
         rxjavaHttpInit();
     }

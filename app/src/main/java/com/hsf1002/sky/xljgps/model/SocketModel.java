@@ -1,9 +1,11 @@
 package com.hsf1002.sky.xljgps.model;
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
+import com.hsf1002.sky.xljgps.params.BeatHeartParam;
 import com.hsf1002.sky.xljgps.params.SosPositionParam;
 import com.hsf1002.sky.xljgps.params.UploadRelationNumberParam;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
@@ -11,15 +13,32 @@ import com.hsf1002.sky.xljgps.service.SocketService;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
+import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_BEATHEART;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_UPLOAD;
 
 /**
  * Created by hefeng on 18-8-9.
  */
 
+/**
+*  author:  hefeng
+*  created: 18-8-10 上午8:48
+*  desc:    基于TCP协议的Socket通信
+*/
 public class SocketModel implements BaseModel {
     private static final String TAG = "SocketModel";
+    private Handler handler;
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-10 下午4:36
+    *  desc:    初始化一个handler
+    *  param:
+    *  return:
+    */
+    public SocketModel() {
+        handler = new Handler();
+    }
 
     /**
     *  author:  hefeng
@@ -40,10 +59,44 @@ public class SocketModel implements BaseModel {
 
     /**
     *  author:  hefeng
+    *  created: 18-8-10 下午4:42
+    *  desc:    在单独的线程去操作
+    *  param:
+    *  return:
+    */
+    private void postDataServer(final String gsonString)
+    {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                SocketService.getInstance().writeDataToServer(gsonString);
+            }
+        });
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-10 上午9:21
+    *  desc:    上报心跳,默认10分钟一次(BEATHEART_SERVICE_INTERVAL)
+    *  param:
+    *  return:
+    */
+    public void reportBeatHeart()
+    {
+        String imei = SprdCommonUtils.getInstance().getIMEI();
+        BeatHeartParam beatHeartParam = new BeatHeartParam(imei, RXJAVAHTTP_COMPANY, RXJAVAHTTP_TYPE_BEATHEART);
+        final String gsonString = BeatHeartParam.getBeatHeartParamGson(beatHeartParam);
+        Log.i(TAG, "reportBeatHeart: gsonString = " + gsonString);
+
+        postDataServer(gsonString);
+    }
+
+    /**
+    *  author:  hefeng
     *  created: 18-8-9 下午3:37
     *  desc:    上传亲情号码到服务器端
     *  param:
-    *  return:
+    *  return:  从服务器返回: {"success":1,"time":"20180810085825","command":203}
     */
     @Override
     public void uploadRelationNumber(RxjavaHttpPresenter.OnUploadListener listener) {
@@ -60,10 +113,10 @@ public class SocketModel implements BaseModel {
                 sosPhones,
                 sosPhoneNames,
                 time);
-        String gsonString = UploadRelationNumberParam.getSendParamGson(sendParam);
+        final String gsonString = UploadRelationNumberParam.getSendParamGson(sendParam);
         Log.i(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
 
-        SocketService.getInstance().writeDataToServer(gsonString);
+        postDataServer(gsonString);
     }
 
     /**
@@ -71,7 +124,7 @@ public class SocketModel implements BaseModel {
     *  created: 18-8-9 下午3:39
     *  desc:    上报定位信息到服务器端
     *  param:
-    *  return:
+    *  return:  从服务器返回: {"success":1,"imei":"867400020316620","time":"20180810104857","command":202}
     */
     @Override
     public void reportPosition(int type, RxjavaHttpPresenter.OnReportListener listener) {
@@ -97,9 +150,9 @@ public class SocketModel implements BaseModel {
                 capacity
         );
 
-        String gsonString = SosPositionParam.getReportParamGson(reportParamBean);
+        final String gsonString = SosPositionParam.getReportParamGson(reportParamBean);
         Log.i(TAG, "reportPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
 
-        SocketService.getInstance().writeDataToServer(gsonString);
+        postDataServer(gsonString);
     }
 }

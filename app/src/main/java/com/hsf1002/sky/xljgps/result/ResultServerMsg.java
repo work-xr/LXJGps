@@ -9,11 +9,14 @@ import com.google.gson.GsonBuilder;
 
 public class ResultServerMsg<T> {
     private int success;
-
     private T data;
 
-    public int getSuccess() {
-        return success;
+    public void setSuccess(int success) {
+        this.success = success;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 
     public static String getResultServerMsgGson(ResultServerMsg param)

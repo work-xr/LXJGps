@@ -7,7 +7,6 @@ package com.hsf1002.sky.xljgps.result;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_FAILING;
-import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_SUCCESS;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_STATUS_POWEROFF;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_GET_STATUS_INFO;
 
