@@ -63,6 +63,7 @@
         <service android:name=".service.GpsIntentService" />
         <service android:name=".service.GpsService" />
         <service android:name=".service.SocketService" />
+        <service android:name=".service.ReconnectSocketService" />
 	
         <service android:name="com.baidu.location.f"
             android:enabled="true"

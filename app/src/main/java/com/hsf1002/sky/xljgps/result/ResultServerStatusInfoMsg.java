@@ -4,6 +4,8 @@ package com.hsf1002.sky.xljgps.result;
  * Created by hefeng on 18-7-30.
  */
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_FAILING;
@@ -16,7 +18,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_GET_STATUS_IN
 *  desc: 根据平台发送的指令把设备状态上报到平台
  *
 */
-public class ResultServerStatusInfoMsg{
+public class ResultServerStatusInfoMsg extends ResultServerMsg{
     private String message;         // success or failing
     private String imei;
     private int status;             // 1代表开机、0代表关机
@@ -39,6 +41,15 @@ public class ResultServerStatusInfoMsg{
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public static String getResultServerStatusInfoMsgGson(ResultServerStatusInfoMsg param)
+    {
+        Gson gson;
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gson = gsonBuilder.serializeNulls().create();
+
+        return gson.toJson(param, ResultServerStatusInfoMsg.class);
     }
 
     @Override

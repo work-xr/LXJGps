@@ -1,5 +1,7 @@
 package com.hsf1002.sky.xljgps.result;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
@@ -9,7 +11,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_INTERVAL;
  * Created by hefeng on 18-8-8.
  */
 
-public class ResultServerIntervalMsg {
+public class ResultServerIntervalMsg extends ResultServerMsg {
     private String company;
     private String time;
     private int type;
@@ -18,5 +20,14 @@ public class ResultServerIntervalMsg {
         this.company = RXJAVAHTTP_COMPANY;
         this.time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         this.type = RXJAVAHTTP_TYPE_INTERVAL;
+    }
+
+    public static String getResultServerIntervalMsgGson(ResultServerIntervalMsg param)
+    {
+        Gson gson;
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gson = gsonBuilder.serializeNulls().create();
+
+        return gson.toJson(param, ResultServerIntervalMsg.class);
     }
 }

@@ -3,7 +3,6 @@ package com.hsf1002.sky.xljgps.util;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.telephony.SmsManager;
@@ -60,7 +59,7 @@ public class SprdCommonUtils {
         String deviceId = null;
         //int phoneCount = telephonyManager.getPhoneCount();    // Android4.4 不支持此方法
 
-        Log.i(TAG, "getIMEI: start " );
+        //Log.i(TAG, "getIMEI: start " );
 
         //for (int slot = 0; slot < phoneCount; slot++)
         {
@@ -73,7 +72,7 @@ public class SprdCommonUtils {
 
             if (!TextUtils.isEmpty(deviceId))
             {
-                Log.i(TAG, "getIMEI: imei = " + deviceId );
+               // Log.i(TAG, "getIMEI: imei = " + deviceId );
                // break;
             }
         }
@@ -241,7 +240,7 @@ public class SprdCommonUtils {
         //sosNumSharedPreferences.edit().commit();
 
         Intent intent = new Intent();
-        relationNumber = relationNumber.substring(0, relationNumber.length() - list[SOS_NUM_COUNT].length());
+        relationNumber = relationNumber.substring(0, relationNumber.length() - list[SOS_NUM_COUNT].length() - 1);
         intent.setAction(ACTION_SET_RELATION_NUMBER);
         intent.putExtra(SET_RELATION_NUMBER, relationNumber);
 

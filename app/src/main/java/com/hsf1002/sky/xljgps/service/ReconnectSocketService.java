@@ -34,6 +34,13 @@ public class ReconnectSocketService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-11 上午10:54
+    *  desc:    用于重新连接socket, 如果已经连上, 则停止服务
+    *  param:
+    *  return:
+    */
     public static void setServiceAlarm(Context context, boolean isOn)
     {
         Intent intent = new Intent(context, ReconnectSocketService.class);
@@ -52,6 +59,14 @@ public class ReconnectSocketService extends Service {
             manager.cancel(pi);
             pi.cancel();
         }
+    }
+
+    public static boolean isServiceAlarmOn(Context context)
+    {
+        Intent intent = new Intent(context, ReconnectSocketService.class);
+        PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
+
+        return pi != null;
     }
 
     public void stopGpsService()

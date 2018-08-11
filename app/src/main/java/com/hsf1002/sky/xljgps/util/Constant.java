@@ -39,16 +39,16 @@ public class Constant {
     public static final String RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR = "107";      //代表电子围栏超出通知
     public static final String RXJAVAHTTP_TYPE_GET_STATUS_INFO = "108";         //代表获取设备状态信息
 */
-    public static final int RXJAVAHTTP_TYPE_BEATHEART = 301;
-    public static final int RXJAVAHTTP_TYPE_DOWNLOAD = 103;
-    public static final int RXJAVAHTTP_TYPE_SOS = 202;         // 是通过按SOS键上报消息
-    public static final int RXJAVAHTTP_TYPE_UPLOAD = 203;
-    public static final int RXJAVAHTTP_TYPE_CURRENT = 101;     // 收到服务器指令, 实时定位后上报消息
-    public static final int RXJAVAHTTP_TYPE_POWERON = 100;     // 开机上报消息
-    public static final int RXJAVAHTTP_TYPE_TIMING = 201;      // 定时定位后上报消息
-    public static final int RXJAVAHTTP_TYPE_INTERVAL = 106;                // 代表设置定位上传频率
-    public static final int RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR = 107;      //代表电子围栏超出通知
-    public static final int RXJAVAHTTP_TYPE_GET_STATUS_INFO = 108;         //代表获取设备状态信息
+    public static final int RXJAVAHTTP_TYPE_BEATHEART = 301;    // 主动: 上报心跳
+    public static final int RXJAVAHTTP_TYPE_SOS = 202;          // 主动: 通过按SOS键上报消息
+    public static final int RXJAVAHTTP_TYPE_UPLOAD = 203;       // 主动: 上传亲情号码
+    public static final int RXJAVAHTTP_TYPE_POWERON = 100;      // 主动: 开机上报消息
+    public static final int RXJAVAHTTP_TYPE_TIMING = 201;       // 主动: 定时定位后上报消息
+    public static final int RXJAVAHTTP_TYPE_CURRENT = 101;                  // 被动: 接收服务器指令后, 实时定位后上报消息
+    public static final int RXJAVAHTTP_TYPE_DOWNLOAD = 103;                 // 被动: 接收服务器指令后, 设置亲情号码
+    public static final int RXJAVAHTTP_TYPE_INTERVAL = 106;                 // 被动: 接收服务器指令后, 设置定位上传频率
+    public static final int RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR = 107;       // 被动: 接收服务器指令后, 电子围栏超出通知
+    public static final int RXJAVAHTTP_TYPE_GET_STATUS_INFO = 108;          // 被动: 接收服务器指令后, 获取设备状态信息
     public static final String RXJAVAHTTP_COMPANY = "xiaolajiao";
     public static final String RXJAVAHTTP_SECRET_CODE = "ab2796145acdf";//"8s6HiyY0yGCLeZp5";     //ab2342145acdf;    // iETOECQ9kiJw75AZ
     public static final String RXJAVAHTTP_ENCODE_TYPE = "UTF-8";
@@ -112,7 +112,7 @@ public class Constant {
     public static final String RESULT_PARAM_TYPE = "type";
     public static final String RESULT_PARAM_TIME = "time";
     public static final String RESULT_PARAM_COMMAND = "command";
-    public static final String RESULT_PARAM_NAME = "e_order";
+    public static final String RESULT_PARAM_NAME = "name";
     public static final String RESULT_PARAM_NUMBER = "sos_phone";
 
     public static final String SOCKET_SERVER_ADDRESS_URL = "healthdata.4000300659.com";

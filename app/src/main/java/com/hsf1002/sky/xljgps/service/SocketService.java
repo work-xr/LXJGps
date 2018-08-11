@@ -10,6 +10,7 @@ import android.util.Log;
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
 import com.hsf1002.sky.xljgps.model.SocketModel;
 import com.hsf1002.sky.xljgps.params.BeatHeartParam;
+import com.hsf1002.sky.xljgps.result.ResultServerDownloadNumberMsg;
 import com.hsf1002.sky.xljgps.result.ResultServerIntervalMsg;
 import com.hsf1002.sky.xljgps.result.ResultServerMsg;
 import com.hsf1002.sky.xljgps.result.ResultServerOuterElectricMsg;
@@ -25,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -74,7 +76,11 @@ public class SocketService extends Service {
     private OutputStream os = null;
     private DataInputStream dis = null;
 
+    // 用于连接socket, 以及断开时重新连接
+    private static Thread connectServerThread;
+    // 用于从服务器端读取数据, 解析后再返回数据到服务器端
     private static Thread readServerThread;
+    // 用于给服务器端写数据
     private static Thread writeServerThread;
     private static String gsonString = null;
 
@@ -83,16 +89,17 @@ public class SocketService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
 
-        // ....
+        /*
         sThreadPool = new ThreadPoolExecutor(
                 1,
                 1,
                 60,
                  TimeUnit.SECONDS,
                  new LinkedBlockingDeque<Runnable>(),
-                 new ThreadPoolExecutor.AbortPolicy());
+                 new ThreadPoolExecutor.AbortPolicy());*/
 
-        connectSocketServer();
+        connectServerThread = new ConnectServerThread();
+        connectServerThread.start();
         readServerThread = new ReadServerThread();
         readServerThread.start();
         writeServerThread = new WriteDataThread();
@@ -101,6 +108,10 @@ public class SocketService extends Service {
        // writeDataToServer(null);
         //SocketModel.getInstance().reportBeatHeart();
         //parseServerMsg("{\"imei\":\"867400020316620\",\"time\":\"20180810155626\",\"command\":101}");
+        //parseServerMsg("{\"interval\":\"3600\",\"command\":106,\"time\":\"20170102302022\"}");
+        //parseServerMsg("{\"imei \":\"869938027477745\",\"command\":107,\"time\":\"20170102302022\"}");
+        //parseServerMsg("{\"imei\":\"869938027477745\",\"command\":108,\"time\":\"20170102302022\"}");
+        parseServerMsg("{\"sos_phone\":\"10086,12345,19968867878,059212349\",\"name\":\"亲1,亲2,亲3,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
     }
 
     @Nullable
@@ -149,26 +160,32 @@ public class SocketService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-3 上午10:00
-    *  desc:    基于TCP协议连接远程服务器的Socket
+    *  desc:    重新连接socket
     *  param:
     *  return:
     */
     public void connectSocketServer()
     {
-        if (sSocket == null) {
-            sThreadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    Log.i(TAG, "connectSocketServer: start");
-                    try {
-                        sSocket = new Socket(SOCKET_SERVER_ADDRESS_URL, SOCKET_SERVER_ADDRESS_PORT);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return;
-                    }
-                    Log.i(TAG, "connectSocketServer: finished");
+        if (!connectServerThread.isAlive())
+        {
+            connectServerThread.run();
+        }
+    }
+
+    private class ConnectServerThread extends Thread
+    {
+        @Override
+        public void run() {
+            if (sSocket == null) {
+                 Log.i(TAG, "connectSocketServer: start");
+                try {
+                    sSocket = new Socket(SOCKET_SERVER_ADDRESS_URL, SOCKET_SERVER_ADDRESS_PORT);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
                 }
-            });
+                Log.i(TAG, "connectSocketServer: finished");
+            }
         }
     }
 
@@ -181,7 +198,7 @@ public class SocketService extends Service {
     */
     private void disConnectSocketServer()
     {
-        Log.i(TAG, "disConnectSocketServer: start");
+        Log.i(TAG, "disConnectSocketServer: start*****************************************************************");
 
         try
         {
@@ -199,6 +216,11 @@ public class SocketService extends Service {
             }
             if (sSocket != null) {
                 sSocket.close();
+
+                Log.d(TAG, "disConnectSocketServer: isConnected = " + sSocket.isConnected());
+                Log.d(TAG, "disConnectSocketServer: isClosed = " + sSocket.isClosed());
+
+                sSocket = null;
             }
         }
         catch (IOException e)
@@ -206,7 +228,7 @@ public class SocketService extends Service {
             e.printStackTrace();
         }
 
-        Log.i(TAG, "disConnectSocketServer: finished");
+        Log.i(TAG, "disConnectSocketServer: finished***************************************************************");
     }
 
     /**
@@ -218,17 +240,58 @@ public class SocketService extends Service {
     */
     private boolean isSocketConnected()
     {
-        if (sSocket == null) {
-            ReconnectSocketService.setServiceAlarm(XLJGpsApplication.getAppContext(), true);
-            return false;
-        }
-        else {
-            Log.i(TAG, "isSocketConnected: isConnected = " + sSocket.isConnected());
-            Log.i(TAG, "isSocketConnected: isBound = " + sSocket.isBound());
-            Log.i(TAG, "isSocketConnected: isClosed = " + sSocket.isClosed());
-            return sSocket.isConnected();
-        }
+        //Log.i(TAG, "isSocketConnected: isConnected = " + sSocket.isConnected()); // true
+        //Log.i(TAG, "isSocketConnected: isBound = " + sSocket.isBound());    // false
+        //Log.i(TAG, "isSocketConnected: isClosed = " + sSocket.isClosed());  // false
+        return confirmSocketConnected();
     }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-11 上午11:27
+    *  desc:
+    *  param:
+    *  return:
+    */
+    private boolean confirmSocketConnected()
+    {
+        boolean disconnected = false;
+
+        if (sSocket == null)
+        {
+            disconnected = true;
+        }
+        boolean serviceStarted = ReconnectSocketService.isServiceAlarmOn(XLJGpsApplication.getAppContext());
+
+        Log.i(TAG, "confirmSocketConnected: disconnected = " + disconnected + ", serviceStarted = " + serviceStarted);
+
+        // 如果socket连上了, 且重连服务已经开启, 则关闭
+        if (!disconnected && serviceStarted) {
+            ReconnectSocketService.setServiceAlarm(XLJGpsApplication.getAppContext(), false);
+            Log.d(TAG, "confirmSocketConnected: socket already connected, stopped reconncect service**********************************");
+            return true;
+        }
+        // 如果socket断开了, 且重连服务没有开启, 则开启
+        else if (disconnected && !serviceStarted) {
+            ReconnectSocketService.setServiceAlarm(XLJGpsApplication.getAppContext(), true);
+            Log.d(TAG, "confirmSocketConnected: start to reconncect service***********************************************************");
+        }
+        // 如果socket连上了, 且重连服务已经断开或 socket断开了, 且重连服务已经开启, 不处理
+        else
+        {
+            if (!disconnected)
+            {
+                Log.i(TAG, "confirmSocketConnected:  socket already connected, continue***********************************************");
+            }
+            else
+            {
+                Log.i(TAG, "confirmSocketConnected:  connected socket failed, continue************************************************");
+            }
+        }
+
+        return !disconnected;
+    }
+
 
     /**
     *  author:  hefeng
@@ -285,7 +348,8 @@ public class SocketService extends Service {
             // 前4个字节应该都是数字,否则丢弃此次读取
             if (!TextUtils.isDigitsOnly(sizeStr))
             {
-                Log.d(TAG, "getParseDataString: the first 4 bytes invalid, discard it!");
+                Log.d(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************************!");
+                disConnectSocketServer();
                 return null;
             }
 
@@ -348,8 +412,9 @@ public class SocketService extends Service {
 
         @Override
         public void run() {
+            // 先等待socket连接成功, 再进行写操作
             try {
-                Thread.sleep(500);
+                connectServerThread.join();
             }
             catch (InterruptedException e)
             {
@@ -375,7 +440,7 @@ public class SocketService extends Service {
                         os.write(completedStr.getBytes());
                         os.flush();
                         //sSocket.shutdownOutput();
-                        Log.i(TAG, "writeDataToServer: write data to server successfully.");
+                        Log.i(TAG, "writeDataToServer: write data to server successfully^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                     }
                     else
                     {
@@ -426,6 +491,33 @@ public class SocketService extends Service {
 
     /**
     *  author:  hefeng
+    *  created: 18-8-11 上午10:17
+    *  desc:    把截取到的参数的值value字符串进行解析, 只取数字部分
+    *  param:
+    *  return:
+    */
+    private String getParamValueOnlyDigit(String value)
+    {
+        StringBuilder commandBuilder = new StringBuilder();
+        int length = value.length();
+
+        for(int i=0; i<length; ++i)
+        {
+            String oneChar = value.substring(i, i+1);
+
+            if (TextUtils.isDigitsOnly(oneChar))
+            {
+                commandBuilder.append(oneChar);
+            }
+        }
+
+        Log.i(TAG, "getParamValueOnlyDigit: commandBuilder.toString() = " + commandBuilder.toString());
+
+        return commandBuilder.toString();
+    }
+
+    /**
+    *  author:  hefeng
     *  created: 18-8-3 上午10:19
     *  desc:    解析从服务器接收的数据
      *  接口4、孝老平台下发修改设备亲情号码等信息    接收数据: {"imei":"869426020023138","command":103, "e_order":"老妈，老弟，老姐, 养老服务中心号码"，"sos_phone":",13555555553, 13555555553 , 13555555555，059612349","time":"20170504113555"}   发送数据: {"imei":"869426020023138","company":"hemiao","type":103,"time":"20170402120223","success":1}
@@ -436,8 +528,7 @@ public class SocketService extends Service {
     *  param:
     *  return:
     */
-    public String parseServerMsg(String msg)
-    {
+    public String parseServerMsg(String msg) {
         String gsonStr = null;
         String[] dataList = null;
         String paramType = null;
@@ -449,34 +540,27 @@ public class SocketService extends Service {
 
         Log.i(TAG, "parseServerMsg: msg = " + msg);
 
-        dataList = msg.split(",");
-
-        for (int i=0; i<dataList.length; ++i)
+        // 如果服务器下发的是修改亲情号码指令, 不能以 , 分割字符串
+        if (msg.contains(RESULT_PARAM_NAME) && msg.contains(RESULT_PARAM_NUMBER))
         {
-            if (dataList[i].contains(RESULT_PARAM_COMMAND))
-            {
-                paramType = dataList[i];
-                Log.i(TAG, "parseServerMsg: param = " + paramType);
-            }
-            else if (dataList[i].contains(RESULT_PARAM_INTERVAL))
-            {
-                paramInterval = dataList[i];
-            }
-            else if (dataList[i].contains(RESULT_PARAM_IMEI))
-            {
-                paramIMEI = dataList[i];
-            }
-            else if (dataList[i].contains(RESULT_PARAM_TIME))
-            {
-                paramTime = dataList[i];
-            }
-            else if (dataList[i].contains(RESULT_PARAM_NAME))
-            {
-                paramName = dataList[i];
-            }
-            else if (dataList[i].contains(RESULT_PARAM_NUMBER))
-            {
-                paramNumber = dataList[i];
+            paramNumber = getOneParam(msg, 0);
+            paramName= getOneParam(msg, 1 + paramNumber.length() + 4);   // {"":"",
+            int commandPos = msg.indexOf(RESULT_PARAM_COMMAND);
+            paramType = msg.substring(commandPos);
+        }
+        else {
+            dataList = msg.split(",");
+
+            for (int i = 0; i < dataList.length; ++i) {
+                if (dataList[i].contains(RESULT_PARAM_COMMAND)) {
+                    paramType = dataList[i];
+                } else if (dataList[i].contains(RESULT_PARAM_INTERVAL)) {
+                    paramInterval = dataList[i];
+                } else if (dataList[i].contains(RESULT_PARAM_IMEI)) {
+                    paramIMEI = dataList[i];
+                } else if (dataList[i].contains(RESULT_PARAM_TIME)) {
+                    paramTime = dataList[i];
+                }
             }
         }
 
@@ -488,23 +572,7 @@ public class SocketService extends Service {
 
         String[] paramList = paramType.split(":");
         String commandStr = paramList[1];
-        int length = commandStr.length();
-        StringBuilder commandBuilder = new StringBuilder();
-
-        for(int i=0; i<length; ++i)
-        {
-            String oneChar = commandStr.substring(i, i+1);
-            //Log.i(TAG, "parseServerMsg: oneChar = " + oneChar);
-
-            if (TextUtils.isDigitsOnly(oneChar))
-            {
-                commandBuilder.append(oneChar);
-            }
-        }
-
-        Log.i(TAG, "parseServerMsg: commandBuilder = " + commandBuilder);
-
-        int command = Integer.valueOf(commandBuilder.toString());
+        int command = Integer.valueOf(getParamValueOnlyDigit(commandStr));
 
         switch (command)
         {
@@ -522,11 +590,18 @@ public class SocketService extends Service {
                 }
 
                 paramList = paramName.split(":");
-                String name = paramList[1].substring(1, paramList[1].length()-1);
+                String name = paramList[1].substring(0, paramList[1].length());
                 paramList = paramNumber.split(":");
-                String number = paramList[1].substring(1, paramList[1].length()-1);
+                String number = paramList[1].substring(0, paramList[1].length());
+
+                Log.i(TAG, "parseServerMsg: name = " + name  + ", number = " + number);
 
                 SprdCommonUtils.getInstance().setRelationNumber(number);
+
+                ResultServerDownloadNumberMsg downloadNumberMsg = new ResultServerDownloadNumberMsg();
+                downloadNumberMsg.setSuccess(RESULT_SUCCESS_1);
+
+                gsonStr = ResultServerDownloadNumberMsg.getResultServerDownloadNumberMsgGson(downloadNumberMsg);
                 break;
             // 上传位置信息
             case RXJAVAHTTP_TYPE_CURRENT:
@@ -540,36 +615,33 @@ public class SocketService extends Service {
                     return null;
                 }
                 paramList = paramInterval.split(":");
-                int interval = Integer.valueOf(paramList[1].substring(1, paramList[1].length()-1));
+                Log.i(TAG, "parseServerMsg: paramInterval = " + paramInterval);
+                int interval = Integer.valueOf(getParamValueOnlyDigit(paramList[1]));
+                Log.i(TAG, "parseServerMsg: interval = " + interval);
                 GpsService.setStartServiceInterval(interval);
 
-                ResultServerMsg<ResultServerIntervalMsg> resultServerIntervalMsg = new ResultServerMsg<ResultServerIntervalMsg>();
-                resultServerIntervalMsg.setSuccess(RESULT_SUCCESS_1);
-                resultServerIntervalMsg.setData(new ResultServerIntervalMsg());
+                ResultServerIntervalMsg intervalMsg = new ResultServerIntervalMsg();
+                intervalMsg.setSuccess(RESULT_SUCCESS_1);
 
-                gsonStr = ResultServerMsg.getResultServerMsgGson(resultServerIntervalMsg);
+                gsonStr = ResultServerIntervalMsg.getResultServerIntervalMsgGson(intervalMsg);
                 break;
             // 超出电子围栏, 给亲情号码发送短信通知
             case RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR:
                 SprdCommonUtils.getInstance().sendSosSms();
 
                 ResultServerOuterElectricMsg outerElectricMsg = new ResultServerOuterElectricMsg();
-                ResultServerMsg<ResultServerOuterElectricMsg> resultServerOuterMsg = new ResultServerMsg<ResultServerOuterElectricMsg>();
-                resultServerOuterMsg.setSuccess(RESULT_SUCCESS_1);
-                resultServerOuterMsg.setData(outerElectricMsg);
+                outerElectricMsg.setSuccess(RESULT_SUCCESS_1);
 
-                gsonStr = ResultServerMsg.getResultServerMsgGson(resultServerOuterMsg);
+                gsonStr = ResultServerOuterElectricMsg.getResultServerOuterElectricMsgGson(outerElectricMsg);
                 break;
             // 获取设备状态信息, 再返回给服务器
             case RXJAVAHTTP_TYPE_GET_STATUS_INFO:
                 ResultServerStatusInfoMsg statusInfoMsg = new ResultServerStatusInfoMsg();
                 statusInfoMsg.setMessage(RESULT_MSG_SUCCESS);
                 statusInfoMsg.setStatus(RESULT_STATUS_POWERON);
-                ResultServerMsg<ResultServerStatusInfoMsg> resultServerStatusMsg = new ResultServerMsg<ResultServerStatusInfoMsg>();
-                resultServerStatusMsg.setSuccess(RESULT_SUCCESS_1);
-                resultServerStatusMsg.setData(statusInfoMsg);
+                statusInfoMsg.setSuccess(RESULT_SUCCESS_1);
 
-                gsonStr = ResultServerMsg.getResultServerMsgGson(resultServerStatusMsg);
+                gsonStr = ResultServerStatusInfoMsg.getResultServerStatusInfoMsgGson(statusInfoMsg);
                 break;
             // 这几条指令, 是本地主动向服务器端发送数据, 只接收服务器端的返回值即可, 无需向服务器端传输任何数据
             case RXJAVAHTTP_TYPE_BEATHEART:
@@ -599,8 +671,9 @@ public class SocketService extends Service {
     {
         @Override
         public void run(){
+            // 先等待socket连接成功, 再进行读写操作
             try {
-                Thread.sleep(500);
+                connectServerThread.join();
             }
             catch (InterruptedException e)
             {
@@ -610,8 +683,6 @@ public class SocketService extends Service {
             while (true)
             {
                 if (isSocketConnected()) {
-                    Log.i(TAG, "readDataFromServer: connected to server successfully.");
-
                     try {
                         // 1. 打开输入流, 从服务器端接收数据
                         Log.i(TAG, "readDataFromServer: waiting for server send data.....................blocked");
@@ -644,7 +715,7 @@ public class SocketService extends Service {
                             os.flush();
                             //sSocket.shutdownOutput();
 
-                            Log.i(TAG, "readDataFromServer: write data to server successfully.");
+                            Log.i(TAG, "readDataFromServer: write data to server successfully^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                             //os.close();
                         }
                         else
@@ -661,6 +732,50 @@ public class SocketService extends Service {
                 }
             }
         }
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-11 下午12:55
+    *  desc:    将一个JSON字符串进行解析, 拼接成key,value形式返回, 不支持嵌套
+    *  param:
+    *  return:
+    */
+    private String getOneParam(String params, int position)
+    {
+        String param = null;
+        int startPos = 0;
+        int endPos = 0;
+
+        //Log.i(TAG, "getOneParam: position = " + position);
+
+        startPos = params.indexOf("\"", position);
+        endPos = params.indexOf("\"", startPos + 1);
+        endPos = params.indexOf("\"", endPos + 1 );
+        endPos = params.indexOf("\"", endPos + 1);
+
+        //Log.i(TAG, "getOneParam: startPos = " + startPos + ", endPos = " + endPos);
+        try {
+            param = params.substring(startPos, endPos + 1);
+        }
+        catch (StringIndexOutOfBoundsException e)
+        {
+            e.printStackTrace();
+        }
+
+        int keyStartPos = params.indexOf("\"", position);
+        int keyEndPos = params.indexOf("\"", keyStartPos + 1);
+        int valueStartPos = params.indexOf("\"", keyEndPos + 1);
+        int valueEndPos = params.indexOf("\"", valueStartPos + 1);
+        String key = params.substring(keyStartPos + 1, keyEndPos);
+        String value = params.substring(valueStartPos + 1, valueEndPos);
+
+        //Log.e(TAG, "getOneParam: keyStartPos = " + keyStartPos + ", keyEndPos = " + keyEndPos + ", valueStartPos = " + valueStartPos + ", valueEndPos = " + valueEndPos);
+        //HashMap<String, String> hashMap = new HashMap<String, String>();
+        //hashMap.put(key, value);
+        //Log.d(TAG, "getOneParam: key = " + key + ":value = " + value);
+
+        return key + ":" + value;
     }
 
     @Override
