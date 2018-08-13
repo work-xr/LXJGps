@@ -60,6 +60,8 @@ public class Constant {
     // 每隔多久启动一次IntentService服务来开始定位,可由服务器端通过调用setStartServiceInterval进行设置更改
     public static final String BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME = "baidu_gps_scan_span_interval_name";
     public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_VALUE = 2 * 60 * 1000;
+    // 如果不用service, 百度默认多久发起一次定位
+    public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
     // 每次启动百度地图服务XLJGpsService.setServiceAlarm(getApplicationContext(), true);, 如果3分钟内没有定位成功, 自动停止地图服务stopBaiduGps
     //public static final int BAIDU_GPS_FIRST_SCAN_TIME_MAX = 3 * 60 * 1000;
     public static final String BAIDU_GPS_LOCATION_TYPE_GPS = "gps";
@@ -118,6 +120,6 @@ public class Constant {
     public static final String SOCKET_SERVER_ADDRESS_URL = "healthdata.4000300659.com";
     public static final int SOCKET_SERVER_ADDRESS_PORT = 12004;
 
-    public static final int BEATHEART_SERVICE_INTERVAL = 10 * 60 * 1000;
+    public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
     public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 60 * 1000;
 }

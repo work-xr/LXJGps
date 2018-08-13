@@ -1,6 +1,5 @@
 package com.hsf1002.sky.xljgps.model;
 
-import android.os.Handler;
 import android.util.Log;
 
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
@@ -11,6 +10,10 @@ import com.hsf1002.sky.xljgps.params.UploadRelationNumberParam;
 import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
 import com.hsf1002.sky.xljgps.service.SocketService;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
+
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_BEATHEART;
@@ -27,17 +30,24 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_UPLOAD;
 */
 public class SocketModel implements BaseModel {
     private static final String TAG = "SocketModel";
-    private Handler handler;
+    private static ThreadPoolExecutor sThreadPool;
+    private SocketService socketService = new SocketService();
 
     /**
     *  author:  hefeng
     *  created: 18-8-10 下午4:36
-    *  desc:    初始化一个handler
+    *  desc:    初始化一个只有一个线程的线程池
     *  param:
     *  return:
     */
     public SocketModel() {
-        handler = new Handler();
+        sThreadPool = new ThreadPoolExecutor(
+                1,
+                1,
+                60,
+                 TimeUnit.SECONDS,
+                 new LinkedBlockingDeque<Runnable>(),
+                 new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
@@ -66,12 +76,31 @@ public class SocketModel implements BaseModel {
     */
     private void postDataServer(final String gsonString)
     {
-        handler.post(new Runnable() {
+        //socketService.writeDataToServer(gsonString);
+        sThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try
+                {
+                    Thread.sleep(100);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+                socketService.waitConnectThread();
+                socketService.writeDataToServer(gsonString);
+            }
+        });
+
+
+/*
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 SocketService.getInstance().writeDataToServer(gsonString);
             }
-        });
+        }).start();*/
     }
 
     /**

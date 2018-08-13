@@ -1,6 +1,8 @@
 ### LXJGps
 * 使用MVP架构
-* 使用AlarmService开启定时服务
+* 使用AlarmService开启定位服务-GpsService
+* 使用AlarmService开启心跳服务-BeatHeartService
+* 使用AlarmService开启重连服务-ReconnectSocketService
 * 使用StickyService打开socket连接
 * 使用百度SDK定位  
 ~~* 使用RxJava访问网络~~

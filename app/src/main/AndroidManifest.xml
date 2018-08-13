@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hsf1002.sky.xljgps">
+    package="com.hsf1002.sky.xljgps"
+    >
 
     <!-- 这个权限用于进行网络定位-->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -40,7 +41,6 @@
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -60,6 +60,7 @@
             </intent-filter>
         </receiver>
 
+        <service android:name=".service.BeatHeartService" />
         <service android:name=".service.GpsIntentService" />
         <service android:name=".service.GpsService" />
         <service android:name=".service.SocketService" />

@@ -18,6 +18,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTE
  * Created by hefeng on 18-6-6.
  */
 
+@Deprecated
 public class GpsIntentService extends IntentService {
     private static final String TAG = "GpsIntentService";
     private static int startServiceInterval = SharedPreUtils.getInstance().getInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_VALUE);

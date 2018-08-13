@@ -32,16 +32,14 @@ public class XLJGpsApplication extends Application {
         Log.i(TAG, "onCreate: ...................................");
         sContext = getApplicationContext();
 
+        // 初始化百度SDK
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
 
         //GpsService.setServiceAlarm(sContext, true);
-
-        startService(new Intent(sContext, SocketService.class));
-
+        //startService(new Intent(sContext, SocketService.class));
         //BeatHeartService.setServiceAlarm(sContext, true);
 
-
-        rxjavaHttpInit();
+        //rxjavaHttpInit();
     }
 
     /**
@@ -51,6 +49,7 @@ public class XLJGpsApplication extends Application {
     *  param:
     *  return:
     */
+    @Deprecated
     private void rxjavaHttpInit()
     {
         RxHttpUtils.init(this);

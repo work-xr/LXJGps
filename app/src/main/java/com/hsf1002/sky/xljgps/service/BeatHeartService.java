@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.hsf1002.sky.xljgps.model.SocketModel;
 
@@ -19,7 +20,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.BEATHEART_SERVICE_INTERVAL;
 public class BeatHeartService extends Service {
 
     public static final String TAG = "BeatHeartService";
-    private static int startServiceInterval = BEATHEART_SERVICE_INTERVAL;
+    private static int startServiceInterval = BEATHEART_SERVICE_INTERVAL/2;
 
     @Nullable
     @Override
@@ -40,6 +41,7 @@ public class BeatHeartService extends Service {
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval);
 
         if  (isOn)
         {

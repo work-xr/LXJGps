@@ -48,7 +48,7 @@ public class ReconnectSocketService extends Service {
 
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         sConnectedCount++;
-        Log.i(TAG, "setServiceAlarm: sConnectedCount = " + sConnectedCount);
+        Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", sConnectedCount = " + sConnectedCount);
 
         if  (isOn)
         {

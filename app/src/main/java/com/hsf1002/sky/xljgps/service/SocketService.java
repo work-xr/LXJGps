@@ -1,6 +1,7 @@
 package com.hsf1002.sky.xljgps.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -9,10 +10,8 @@ import android.util.Log;
 
 import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
 import com.hsf1002.sky.xljgps.model.SocketModel;
-import com.hsf1002.sky.xljgps.params.BeatHeartParam;
 import com.hsf1002.sky.xljgps.result.ResultServerDownloadNumberMsg;
 import com.hsf1002.sky.xljgps.result.ResultServerIntervalMsg;
-import com.hsf1002.sky.xljgps.result.ResultServerMsg;
 import com.hsf1002.sky.xljgps.result.ResultServerOuterElectricMsg;
 import com.hsf1002.sky.xljgps.result.ResultServerStatusInfoMsg;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
@@ -26,10 +25,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_SUCCESS;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_COMMAND;
@@ -40,9 +36,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_TIME;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_STATUS_POWERON;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_SUCCESS_1;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_ENCODE_TYPE;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_IMEI;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_BEATHEART;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_CURRENT;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_DOWNLOAD;
@@ -68,7 +62,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_ADDRESS_URL;
 public class SocketService extends Service {
 
     private static final String TAG = "SocketService";
-    private static ThreadPoolExecutor sThreadPool;
+    private static Context sContext;
     private static Socket sSocket = null;
 
     private InputStream is = null;
@@ -89,29 +83,21 @@ public class SocketService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
 
-        /*
-        sThreadPool = new ThreadPoolExecutor(
-                1,
-                1,
-                60,
-                 TimeUnit.SECONDS,
-                 new LinkedBlockingDeque<Runnable>(),
-                 new ThreadPoolExecutor.AbortPolicy());*/
-
+        sContext = XLJGpsApplication.getAppContext();
         connectServerThread = new ConnectServerThread();
         connectServerThread.start();
         readServerThread = new ReadServerThread();
         readServerThread.start();
         writeServerThread = new WriteDataThread();
         writeServerThread.start();
-        SocketModel.getInstance().reportBeatHeart();
+        //SocketModel.getInstance().reportBeatHeart();
        // writeDataToServer(null);
         //SocketModel.getInstance().reportBeatHeart();
         //parseServerMsg("{\"imei\":\"867400020316620\",\"time\":\"20180810155626\",\"command\":101}");
         //parseServerMsg("{\"interval\":\"3600\",\"command\":106,\"time\":\"20170102302022\"}");
         //parseServerMsg("{\"imei \":\"869938027477745\",\"command\":107,\"time\":\"20170102302022\"}");
         //parseServerMsg("{\"imei\":\"869938027477745\",\"command\":108,\"time\":\"20170102302022\"}");
-        parseServerMsg("{\"sos_phone\":\"10086,12345,19968867878,059212349\",\"name\":\"亲1,亲2,亲3,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
+        //parseServerMsg("{\"sos_phone\":\"10086,12345,19968867878,059212349\",\"name\":\"亲1,亲2,亲3,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
     }
 
     @Nullable
@@ -148,12 +134,6 @@ public class SocketService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: start service...............");
-
-        // 这个方法运行在主线程,必须重新开启子线程
-
-        //SocketModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_SOS, null);
-
-
         return START_STICKY;// super.onStartCommand(intent, flags, startId);
     }
 
@@ -166,9 +146,10 @@ public class SocketService extends Service {
     */
     public void connectSocketServer()
     {
-        if (!connectServerThread.isAlive())
-        {
-            connectServerThread.run();
+        if (connectServerThread != null) {
+            if (!connectServerThread.isAlive()) {
+                connectServerThread.run();
+            }
         }
     }
 
@@ -183,6 +164,12 @@ public class SocketService extends Service {
                 } catch (IOException e) {
                     e.printStackTrace();
                     return;
+                }
+                finally {
+                    // 开启心跳定时服务, 默认每隔5分钟上报一次心跳
+                    BeatHeartService.setServiceAlarm(sContext, true);
+                    // 开机就上报一次位置信息
+                    //SocketModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_POWERON, null);
                 }
                 Log.i(TAG, "connectSocketServer: finished");
             }
@@ -261,19 +248,19 @@ public class SocketService extends Service {
         {
             disconnected = true;
         }
-        boolean serviceStarted = ReconnectSocketService.isServiceAlarmOn(XLJGpsApplication.getAppContext());
+        boolean serviceStarted = ReconnectSocketService.isServiceAlarmOn(sContext);
 
         Log.i(TAG, "confirmSocketConnected: disconnected = " + disconnected + ", serviceStarted = " + serviceStarted);
 
         // 如果socket连上了, 且重连服务已经开启, 则关闭
         if (!disconnected && serviceStarted) {
-            ReconnectSocketService.setServiceAlarm(XLJGpsApplication.getAppContext(), false);
+            ReconnectSocketService.setServiceAlarm(sContext, false);
             Log.d(TAG, "confirmSocketConnected: socket already connected, stopped reconncect service**********************************");
             return true;
         }
         // 如果socket断开了, 且重连服务没有开启, 则开启
         else if (disconnected && !serviceStarted) {
-            ReconnectSocketService.setServiceAlarm(XLJGpsApplication.getAppContext(), true);
+            ReconnectSocketService.setServiceAlarm(sContext, true);
             Log.d(TAG, "confirmSocketConnected: start to reconncect service***********************************************************");
         }
         // 如果socket连上了, 且重连服务已经断开或 socket断开了, 且重连服务已经开启, 不处理
@@ -348,7 +335,7 @@ public class SocketService extends Service {
             // 前4个字节应该都是数字,否则丢弃此次读取
             if (!TextUtils.isDigitsOnly(sizeStr))
             {
-                Log.d(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************************!");
+                Log.d(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************!");
                 disConnectSocketServer();
                 return null;
             }
@@ -404,22 +391,10 @@ public class SocketService extends Service {
 
     public class WriteDataThread extends Thread
     {
-        private String data;
-
-        public void setData(String data) {
-            this.data = data;
-        }
-
         @Override
         public void run() {
             // 先等待socket连接成功, 再进行写操作
-            try {
-                connectServerThread.join();
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
+            waitConnectThread();
 
             if (!isSocketConnected())
             {
@@ -440,7 +415,7 @@ public class SocketService extends Service {
                         os.write(completedStr.getBytes());
                         os.flush();
                         //sSocket.shutdownOutput();
-                        Log.i(TAG, "writeDataToServer: write data to server successfully^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                        Log.i(TAG, "writeDataToServer: write data to server successfully^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                     }
                     else
                     {
@@ -481,10 +456,11 @@ public class SocketService extends Service {
     {
         gsonString = data;
 
-        Log.d(TAG, "writeDataToServer: isAlive = " + writeServerThread.isAlive());
-        Log.i(TAG, "writeDataToServer: isInterrupted = " + writeServerThread.isInterrupted());
+        Log.d(TAG, "writeDataToServer: prepared.............................................");
 
         if (writeServerThread != null ) {
+            Log.d(TAG, "writeDataToServer: isAlive = " + writeServerThread.isAlive());
+            Log.i(TAG, "writeDataToServer: isInterrupted = " + writeServerThread.isInterrupted());
             writeServerThread.run();
         }
     }
@@ -659,6 +635,25 @@ public class SocketService extends Service {
         return gsonStr;
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-13 下午2:46
+    *  desc:    等待
+    *  param:
+    *  return:
+    */
+    public void waitConnectThread()
+    {
+        // 先等待socket连接成功, 再进行读写操作
+        try {
+            connectServerThread.join();
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      *  author:  hefeng
@@ -672,13 +667,7 @@ public class SocketService extends Service {
         @Override
         public void run(){
             // 先等待socket连接成功, 再进行读写操作
-            try {
-                connectServerThread.join();
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
+            waitConnectThread();
 
             while (true)
             {
@@ -715,7 +704,7 @@ public class SocketService extends Service {
                             os.flush();
                             //sSocket.shutdownOutput();
 
-                            Log.i(TAG, "readDataFromServer: write data to server successfully^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                            Log.i(TAG, "readDataFromServer: write data to server successfully^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                             //os.close();
                         }
                         else
