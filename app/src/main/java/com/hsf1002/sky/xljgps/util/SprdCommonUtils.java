@@ -11,7 +11,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.hsf1002.sky.xljgps.R;
-import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
+import com.hsf1002.sky.xljgps.app.GpsApplication;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -55,7 +55,7 @@ public class SprdCommonUtils {
     */
     public String getIMEI()
     {
-        TelephonyManager telephonyManager = (TelephonyManager)XLJGpsApplication.getAppContext().getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager telephonyManager = (TelephonyManager) GpsApplication.getAppContext().getSystemService(Context.TELEPHONY_SERVICE);
         String deviceId = null;
         //int phoneCount = telephonyManager.getPhoneCount();    // Android4.4 不支持此方法
 
@@ -145,7 +145,7 @@ public class SprdCommonUtils {
         Context sosContext = null;
 
         try {
-            sosContext = XLJGpsApplication.getAppContext().createPackageContext(SOS_PACKAGE_NAME, Context.CONTEXT_IGNORE_SECURITY);
+            sosContext = GpsApplication.getAppContext().createPackageContext(SOS_PACKAGE_NAME, Context.CONTEXT_IGNORE_SECURITY);
             Log.i(TAG, "instance initializer: get sos context");
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -245,7 +245,7 @@ public class SprdCommonUtils {
         intent.putExtra(SET_RELATION_NUMBER, relationNumber);
 
         Log.i(TAG, "setRelationNumber: relationNumber = " + relationNumber);
-        XLJGpsApplication.getAppContext().sendBroadcast(intent);
+        GpsApplication.getAppContext().sendBroadcast(intent);
     }
 
     /**
@@ -272,7 +272,7 @@ public class SprdCommonUtils {
 
         if (mSosMsg.equals(SOS_NUM_INVALID_VALUE))
         {
-            mSosMsg = XLJGpsApplication.getAppContext().getResources().getString(R.string.sos_sms);
+            mSosMsg = GpsApplication.getAppContext().getResources().getString(R.string.sos_sms);
         }
         Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
 
@@ -349,7 +349,7 @@ public class SprdCommonUtils {
     public String getRelationNumberNames()
     {
         StringBuilder numberStringNames = new StringBuilder();
-        String[]  names = XLJGpsApplication.getAppContext().getResources().getStringArray(R.array.relation_item_name);
+        String[]  names = GpsApplication.getAppContext().getResources().getStringArray(R.array.relation_item_name);
         //int count = SOS_NUM_COUNT + 1;//getRelationNumberCount();
 
         for (int i=0; i<SOS_NUM_COUNT + 1; ++i)
@@ -360,7 +360,7 @@ public class SprdCommonUtils {
             }
             else
             {
-                String itemName = XLJGpsApplication.getAppContext().getString(R.string.sos_number) + (i + 1);
+                String itemName = GpsApplication.getAppContext().getString(R.string.sos_number) + (i + 1);
                 numberStringNames.append(itemName);
                 numberStringNames.append(",");
             }
@@ -418,7 +418,7 @@ public class SprdCommonUtils {
             }
         }
         else {
-            //BatteryManager batteryManager = (BatteryManager)XLJGpsApplication.getAppContext().getSystemService(BATTERY_SERVICE);
+            //BatteryManager batteryManager = (BatteryManager)GpsApplication.getAppContext().getSystemService(BATTERY_SERVICE);
             //percent = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
         }
 

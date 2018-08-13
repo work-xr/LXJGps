@@ -20,6 +20,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_UPDATE_TO_PLATFORM
 *  created: 18-8-10 上午8:45
 *  desc:    改为socket通信后,该文件没用了
 */
+
 @Deprecated
 public interface ApiService {
     @POST(RXJAVAHTTP_REPORT_SOSPOSITION)

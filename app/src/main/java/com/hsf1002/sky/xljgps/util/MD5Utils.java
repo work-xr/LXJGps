@@ -6,8 +6,10 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by hefeng on 18-6-15.
+ * desc: Rxjava HTTP才会用到, Socket TCP暂时没用到
  */
 
+@Deprecated
 public class MD5Utils {
     private static final String TAG = "MD5Utils";
 

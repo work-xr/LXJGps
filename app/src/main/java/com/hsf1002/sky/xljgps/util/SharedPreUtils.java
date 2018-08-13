@@ -3,9 +3,7 @@ package com.hsf1002.sky.xljgps.util;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
-
-import static com.hsf1002.sky.xljgps.util.Constant.SHARED_PREFERENCE_NAME;
+import com.hsf1002.sky.xljgps.app.GpsApplication;
 
 /**
  * Created by hefeng on 18-6-8.
@@ -18,7 +16,7 @@ public class SharedPreUtils {
     private static SharedPreferences.Editor editor;
 
     private SharedPreUtils() {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(XLJGpsApplication.getAppContext());//XLJGpsApplication.getAppContext().getSharedPreferences(SHARED_NAME, Context.MODE_MULTI_PROCESS);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(GpsApplication.getAppContext());//GpsApplication.getAppContext().getSharedPreferences(SHARED_NAME, Context.MODE_MULTI_PROCESS);
         editor = sharedPreferences.edit();
     }
 

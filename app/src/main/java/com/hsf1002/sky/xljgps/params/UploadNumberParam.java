@@ -4,9 +4,10 @@ import com.google.gson.Gson;
 
 /**
  * Created by hefeng on 18-6-15.
+ * desc: 不管Rxjava HTTP还是Socket TCP都共用此类, 其中type的类型不一样
  */
 
-public class UploadRelationNumberParam {
+public class UploadNumberParam {
     private String imei;
     //private String manufactory;
     //private String model;
@@ -16,7 +17,7 @@ public class UploadRelationNumberParam {
     private String name;
     private String time;
 
-    public UploadRelationNumberParam(String imei, /*String manufactory, String model,*/ String company, int type, String sos_phone, String name, String time) {
+    public UploadNumberParam(String imei, /*String manufactory, String model,*/ String company, int type, String sos_phone, String name, String time) {
         this.imei = imei;
         //this.manufactory = manufactory;
         //this.model = model;
@@ -27,10 +28,10 @@ public class UploadRelationNumberParam {
         this.time = time;
     }
 
-    public static String getSendParamGson(UploadRelationNumberParam param)
+    public static String getSendParamGson(UploadNumberParam param)
     {
         Gson gson = new Gson();
 
-        return gson.toJson(param, UploadRelationNumberParam.class);
+        return gson.toJson(param, UploadNumberParam.class);
     }
 }

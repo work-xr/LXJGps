@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
+import com.hsf1002.sky.xljgps.app.GpsApplication;
 import com.hsf1002.sky.xljgps.model.SocketModel;
 import com.hsf1002.sky.xljgps.result.ResultServerDownloadNumberMsg;
 import com.hsf1002.sky.xljgps.result.ResultServerIntervalMsg;
@@ -25,7 +25,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_SUCCESS;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_COMMAND;
@@ -36,19 +35,19 @@ import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_TIME;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_STATUS_POWERON;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_SUCCESS_1;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_ENCODE_TYPE;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_BEATHEART;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_CURRENT;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_DOWNLOAD;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_GET_STATUS_INFO;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_INTERVAL;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_POWERON;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_SOS;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_TIMING;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_UPLOAD;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_ENCODE_TYPE;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_ADDRESS_PORT;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_ADDRESS_URL;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_BEATHEART;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_CURRENT;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_DOWNLOAD;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_GET_STATUS_INFO;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_INTERVAL;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_OUTER_ELECTRIC_BAR;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_POWERON;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_SOS;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_UPLOAD;
 
 
 /**
@@ -83,7 +82,7 @@ public class SocketService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
 
-        sContext = XLJGpsApplication.getAppContext();
+        sContext = GpsApplication.getAppContext();
         connectServerThread = new ConnectServerThread();
         connectServerThread.start();
         readServerThread = new ReadServerThread();
@@ -346,7 +345,7 @@ public class SocketService extends Service {
             dis.read(dataBytes);
 
             dencodedStr = new String(dataBytes);
-            dencodedStr = URLDecoder.decode(dencodedStr, RXJAVAHTTP_ENCODE_TYPE);
+            dencodedStr = URLDecoder.decode(dencodedStr, SOCKET_ENCODE_TYPE);
         }
         catch (IOException e)
         {
@@ -377,7 +376,7 @@ public class SocketService extends Service {
 
         try
         {
-            encodedData = URLEncoder.encode(data, RXJAVAHTTP_ENCODE_TYPE);
+            encodedData = URLEncoder.encode(data, SOCKET_ENCODE_TYPE);
         }
         catch (UnsupportedEncodingException e)
         {
@@ -553,7 +552,7 @@ public class SocketService extends Service {
         switch (command)
         {
             // 从平台下载,再设置本地平台中心号码和亲情号码
-            case RXJAVAHTTP_TYPE_DOWNLOAD:
+            case SOCKET_TYPE_DOWNLOAD:
                 if (paramName == null)
                 {
                     Log.d(TAG, "parseServerMsg: paramName is null");
@@ -580,11 +579,11 @@ public class SocketService extends Service {
                 gsonStr = ResultServerDownloadNumberMsg.getResultServerDownloadNumberMsgGson(downloadNumberMsg);
                 break;
             // 上传位置信息
-            case RXJAVAHTTP_TYPE_CURRENT:
-                SocketModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_CURRENT, null);
+            case SOCKET_TYPE_CURRENT:
+                SocketModel.getInstance().reportPosition(SOCKET_TYPE_CURRENT, null);
                 break;
             // 设置上报定位信息的频率
-            case RXJAVAHTTP_TYPE_INTERVAL:
+            case SOCKET_TYPE_INTERVAL:
                 if (paramInterval == null)
                 {
                     Log.d(TAG, "parseServerMsg: paramInterval is null");
@@ -602,7 +601,7 @@ public class SocketService extends Service {
                 gsonStr = ResultServerIntervalMsg.getResultServerIntervalMsgGson(intervalMsg);
                 break;
             // 超出电子围栏, 给亲情号码发送短信通知
-            case RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR:
+            case SOCKET_TYPE_OUTER_ELECTRIC_BAR:
                 SprdCommonUtils.getInstance().sendSosSms();
 
                 ResultServerOuterElectricMsg outerElectricMsg = new ResultServerOuterElectricMsg();
@@ -611,7 +610,7 @@ public class SocketService extends Service {
                 gsonStr = ResultServerOuterElectricMsg.getResultServerOuterElectricMsgGson(outerElectricMsg);
                 break;
             // 获取设备状态信息, 再返回给服务器
-            case RXJAVAHTTP_TYPE_GET_STATUS_INFO:
+            case SOCKET_TYPE_GET_STATUS_INFO:
                 ResultServerStatusInfoMsg statusInfoMsg = new ResultServerStatusInfoMsg();
                 statusInfoMsg.setMessage(RESULT_MSG_SUCCESS);
                 statusInfoMsg.setStatus(RESULT_STATUS_POWERON);
@@ -620,11 +619,11 @@ public class SocketService extends Service {
                 gsonStr = ResultServerStatusInfoMsg.getResultServerStatusInfoMsgGson(statusInfoMsg);
                 break;
             // 这几条指令, 是本地主动向服务器端发送数据, 只接收服务器端的返回值即可, 无需向服务器端传输任何数据
-            case RXJAVAHTTP_TYPE_BEATHEART:
-            case RXJAVAHTTP_TYPE_UPLOAD:
-            case RXJAVAHTTP_TYPE_SOS:
-            case RXJAVAHTTP_TYPE_POWERON:
-            case RXJAVAHTTP_TYPE_TIMING:
+            case SOCKET_TYPE_BEATHEART:
+            case SOCKET_TYPE_UPLOAD:
+            case SOCKET_TYPE_SOS:
+            case SOCKET_TYPE_POWERON:
+            case SOCKET_TYPE_TIMING:
                 break;
             default:
                 break;

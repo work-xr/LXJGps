@@ -1,30 +1,26 @@
 package com.hsf1002.sky.xljgps.presenter;
 
-import com.hsf1002.sky.xljgps.model.SocketModel;
-import com.hsf1002.sky.xljgps.result.RelationNumberMsg;
-import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.model.BaseModel;
-import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
+import com.hsf1002.sky.xljgps.model.SocketModel;
+import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.view.BaseView;
 
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_CURRENT;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_POWERON;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_TIMING;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
 
 /**
  * Created by hefeng on 18-6-8.
+ * desc: 不管Rxjava HTTP还是Socket TCP都共用此类
  */
 
-public class RxjavaHttpPresenterImpl implements
-                                                RxjavaHttpPresenter.OnUploadListener,
-                                                RxjavaHttpPresenter.OnReportListener
+public class NetworkPresenterImpl implements
+                                                NetworkPresenter.OnUploadListener,
+                                                NetworkPresenter.OnReportListener
 {
-    private static final String TAG = "RxjavaHttpPresenterImpl";
     private BaseView view;
     //private BaseModel model = new RxjavaHttpModel();
     private BaseModel model = new SocketModel();
 
-    public RxjavaHttpPresenterImpl(BaseView baseView)
+    public NetworkPresenterImpl(BaseView baseView)
     {
         view = baseView;
     }
@@ -45,7 +41,7 @@ public class RxjavaHttpPresenterImpl implements
 
     @Override
     public void reportSosPosition() {
-        model.reportPosition(RXJAVAHTTP_TYPE_TIMING, this);
+        model.reportPosition(SOCKET_TYPE_TIMING, this);
     }
 
     @Override

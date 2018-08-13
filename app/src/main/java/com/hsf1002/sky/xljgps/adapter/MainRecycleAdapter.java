@@ -7,8 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hsf1002.sky.xljgps.R;
-import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
-import com.hsf1002.sky.xljgps.ui.MainActivity;
+import com.hsf1002.sky.xljgps.app.GpsApplication;
 
 import java.util.List;
 
@@ -76,9 +75,9 @@ public class MainRecycleAdapter extends RecyclerView.Adapter<MainRecycleAdapter.
         holder.itemName.setText(name);
 
         if(selectedPos == holder.getPosition()) {
-            holder.itemName.setBackgroundColor(XLJGpsApplication.getAppContext().getResources().getColor(R.color.list_item_focuse));
+            holder.itemName.setBackgroundColor(GpsApplication.getAppContext().getResources().getColor(R.color.list_item_focuse));
         } else {
-            holder.itemName.setBackgroundColor(XLJGpsApplication.getAppContext().getResources().getColor(R.color.background_holo_light));
+            holder.itemName.setBackgroundColor(GpsApplication.getAppContext().getResources().getColor(R.color.background_holo_light));
         }
     }
 

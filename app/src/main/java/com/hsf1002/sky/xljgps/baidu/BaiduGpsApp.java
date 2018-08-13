@@ -10,8 +10,8 @@ import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.hsf1002.sky.xljgps.app.XLJGpsApplication;
-import com.hsf1002.sky.xljgps.model.RxjavaHttpModel;
+import com.hsf1002.sky.xljgps.app.GpsApplication;
+import com.hsf1002.sky.xljgps.model.SocketModel;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 
 import static android.content.Context.WIFI_SERVICE;
@@ -23,7 +23,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_GPS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_LBS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_WIFI;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_TIMING;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
 
 /**
  * Created by hefeng on 18-6-6.
@@ -190,7 +190,7 @@ public class BaiduGpsApp {
             }
             else if (locType == BDLocation.TypeNetWorkLocation)
             {
-                WifiManager wifiManager = (WifiManager)XLJGpsApplication.getAppContext().getApplicationContext().getSystemService(WIFI_SERVICE);
+                WifiManager wifiManager = (WifiManager) GpsApplication.getAppContext().getApplicationContext().getSystemService(WIFI_SERVICE);
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
                 if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED && wifiInfo != null)
@@ -219,13 +219,13 @@ public class BaiduGpsApp {
                 Log.i(TAG, "onReceiveLocation:  get location success, stop gps service");
                 setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locTypeStr, locationType);
 
-                //RxjavaHttpModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_TIMING, null);
+                SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
             }
             else
             {
                 Log.i(TAG, "onReceiveLocation:  get location failed, stop gps service");
             }
-            //stopBaiduGps();
+            stopBaiduGps();
         }
 
         @Override

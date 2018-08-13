@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_OUTER_ELECTRIC_BAR;
 
 /**
  * Created by hefeng on 18-8-8.
@@ -18,7 +18,7 @@ public class ResultServerOuterElectricMsg extends ResultServerMsg{
     public ResultServerOuterElectricMsg() {
         this.imei = SprdCommonUtils.getInstance().getIMEI();
         this.time = SprdCommonUtils.getInstance().getFormatCurrentTime();;
-        this.type = RXJAVAHTTP_TYPE_OUTER_ELECTRIC_BAR;
+        this.type = SOCKET_TYPE_OUTER_ELECTRIC_BAR;
     }
 
     public static String getResultServerOuterElectricMsgGson(ResultServerOuterElectricMsg param)

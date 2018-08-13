@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_INTERVAL;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_COMPANY;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_INTERVAL;
 
 /**
  * Created by hefeng on 18-8-8.
@@ -17,9 +17,9 @@ public class ResultServerIntervalMsg extends ResultServerMsg {
     private int type;
 
     public ResultServerIntervalMsg() {
-        this.company = RXJAVAHTTP_COMPANY;
+        this.company = SOCKET_COMPANY;
         this.time = SprdCommonUtils.getInstance().getFormatCurrentTime();
-        this.type = RXJAVAHTTP_TYPE_INTERVAL;
+        this.type = SOCKET_TYPE_INTERVAL;
     }
 
     public static String getResultServerIntervalMsgGson(ResultServerIntervalMsg param)

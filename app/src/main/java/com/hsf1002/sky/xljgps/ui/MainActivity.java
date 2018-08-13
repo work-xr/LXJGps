@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.hsf1002.sky.xljgps.R;
 import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
-import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenterImpl;
+import com.hsf1002.sky.xljgps.presenter.NetworkPresenterImpl;
 import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
 import com.hsf1002.sky.xljgps.view.BaseView;
@@ -34,7 +34,7 @@ public class MainActivity extends Activity implements BaseView{
     private RecyclerView recyclerView;
     private MainRecycleAdapter adapter;
     private List<String> items = new ArrayList<String>();
-    private RxjavaHttpPresenterImpl presenter = new RxjavaHttpPresenterImpl(this);
+    private NetworkPresenterImpl presenter = new NetworkPresenterImpl(this);
     private int currentPosition = 0;
 
     @Override

@@ -4,9 +4,11 @@ import com.hsf1002.sky.xljgps.result.ResultMsg;
 
 /**
  * Created by hefeng on 18-6-8.
+ * desc: 不管Rxjava HTTP还是Socket TCP都共用此接口
  */
 
-public interface RxjavaHttpPresenter {
+
+public interface NetworkPresenter {
 
     interface OnUploadListener
     {

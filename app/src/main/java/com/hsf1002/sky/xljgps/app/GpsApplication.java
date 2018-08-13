@@ -2,15 +2,10 @@ package com.hsf1002.sky.xljgps.app;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 import com.allen.library.RxHttpUtils;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
-import com.hsf1002.sky.xljgps.model.SocketModel;
-import com.hsf1002.sky.xljgps.service.BeatHeartService;
-import com.hsf1002.sky.xljgps.service.GpsService;
-import com.hsf1002.sky.xljgps.service.SocketService;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_URL_TEST;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_CONNCET_TIMEOUT;
@@ -21,8 +16,8 @@ import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_WRITE_TIMEOUT;
  * Created by hefeng on 18-6-6.
  */
 
-public class XLJGpsApplication extends Application {
-    private static final String TAG = "XLJGpsApplication";
+public class GpsApplication extends Application {
+    private static final String TAG = "GpsApplication";
     private static Context sContext;
 
     @Override
@@ -32,14 +27,8 @@ public class XLJGpsApplication extends Application {
         Log.i(TAG, "onCreate: ...................................");
         sContext = getApplicationContext();
 
-        // 初始化百度SDK
+        // 初始化百度SDK, 这里比 StartupReceiver 广播要早
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
-
-        //GpsService.setServiceAlarm(sContext, true);
-        //startService(new Intent(sContext, SocketService.class));
-        //BeatHeartService.setServiceAlarm(sContext, true);
-
-        //rxjavaHttpInit();
     }
 
     /**

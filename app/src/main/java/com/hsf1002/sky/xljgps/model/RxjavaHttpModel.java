@@ -10,8 +10,8 @@ import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.http.ApiService;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 import com.hsf1002.sky.xljgps.params.SosPositionParam;
-import com.hsf1002.sky.xljgps.params.UploadRelationNumberParam;
-import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
+import com.hsf1002.sky.xljgps.params.UploadNumberParam;
+import com.hsf1002.sky.xljgps.presenter.NetworkPresenter;
 import com.hsf1002.sky.xljgps.result.ResultMsg;
 import com.hsf1002.sky.xljgps.util.MD5Utils;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
@@ -51,7 +51,7 @@ public class RxjavaHttpModel implements BaseModel {
     *  return:
     */
     @Override
-    public void uploadRelationNumber(final RxjavaHttpPresenter.OnUploadListener listener) {
+    public void uploadRelationNumber(final NetworkPresenter.OnUploadListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         //String manufactory = SprdCommonUtils.getInstance().getManufactory();
@@ -62,16 +62,16 @@ public class RxjavaHttpModel implements BaseModel {
         String data = null;
         String sign = null;
 
-        UploadRelationNumberParam sendParam = new UploadRelationNumberParam(
+        UploadNumberParam sendParam = new UploadNumberParam(
                 imei,
                 //manufactory,
                 //model,
                 RXJAVAHTTP_COMPANY,
-                RXJAVAHTTP_TYPE_UPLOAD,
+                Integer.valueOf(RXJAVAHTTP_TYPE_UPLOAD),
                 sosPhones,
                 sosPhoneNames,
                 time);
-        String gsonString = UploadRelationNumberParam.getSendParamGson(sendParam);
+        String gsonString = UploadNumberParam.getSendParamGson(sendParam);
         Log.i(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
@@ -123,7 +123,7 @@ public class RxjavaHttpModel implements BaseModel {
     *  return:
     */
     @Override
-    public void reportPosition(int type, final RxjavaHttpPresenter.OnReportListener listener) {
+    public void reportPosition(int type, final NetworkPresenter.OnReportListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         //String manufactory = SprdCommonUtils.getInstance().getManufactory();

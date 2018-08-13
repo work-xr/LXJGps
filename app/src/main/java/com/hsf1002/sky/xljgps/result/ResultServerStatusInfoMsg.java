@@ -10,7 +10,7 @@ import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_FAILING;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_STATUS_POWEROFF;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_GET_STATUS_INFO;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_GET_STATUS_INFO;
 
 /**
 *  author:  hefeng
@@ -32,7 +32,7 @@ public class ResultServerStatusInfoMsg extends ResultServerMsg{
         this.status = RESULT_STATUS_POWEROFF;
         this.power = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
         this.time = SprdCommonUtils.getInstance().getFormatCurrentTime();
-        this.type = RXJAVAHTTP_TYPE_GET_STATUS_INFO;
+        this.type = SOCKET_TYPE_GET_STATUS_INFO;
     }
 
     public void setStatus(int status) {

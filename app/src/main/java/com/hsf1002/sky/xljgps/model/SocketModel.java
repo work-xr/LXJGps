@@ -6,8 +6,8 @@ import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 import com.hsf1002.sky.xljgps.params.BeatHeartParam;
 import com.hsf1002.sky.xljgps.params.SosPositionParam;
-import com.hsf1002.sky.xljgps.params.UploadRelationNumberParam;
-import com.hsf1002.sky.xljgps.presenter.RxjavaHttpPresenter;
+import com.hsf1002.sky.xljgps.params.UploadNumberParam;
+import com.hsf1002.sky.xljgps.presenter.NetworkPresenter;
 import com.hsf1002.sky.xljgps.service.SocketService;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 
@@ -15,9 +15,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_COMPANY;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_BEATHEART;
-import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_TYPE_UPLOAD;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_COMPANY;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_BEATHEART;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_UPLOAD;
 
 /**
  * Created by hefeng on 18-8-9.
@@ -113,7 +113,7 @@ public class SocketModel implements BaseModel {
     public void reportBeatHeart()
     {
         String imei = SprdCommonUtils.getInstance().getIMEI();
-        BeatHeartParam beatHeartParam = new BeatHeartParam(imei, RXJAVAHTTP_COMPANY, RXJAVAHTTP_TYPE_BEATHEART);
+        BeatHeartParam beatHeartParam = new BeatHeartParam(imei, SOCKET_COMPANY, SOCKET_TYPE_BEATHEART);
         final String gsonString = BeatHeartParam.getBeatHeartParamGson(beatHeartParam);
         Log.i(TAG, "reportBeatHeart: gsonString = " + gsonString);
 
@@ -128,21 +128,21 @@ public class SocketModel implements BaseModel {
     *  return:  从服务器返回: {"success":1,"time":"20180810085825","command":203}
     */
     @Override
-    public void uploadRelationNumber(RxjavaHttpPresenter.OnUploadListener listener) {
+    public void uploadRelationNumber(NetworkPresenter.OnUploadListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         String sosPhones = SprdCommonUtils.getInstance().getRelationNumber();
         String sosPhoneNames = SprdCommonUtils.getInstance().getRelationNumberNames();
 
 
-        UploadRelationNumberParam sendParam = new UploadRelationNumberParam(
+        UploadNumberParam sendParam = new UploadNumberParam(
                 imei,
-                RXJAVAHTTP_COMPANY,
-                RXJAVAHTTP_TYPE_UPLOAD,
+                SOCKET_COMPANY,
+                SOCKET_TYPE_UPLOAD,
                 sosPhones,
                 sosPhoneNames,
                 time);
-        final String gsonString = UploadRelationNumberParam.getSendParamGson(sendParam);
+        final String gsonString = UploadNumberParam.getSendParamGson(sendParam);
         Log.i(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
 
         postDataServer(gsonString);
@@ -156,7 +156,7 @@ public class SocketModel implements BaseModel {
     *  return:  从服务器返回: {"success":1,"imei":"867400020316620","time":"20180810104857","command":202}
     */
     @Override
-    public void reportPosition(int type, RxjavaHttpPresenter.OnReportListener listener) {
+    public void reportPosition(int type, NetworkPresenter.OnReportListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         int capacity = SprdCommonUtils.getInstance().getCurrentBatteryCapacity();
@@ -169,7 +169,7 @@ public class SocketModel implements BaseModel {
 
         SosPositionParam reportParamBean = new SosPositionParam(
                 imei,
-                RXJAVAHTTP_COMPANY,
+                SOCKET_COMPANY,
                 type,
                 positionType,
                 time,
