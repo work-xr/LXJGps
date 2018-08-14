@@ -12,7 +12,7 @@ public class UploadNumberParam {
     //private String manufactory;
     //private String model;
     private String company;
-    private int type;
+    private int type;               // 203
     private String sos_phone;
     private String name;
     private String time;

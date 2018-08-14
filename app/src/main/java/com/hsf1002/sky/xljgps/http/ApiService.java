@@ -39,7 +39,6 @@ public interface ApiService {
             @Field("sign") String sign
     );
 
-
     @POST(RXJAVAHTTP_REPORT_POSITION)
     @FormUrlEncoded
     Observable<ResultMsg> reportPosition(

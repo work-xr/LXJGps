@@ -30,7 +30,6 @@ public class Constant {
 
     // 每隔多久启动一次IntentService服务来开始定位,可由服务器端通过调用setStartServiceInterval进行设置更改
     public static final String BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME = "baidu_gps_scan_span_interval_name";
-    public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_VALUE = 3 * 60 * 1000;
     // 如果不用定时service,而且不停止百度service, 百度默认多久发起一次定位
     public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
     public static final String BAIDU_GPS_LOCATION_TYPE_GPS = "gps";
@@ -87,8 +86,9 @@ public class Constant {
     public static final String SOCKET_SERVER_ADDRESS_URL = "healthdata.4000300659.com";
     public static final int SOCKET_SERVER_ADDRESS_PORT = 12004;
 
-    public static final int BEATHEART_SERVICE_INTERVAL = 3 * 60 * 1000;
-    public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 60 * 1000;
+    public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
+    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 10 * 60 * 1000;
+    public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 30 * 1000;
 
 
     /********************************** 改为socket通信后, 这些就没用了 ************************************/

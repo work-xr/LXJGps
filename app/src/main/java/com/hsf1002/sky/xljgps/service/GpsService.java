@@ -13,15 +13,16 @@ import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.util.SharedPreUtils;
 
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME;
-import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_VALUE;
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SERVICE_SCAN_INTERVAL;
 
 /**
  * Created by hefeng on 18-6-11.
+ * desc: 定时默认10分钟 BAIDU_GPS_SERVICE_SCAN_INTERVAL 上报定位信息, 此服务不会停止
  */
 
 public class GpsService extends Service {
     private static final String TAG = "GpsService";
-    private static int startServiceInterval = SharedPreUtils.getInstance().getInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_VALUE);
+    private static int startServiceInterval = SharedPreUtils.getInstance().getInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, BAIDU_GPS_SERVICE_SCAN_INTERVAL);
 
     /**
     *  author:  hefeng
@@ -60,19 +61,6 @@ public class GpsService extends Service {
             manager.cancel(pi);
             pi.cancel();
         }
-    }
-
-    public static boolean isServiceAlarmOn(Context context)
-    {
-        Intent intent = new Intent(context, GpsService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
-
-        return pi != null;
-    }
-
-    public void stopGpsService()
-    {
-        stopSelf();
     }
 
     /**

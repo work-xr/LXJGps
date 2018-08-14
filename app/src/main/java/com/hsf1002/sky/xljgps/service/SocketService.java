@@ -59,7 +59,6 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_UPLOAD;
 */
 
 public class SocketService extends Service {
-
     private static final String TAG = "SocketService";
     private static Context sContext;
     private static Socket sSocket = null;
@@ -75,6 +74,7 @@ public class SocketService extends Service {
     private static Thread readServerThread;
     // 用于给服务器端写数据
     private static Thread writeServerThread;
+    // 用于保存从其他地方传递过来的数据, 然后在线程中写到服务器端
     private static String gsonString = null;
 
     @Override
@@ -89,6 +89,7 @@ public class SocketService extends Service {
         readServerThread.start();
         writeServerThread = new WriteDataThread();
         writeServerThread.start();
+
         //SocketModel.getInstance().reportBeatHeart();
        // writeDataToServer(null);
         //SocketModel.getInstance().reportBeatHeart();
@@ -106,18 +107,19 @@ public class SocketService extends Service {
         return null;
     }
 
+
+    /**
+     *  author:  hefeng
+     *  created: 18-8-8 下午4:06
+     *  desc:    创建单例
+     *  param:
+     *  return:
+     */
     private static final class Holder
     {
         private static final SocketService instance = new SocketService();
     }
 
-    /**
-    *  author:  hefeng
-    *  created: 18-8-8 下午4:06
-    *  desc:    获取单例
-    *  param:
-    *  return:
-    */
     public static SocketService getInstance()
     {
         return Holder.instance;
@@ -143,7 +145,7 @@ public class SocketService extends Service {
     *  param:
     *  return:
     */
-    public void connectSocketServer()
+    public void reconnectSocketServer()
     {
         if (connectServerThread != null) {
             if (!connectServerThread.isAlive()) {
@@ -152,12 +154,19 @@ public class SocketService extends Service {
         }
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-13 下午7:50
+    *  desc:    连接socket的线程, 连接成功后, 开启心跳服务
+    *  param:
+    *  return:
+    */
     private class ConnectServerThread extends Thread
     {
         @Override
         public void run() {
             if (sSocket == null) {
-                 Log.i(TAG, "connectSocketServer: start");
+                 Log.i(TAG, "reconnectSocketServer: start");
                 try {
                     sSocket = new Socket(SOCKET_SERVER_ADDRESS_URL, SOCKET_SERVER_ADDRESS_PORT);
                 } catch (IOException e) {
@@ -167,10 +176,8 @@ public class SocketService extends Service {
                 finally {
                     // 开启心跳定时服务, 默认每隔5分钟上报一次心跳
                     BeatHeartService.setServiceAlarm(sContext, true);
-                    // 开机就上报一次位置信息
-                    //SocketModel.getInstance().reportPosition(RXJAVAHTTP_TYPE_POWERON, null);
                 }
-                Log.i(TAG, "connectSocketServer: finished");
+                Log.i(TAG, "reconnectSocketServer: finished");
             }
         }
     }
@@ -178,7 +185,7 @@ public class SocketService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-8 下午6:10
-    *  desc:    断开Socket连接
+    *  desc:    断开Socket连接, 目前在两个地方调用: onDestroy的时候以及读取服务器数据的时候, 如果读到的前四个字节不是数字, 则调用此方法
     *  param:
     *  return:
     */
@@ -235,7 +242,7 @@ public class SocketService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-11 上午11:27
-    *  desc:
+    *  desc:  判断Socket是否处于连接状态, 如果处于连接状态, 则返回true, 如果处于断开状态, 则开启重连服务
     *  param:
     *  return:
     */
@@ -282,7 +289,7 @@ public class SocketService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-9 上午10:07
-    *  desc:    获取传输给服务器的数据前4个字节
+    *  desc:    获取传输给服务器的数据前4个字节, 是传输数据的长度, 比如数据长度为8个字节, 则是0008, 如果数据长度是256, 则是0256
     *  param:
     *  return:
     */
@@ -328,10 +335,8 @@ public class SocketService extends Service {
             dis.read(sizeBytes);
             String sizeStr = new String(sizeBytes);
             Log.d(TAG, "getParseDataString: sizeStr = " + sizeStr);
-            //String decodedSizeStr = URLDecoder.decode(sizeStr, RXJAVAHTTP_ENCODE_TYPE);
-            //Log.d(TAG, "getParseDataString: decodedSizeStr = " + decodedSizeStr);
 
-            // 前4个字节应该都是数字,否则丢弃此次读取
+            // 前4个字节应该都是数字,否则丢弃此次读取, 并且断开socket服务
             if (!TextUtils.isDigitsOnly(sizeStr))
             {
                 Log.d(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************!");
@@ -341,9 +346,12 @@ public class SocketService extends Service {
 
             size = Integer.valueOf(sizeStr);
             Log.d(TAG, "getParseDataString: size = " + size);
+
+            // 读取服务器发送的实际数据
             byte[] dataBytes = new byte[size - 4];
             dis.read(dataBytes);
 
+            // 用UTF-8进行解码
             dencodedStr = new String(dataBytes);
             dencodedStr = URLDecoder.decode(dencodedStr, SOCKET_ENCODE_TYPE);
         }
@@ -388,11 +396,20 @@ public class SocketService extends Service {
         return completedStr;
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-13 下午7:59
+    *  desc:    主动发送数据给服务器端, 然后再接收服务端返回的消息
+     *  比如上报心跳报文:       {"imei":"869426020023138","company":"hemiao","type":301}
+     *  从服务器读取返回内容:   {"success":1,"company":"hemiao","command":301}
+    *  param:
+    *  return:
+    */
     public class WriteDataThread extends Thread
     {
         @Override
         public void run() {
-            // 先等待socket连接成功, 再进行写操作
+            // 0. 先等待socket连接成功, 再进行写操作
             waitConnectThread();
 
             if (!isSocketConnected())
@@ -404,7 +421,7 @@ public class SocketService extends Service {
                 Log.i(TAG, "writeDataToServer: connected to server successfully.");
 
                 try {
-                    // 1 先将完整数据进行编码(发送的数据之前4个字节要添加数据的长度)
+                    // 1 将完整数据进行编码(发送的数据之前4个字节要添加数据的长度)
                     String completedStr = getCompletedString(gsonString);
 
                     // 2. 打开输出流, 将数据写入
@@ -413,6 +430,7 @@ public class SocketService extends Service {
                         os = sSocket.getOutputStream();
                         os.write(completedStr.getBytes());
                         os.flush();
+                        // 不能关闭输出流
                         //sSocket.shutdownOutput();
                         Log.i(TAG, "writeDataToServer: write data to server successfully^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                     }
@@ -420,20 +438,7 @@ public class SocketService extends Service {
                     {
                         Log.i(TAG, "writeDataToServer: no data to send" );
                     }
-                    // 3. 打开输入流, 接收从服务器端返回的数据
-                    /*Log.i(TAG, "writeDataToServer: waiting for server send data.....................blocked");
-                    is = sSocket.getInputStream();
-                    dis = new DataInputStream(is);
-
-                    // 4. 对服务器返回的数据进行处理
-                    String decodedStr = getParseDataString(dis);
-
-                    if (!TextUtils.isEmpty(decodedStr)) {
-                        // 如果是主动向服务器发送数据, 返回结果只打印
-                        Log.d(TAG, "writeDataToServer: server return data decodedStr = " + decodedStr);
-                    } else {
-                        Log.i(TAG, "writeDataToServer: server return data empty!");
-                    }*/
+                    // 3. 对服务器返回的数据进行读取, 不能在此处处理, 否则可能被读的线程读到数据
                 }
                 catch (IOException e)
                 {
@@ -446,8 +451,7 @@ public class SocketService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-8 下午1:26
-    *  desc:    主动发送数据给服务器端, 然后再接收服务端返回的消息
-     *  比如上报心跳报文: {"imei":"869426020023138","company":"hemiao","type":301} 之后, 从服务器读取返回内容: {"success":1,"company":"hemiao","command":301}
+    *  desc:    其他类会通过此接口, 将开机信息, 定位信息 上传到服务器
     *  param:
     *  return:
     */
@@ -515,7 +519,7 @@ public class SocketService extends Service {
 
         Log.i(TAG, "parseServerMsg: msg = " + msg);
 
-        // 如果服务器下发的是修改亲情号码指令, 不能以 , 分割字符串
+        // 如果服务器下发的是修改亲情号码指令, 不能以 , 分割字符串, 需要单独处理
         if (msg.contains(RESULT_PARAM_NAME) && msg.contains(RESULT_PARAM_NUMBER))
         {
             paramNumber = getOneParam(msg, 0);
@@ -637,13 +641,12 @@ public class SocketService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-13 下午2:46
-    *  desc:    等待
+    *  desc:    先等待socket连接成功, 再进行读写操作
     *  param:
     *  return:
     */
     public void waitConnectThread()
     {
-        // 先等待socket连接成功, 再进行读写操作
         try {
             connectServerThread.join();
         }
@@ -652,7 +655,6 @@ public class SocketService extends Service {
             e.printStackTrace();
         }
     }
-
 
     /**
      *  author:  hefeng
@@ -665,7 +667,7 @@ public class SocketService extends Service {
     {
         @Override
         public void run(){
-            // 先等待socket连接成功, 再进行读写操作
+            // 0. 先等待socket连接成功, 再进行读写操作
             waitConnectThread();
 
             while (true)
@@ -678,16 +680,19 @@ public class SocketService extends Service {
                         dis = new DataInputStream(is);
                         //is.close();
                         //dis.close();
-                        // 4. 对服务器返回的数据进行处理
+                        // 2. 对服务器返回的数据进行处理
                         String decodedStr = getParseDataString(dis);
 
                         if (!TextUtils.isEmpty(decodedStr)) {
 
                             Log.d(TAG, "readDataFromServer: dencodedStr = " + decodedStr);
-                            // 2. 解析数据, 并将需要发送给服务器的数据返回
+                            // 3. 解析数据, 并将需要发送给服务器的数据返回
                             String gsonStr = parseServerMsg(decodedStr);
                             String completedStr = getCompletedString(gsonStr);
 
+                            // 如果为空,表示此次读取数据的上一次操作是客户端主动发送消息到服务器, 而服务器没有返回任何数据
+                            // (本来是有返回值的, 而且返回了客户端发送的command, 客户端收到数据后进行解析, 由于是根据command判断并做出响应,
+                            // 又发送了一次数据给服务器端, 造成了死循环, 因此客户端要求服务器不要发送返回状态)
                             if (completedStr == null)
                             {
                                 Log.i(TAG, "readDataFromServer: completedStr == null, no need to send data to server");
@@ -697,7 +702,7 @@ public class SocketService extends Service {
                                 Log.i(TAG, "readDataFromServer: completedStr = " + completedStr + ", start to write");
                             }
 
-                            // 3. 打开输出流, 将数据写入
+                            // 4. 打开输出流, 将数据写入
                             os = sSocket.getOutputStream();
                             os.write(completedStr.getBytes());
                             os.flush();

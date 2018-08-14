@@ -9,6 +9,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_DOWNLOAD;
 
 /**
  * Created by hefeng on 18-8-8.
+ * desc: 这是从服务器端接收到的指令参数, 根据平台发送的指令把从服务器读到的亲情号码, 设置到本地(覆盖本地三个紧急呼叫号码)
  */
 
 public class ResultServerDownloadNumberMsg extends ResultServerMsg{

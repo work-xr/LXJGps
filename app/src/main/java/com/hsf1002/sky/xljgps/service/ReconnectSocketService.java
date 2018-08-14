@@ -13,7 +13,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_INTE
 
 /**
  * Created by hefeng on 18-8-10.
- * desc 每隔一段时间就重新连接一次socket, 第一次是1分钟, 第二次是2分钟, 4, 8, 16....
+ * desc: 如果检测到Socket服务断开了, 每隔一段时间就重新连接一次Socket, 第一次是30秒, 第二次是1分钟, 2, 4, 8, 16....
  */
 
 public class ReconnectSocketService extends Service {
@@ -29,7 +29,7 @@ public class ReconnectSocketService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        SocketService.getInstance().connectSocketServer();
+        SocketService.getInstance().reconnectSocketServer();
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -61,16 +61,18 @@ public class ReconnectSocketService extends Service {
         }
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-13 下午7:30
+    *  desc:    判断该服务是否已经开启
+    *  param:
+    *  return:
+    */
     public static boolean isServiceAlarmOn(Context context)
     {
         Intent intent = new Intent(context, ReconnectSocketService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
 
         return pi != null;
-    }
-
-    public void stopGpsService()
-    {
-        stopSelf();
     }
 }

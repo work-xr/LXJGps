@@ -8,6 +8,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_OUTER_ELECTRIC_BA
 
 /**
  * Created by hefeng on 18-8-8.
+ * desc: 这是从服务器端接收到的指令参数, 根据平台发送的指令发送短信给亲情号码
  */
 
 public class ResultServerOuterElectricMsg extends ResultServerMsg{

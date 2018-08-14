@@ -36,12 +36,26 @@ public class BaiduGpsApp {
     private LocationClientOption option;
     private static BaiduGpsParam sBaiduGpsMsgBean;
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-13 下午6:33
+    *  desc:    初始化定位, 开机就要上传定位信息
+    *  param:
+    *  return:
+    */
     static
     {
         sBaiduGpsMsgBean = new BaiduGpsParam();
         setBaiduGpsStatus(/*null,*/ null, null, null, null);
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-13 下午6:32
+    *  desc:    创建单例模式
+    *  param:
+    *  return:
+    */
     public static BaiduGpsApp getInstance()
     {
         return Holder.instance;
@@ -217,15 +231,20 @@ public class BaiduGpsApp {
             if (locType == BDLocation.TypeGpsLocation || locType == BDLocation.TypeNetWorkLocation)
             {
                 Log.i(TAG, "onReceiveLocation:  get location success, stop gps service");
+                // 保存定位信息
                 setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locTypeStr, locationType);
 
+                // 上报定时定位信息
                 SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
+
+                // 如果定位成功, 就停止百度服务(百度服务运行在一个单独的进程)
+                stopBaiduGps();
             }
             else
             {
+                // 如果定位失败, 隔一段时间会重新发起定位请求, 目前默认设置为1分钟 BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL
                 Log.i(TAG, "onReceiveLocation:  get location failed, stop gps service");
             }
-            stopBaiduGps();
         }
 
         @Override

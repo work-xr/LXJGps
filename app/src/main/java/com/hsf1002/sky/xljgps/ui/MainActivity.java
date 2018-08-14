@@ -29,6 +29,15 @@ import static com.hsf1002.sky.xljgps.util.Constant.REPORT_INFO_TO_PLATFORM_INDEX
 import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.UPLOAD_INFO_TO_PLATFORM_INDEX;
 
+/**
+*  author:  hefeng
+*  created: 18-8-13 下午7:41
+*  desc:    孝老平台主界面
+*  param:
+*  return:
+*/
+
+
 public class MainActivity extends Activity implements BaseView{
     private static final String TAG = "MainActivity";
     private RecyclerView recyclerView;
@@ -60,7 +69,6 @@ public class MainActivity extends Activity implements BaseView{
             }
         });
         recyclerView.setAdapter(adapter);
-        //requestPermission();
     }
 
     private void initItems()
@@ -186,60 +194,4 @@ public class MainActivity extends Activity implements BaseView{
     protected void onDestroy() {
         super.onDestroy();
     }
-
-
-/*
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        switch (requestCode)
-        {
-            case 1:
-                if (grantResults.length > 0)
-                {
-                    for (int result:grantResults)
-                    {
-                        if (result != PackageManager.PERMISSION_GRANTED)
-                        {
-                            Toast.makeText(this, getString(R.string.get_gps_permission_fail), Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Deprecated
-    private void requestPermission()
-    {
-        List<String> permissionList = new ArrayList<>();
-
-        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
-            permissionList.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
-        {
-            permissionList.add(android.Manifest.permission.READ_PHONE_STATE);
-        }
-        if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-        {
-            permissionList.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-
-        if (!permissionList.isEmpty())
-        {
-            String [] permissions = permissionList.toArray(new String[permissionList.size()]);
-            ActivityCompat.requestPermissions(MainActivity.this, permissions, 1);
-        }
-        else
-        {
-            //requestLocation();
-        }
-    }
-*/
 }

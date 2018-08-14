@@ -43,8 +43,28 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOS_SMS_PROPERTY_MSG;
 public class SprdCommonUtils {
     private static final String TAG = "SprdCommonUtils";
     private static final String BATTERY_CAPACITY_FILE_PATH = "/sys/class/power_supply/battery/capacity";
-    //private SharedPreferences sosNumSharedPreferences = null;
-    //private SharedPreferences sosMsgSharedPreferences = null;
+    private static Context sAppContext = null;
+
+    public SprdCommonUtils() {
+        sAppContext = GpsApplication.getAppContext();
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-13 下午7:36
+    *  desc:    创建单例模式
+    *  param:
+    *  return:
+    */
+    public static SprdCommonUtils getInstance()
+    {
+        return Holder.instance;
+    }
+
+    private static class Holder
+    {
+        private static final SprdCommonUtils instance = new SprdCommonUtils();
+    }
 
     /**
     *  author:  hefeng
@@ -55,7 +75,7 @@ public class SprdCommonUtils {
     */
     public String getIMEI()
     {
-        TelephonyManager telephonyManager = (TelephonyManager) GpsApplication.getAppContext().getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager telephonyManager = (TelephonyManager) sAppContext.getSystemService(Context.TELEPHONY_SERVICE);
         String deviceId = null;
         //int phoneCount = telephonyManager.getPhoneCount();    // Android4.4 不支持此方法
 
@@ -133,28 +153,6 @@ public class SprdCommonUtils {
         return SharedPreUtils.getInstance().getInt(RELATION_NUMBER_COUNT, 0);
     }
 
-    /**
-    *  author:  hefeng
-    *  created: 18-8-1 上午9:55
-    *  desc:    
-    *  param:
-    *  return:
-    */
-    /*private void setSosContext()
-    {
-        Context sosContext = null;
-
-        try {
-            sosContext = GpsApplication.getAppContext().createPackageContext(SOS_PACKAGE_NAME, Context.CONTEXT_IGNORE_SECURITY);
-            Log.i(TAG, "instance initializer: get sos context");
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        sosNumSharedPreferences = sosContext.getSharedPreferences(SOS_NUM_PREFS_NAME, Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
-        sosMsgSharedPreferences = sosContext.getSharedPreferences(SOS_SMS_PREFS_NAME, Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
-    }
-*/
     /**
     *  author:  hefeng
     *  created: 18-7-31 下午2:35
@@ -245,7 +243,7 @@ public class SprdCommonUtils {
         intent.putExtra(SET_RELATION_NUMBER, relationNumber);
 
         Log.i(TAG, "setRelationNumber: relationNumber = " + relationNumber);
-        GpsApplication.getAppContext().sendBroadcast(intent);
+        sAppContext.sendBroadcast(intent);
     }
 
     /**
@@ -272,7 +270,7 @@ public class SprdCommonUtils {
 
         if (mSosMsg.equals(SOS_NUM_INVALID_VALUE))
         {
-            mSosMsg = GpsApplication.getAppContext().getResources().getString(R.string.sos_sms);
+            mSosMsg = sAppContext.getResources().getString(R.string.sos_sms);
         }
         Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
 
@@ -349,7 +347,7 @@ public class SprdCommonUtils {
     public String getRelationNumberNames()
     {
         StringBuilder numberStringNames = new StringBuilder();
-        String[]  names = GpsApplication.getAppContext().getResources().getStringArray(R.array.relation_item_name);
+        String[]  names = sAppContext.getResources().getStringArray(R.array.relation_item_name);
         //int count = SOS_NUM_COUNT + 1;//getRelationNumberCount();
 
         for (int i=0; i<SOS_NUM_COUNT + 1; ++i)
@@ -360,7 +358,7 @@ public class SprdCommonUtils {
             }
             else
             {
-                String itemName = GpsApplication.getAppContext().getString(R.string.sos_number) + (i + 1);
+                String itemName = sAppContext.getString(R.string.sos_number) + (i + 1);
                 numberStringNames.append(itemName);
                 numberStringNames.append(",");
             }
@@ -418,22 +416,12 @@ public class SprdCommonUtils {
             }
         }
         else {
-            //BatteryManager batteryManager = (BatteryManager)GpsApplication.getAppContext().getSystemService(BATTERY_SERVICE);
+            //BatteryManager batteryManager = (BatteryManager)sAppContext.getSystemService(BATTERY_SERVICE);
             //percent = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
         }
 
         Log.i(TAG, "getCurrentBatteryCapacity: battery = " + percent);
 
         return /*String.valueOf(percent)*/ percent;
-    }
-
-    public static SprdCommonUtils getInstance()
-    {
-        return Holder.instance;
-    }
-
-    private static class Holder
-    {
-        private static final SprdCommonUtils instance = new SprdCommonUtils();
     }
 }

@@ -8,8 +8,10 @@ import static com.hsf1002.sky.xljgps.util.Constant.RESULT_SUCCESS_0;
 
 /**
  * Created by hefeng on 18-6-8.
+ * desc: Rxjava HTTP方式访问服务器的返回值, 各个接口都统一用这个
  */
 
+@Deprecated
 public class ResultMsg<T> {
     protected int success;
     protected String message;

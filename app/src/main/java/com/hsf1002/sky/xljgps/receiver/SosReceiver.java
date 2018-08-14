@@ -12,6 +12,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_SOS;
 
 /**
  * Created by hefeng on 18-7-30.
+ * desc: 用户按了SOS键之后, 会发送此广播, 本应用收到广播后上报SOS信息
  */
 
 public class SosReceiver extends BroadcastReceiver {
@@ -21,10 +22,8 @@ public class SosReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         String action = intent.getAction();
-
         Log.d(TAG, "onReceive: action = " + action);
 
-        // 用户按了SOS键之后, 会发送此广播, 本应用收到广播后上报SOS信息
         if (action.equals(ANCTION_SOS_REPORT_POSITION))
         {
             SocketModel.getInstance().reportPosition(SOCKET_TYPE_SOS, null);

@@ -13,7 +13,7 @@ import com.hsf1002.sky.xljgps.service.SocketService;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_POWERON;
 
 /**
- * Created by hefeng on 18-6-6.
+ * Created by hefeng on 18-8-6.
  */
 
 public class StartupReceiver extends BroadcastReceiver {
@@ -25,7 +25,7 @@ public class StartupReceiver extends BroadcastReceiver {
 
         Context appContext = GpsApplication.getAppContext();
 
-        // 开启定时服务, 默认每隔30分钟上报一次位置信息
+        // 开启定时服务, 默认每隔10分钟上报一次位置信息
         GpsService.setServiceAlarm(appContext, true);
 
         // 开启sticky服务, 接收服务器下发的各种指令

@@ -15,6 +15,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.BEATHEART_SERVICE_INTERVAL;
 
 /**
  * Created by hefeng on 18-8-8.
+ * desc: 定时默认5分钟 BEATHEART_SERVICE_INTERVAL 上报心跳信息, 此服务不会停止
  */
 
 public class BeatHeartService extends Service {
@@ -44,7 +45,7 @@ public class BeatHeartService extends Service {
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval);
 
-        if  (isOn)
+        if (isOn)
         {
             manager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), startServiceInterval, pi);
         }
@@ -53,18 +54,5 @@ public class BeatHeartService extends Service {
             manager.cancel(pi);
             pi.cancel();
         }
-    }
-
-    public static boolean isServiceAlarmOn(Context context)
-    {
-        Intent intent = new Intent(context, GpsService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
-
-        return pi != null;
-    }
-
-    public void stopGpsService()
-    {
-        stopSelf();
     }
 }

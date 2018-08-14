@@ -74,12 +74,13 @@ public class SocketModel implements BaseModel {
     *  param:
     *  return:
     */
-    private void postDataServer(final String gsonString)
+    private void postDataToServer(final String gsonString)
     {
         //socketService.writeDataToServer(gsonString);
         sThreadPool.execute(new Runnable() {
             @Override
             public void run() {
+                // 由于开机会同时开启Socket服务, 并上报开机信息到服务器(会调用此方法), 如果不加此延迟, 可能Socket的三个线程还没有开始运行
                 try
                 {
                     Thread.sleep(100);
@@ -88,19 +89,13 @@ public class SocketModel implements BaseModel {
                 {
                     e.printStackTrace();
                 }
+
+                // 先等待socket连接成功, 再进行读写操作
                 socketService.waitConnectThread();
+                // 上传信息到服务器
                 socketService.writeDataToServer(gsonString);
             }
         });
-
-
-/*
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SocketService.getInstance().writeDataToServer(gsonString);
-            }
-        }).start();*/
     }
 
     /**
@@ -117,7 +112,7 @@ public class SocketModel implements BaseModel {
         final String gsonString = BeatHeartParam.getBeatHeartParamGson(beatHeartParam);
         Log.i(TAG, "reportBeatHeart: gsonString = " + gsonString);
 
-        postDataServer(gsonString);
+        postDataToServer(gsonString);
     }
 
     /**
@@ -134,7 +129,6 @@ public class SocketModel implements BaseModel {
         String sosPhones = SprdCommonUtils.getInstance().getRelationNumber();
         String sosPhoneNames = SprdCommonUtils.getInstance().getRelationNumberNames();
 
-
         UploadNumberParam sendParam = new UploadNumberParam(
                 imei,
                 SOCKET_COMPANY,
@@ -145,7 +139,7 @@ public class SocketModel implements BaseModel {
         final String gsonString = UploadNumberParam.getSendParamGson(sendParam);
         Log.i(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
 
-        postDataServer(gsonString);
+        postDataToServer(gsonString);
     }
 
     /**
@@ -182,6 +176,6 @@ public class SocketModel implements BaseModel {
         final String gsonString = SosPositionParam.getReportParamGson(reportParamBean);
         Log.i(TAG, "reportPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
 
-        postDataServer(gsonString);
+        postDataToServer(gsonString);
     }
 }

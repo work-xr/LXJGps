@@ -15,7 +15,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_GET_STATUS_INFO;
 /**
 *  author:  hefeng
 *  created: 18-7-30 下午6:50
-*  desc: 根据平台发送的指令把设备状态上报到平台
+*  desc: 这是从服务器端接收到的指令参数, 根据平台发送的指令把设备状态上报到平台
  *
 */
 public class ResultServerStatusInfoMsg extends ResultServerMsg{

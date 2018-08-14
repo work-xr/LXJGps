@@ -51,6 +51,7 @@ public class RxjavaHttpModel implements BaseModel {
     *  return:
     */
     @Override
+    @Deprecated
     public void uploadRelationNumber(final NetworkPresenter.OnUploadListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
@@ -123,6 +124,7 @@ public class RxjavaHttpModel implements BaseModel {
     *  return:
     */
     @Override
+    @Deprecated
     public void reportPosition(int type, final NetworkPresenter.OnReportListener listener) {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();

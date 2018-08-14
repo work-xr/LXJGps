@@ -9,6 +9,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_INTERVAL;
 
 /**
  * Created by hefeng on 18-8-8.
+ * desc: 这是从服务器端接收到的指令参数, 根据平台发送的指令设置定位信息上报的时间间隔
  */
 
 public class ResultServerIntervalMsg extends ResultServerMsg {

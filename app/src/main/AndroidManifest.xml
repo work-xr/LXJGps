@@ -21,7 +21,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- SD卡读取权限，用户写入离线定位数据-->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
-
+    <!-- 开机广播权限 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- 长按平台中心号码可以呼出 -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
@@ -60,9 +60,13 @@
             </intent-filter>
         </receiver>
 
+        <!-- 定时默认5分钟 BEATHEART_SERVICE_INTERVAL 上报心跳信息, 此服务不会停止 -->
         <service android:name=".service.BeatHeartService" />
+        <!-- 定时默认10分钟 BAIDU_GPS_SERVICE_SCAN_INTERVAL 上报定位信息, 此服务不会停止 -->
         <service android:name=".service.GpsService" />
+
         <service android:name=".service.SocketService" />
+        <!-- 如果检测到Socket服务断开了, 每隔一段时间就重新连接一次Socket, 第一次是30秒, 第二次是1分钟, 2, 4, 8, 16.... -->
         <service android:name=".service.ReconnectSocketService" />
 	
         <service android:name="com.baidu.location.f"
