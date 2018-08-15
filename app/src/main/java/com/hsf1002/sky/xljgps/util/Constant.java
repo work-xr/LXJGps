@@ -5,15 +5,16 @@ package com.hsf1002.sky.xljgps.util;
  */
 
 public class Constant {
+    // 孝老平台主界面List三个菜单
     public static final int SET_RELATION_NUMBER_INDEX = 0;
     public static final int UPLOAD_INFO_TO_PLATFORM_INDEX = 1;
     public static final int REPORT_INFO_TO_PLATFORM_INDEX = 2;
-
+    // 孝老平台中心号码
     public static final String RELATION_NUMBER = "relation_number_";
     public static final String RELATION_NUMBER_COUNT = "relation_number_count";
     public static final String RELATION_NAME = "relation_name_";
     public static final String RELATION_NUMBER_DEFAULT = "12349";
-
+    // 客户端向孝老平台服务器上传数据类型, 以及服务器下发的指令类型
     public static final int SOCKET_TYPE_BEATHEART = 301;    // 主动: 上报心跳
     public static final int SOCKET_TYPE_SOS = 202;          // 主动: 通过按SOS键上报消息
     public static final int SOCKET_TYPE_UPLOAD = 203;       // 主动: 上传亲情号码
@@ -24,70 +25,65 @@ public class Constant {
     public static final int SOCKET_TYPE_INTERVAL = 106;                 // 被动: 接收服务器指令后, 设置定位上传频率
     public static final int SOCKET_TYPE_OUTER_ELECTRIC_BAR = 107;       // 被动: 接收服务器指令后, 电子围栏超出通知
     public static final int SOCKET_TYPE_GET_STATUS_INFO = 108;          // 被动: 接收服务器指令后, 获取设备状态信息
+    // 项目名称, 即客户名称
     public static final String SOCKET_COMPANY = "xiaolajiao";
-    public static final String SOCKET_SECRET_CODE = "ab2796145acdf";//"8s6HiyY0yGCLeZp5";     //ab2342145acdf;    // iETOECQ9kiJw75AZ
+    // 传输数据的编码类型
     public static final String SOCKET_ENCODE_TYPE = "UTF-8";
 
     // 每隔多久启动一次IntentService服务来开始定位,可由服务器端通过调用setStartServiceInterval进行设置更改
     public static final String BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME = "baidu_gps_scan_span_interval_name";
     // 如果不用定时service,而且不停止百度service, 百度默认多久发起一次定位
     public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
+    // 百度定位方式, 目前只有lbs一种
     public static final String BAIDU_GPS_LOCATION_TYPE_GPS = "gps";
     public static final String BAIDU_GPS_LOCATION_TYPE_LBS = "lbs";
     public static final String BAIDU_GPS_LOCATION_TYPE_WIFI = "wifi";
-
+    // 由于上传给服务器的数据不能为空, 定位数据的默认值
     public static final String BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE = "113.957178";
     public static final String BAIDU_GPS_LOCATION_DEFAULT_LANTITUDE = "22.537702";
     public static final String BAIDU_GPS_LOCATION_DEFAULT_LOCTYPE = "1";    // 1: baidu map  2: gaode map
     public static final String BAIDU_GPS_LOCATION_DEFAULT_POSITIONTYPE = "lbs";
 
-    // 按键sos后发此广播, 收到广播后,上传信息到平台
+    // 按键SOS后发此广播, 收到广播后,上传信息到平台
     public static final String ANCTION_SOS_REPORT_POSITION = "action.sos.report.position";
 
-    // SOS包的名字
-    public static final String SOS_PACKAGE_NAME = "com.android.sos";
-    // SOS包的SharedPreferences的名字
-    public static final String SOS_NUM_PREFS_NAME = "sos_num_prefs";
-    public static final String SOS_NUM_PREFS_ = "sosNum";
-    // 第一个紧急呼叫号码的KEY
-    public static final String SOS_NUM_PREFS_1 = "sosNum1";
-    // 第二个紧急呼叫号码的KEY
-    public static final String SOS_NUM_PREFS_2 = "sosNum2";
-    // 第三个紧急呼叫号码的KEY
-    public static final String SOS_NUM_PREFS_3 = "sosNum3";
-
-    public static final String SHARED_PREFERENCE_NAME = "lxjgps_sp";
-
+    // 将SOS的三个紧急号码和紧急短信保存到SystemProperties, 该应用只读,写操作会发送广播让SOS模块实现
     public static final String SOS_NUM_PROPERTY_1 = "persist.sys.sos.num1";
     public static final String SOS_NUM_PROPERTY_2 = "persist.sys.sos.num2";
     public static final String SOS_NUM_PROPERTY_3 = "persist.sys.sos.num3";
     public static final String SOS_SMS_PROPERTY_MSG = "persist.sys.sos.msg";
     public static final String SOS_NUM_INVALID_VALUE = "FFFF";
     public static final int SOS_NUM_COUNT = 3;
-
+    // 给SOS发送设置紧急呼叫号码的广播
     public static final String ACTION_SET_RELATION_NUMBER = "intent.action.SET_RELATION_NUMBER";
     public static final String SET_RELATION_NUMBER = "com.hsf1002.sky.xljgps.setrelationnumber";
 
+    // 返回给服务器的数据参数, 0表示失败, 1表示成功
     public static final int RESULT_SUCCESS_0 = 0;
     public static final int RESULT_SUCCESS_1 = 1;
     public static final String RESULT_MSG_FAILING = "failing";
     public static final String RESULT_MSG_SUCCESS = "success";
+    // 返回给服务器的数据参数, 当前肯定是开机状态
     public static final int RESULT_STATUS_POWERON = 1;
     public static final int RESULT_STATUS_POWEROFF = 0;
-
+    // 返回给服务器的数据参数, 各个参数的名称
     public static final String RESULT_PARAM_IMEI = "imei";
     public static final String RESULT_PARAM_INTERVAL = "interval";
-    public static final String RESULT_PARAM_TYPE = "type";
     public static final String RESULT_PARAM_TIME = "time";
     public static final String RESULT_PARAM_COMMAND = "command";
     public static final String RESULT_PARAM_NAME = "name";
     public static final String RESULT_PARAM_NUMBER = "sos_phone";
 
+    // 服务器端socket的地址
     public static final String SOCKET_SERVER_ADDRESS_URL = "healthdata.4000300659.com";
+    // 服务器端socket的端口
     public static final int SOCKET_SERVER_ADDRESS_PORT = 12004;
 
-    public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
-    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 10 * 60 * 1000;
+    // 心跳服务上报的时间间隔
+    public static final int BEATHEART_SERVICE_INTERVAL = 4 * 60 * 1000;
+    // 定位服务上报的时间间隔
+    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 3 * 60 * 1000;
+    // 重连服务第一次连接等待时长
     public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 30 * 1000;
 
 

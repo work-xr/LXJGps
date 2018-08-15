@@ -2,10 +2,13 @@ package com.hsf1002.sky.xljgps.app;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import com.allen.library.RxHttpUtils;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
+import com.hsf1002.sky.xljgps.service.GpsService;
+import com.hsf1002.sky.xljgps.service.SocketService;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_BASE_URL_TEST;
 import static com.hsf1002.sky.xljgps.util.Constant.RXJAVAHTTP_CONNCET_TIMEOUT;
@@ -29,6 +32,12 @@ public class GpsApplication extends Application {
 
         // 初始化百度SDK, 这里比 StartupReceiver 广播要早
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
+
+        // 开启定时服务, 默认每隔10分钟上报一次位置信息
+        GpsService.setServiceAlarm(sContext, true);
+
+        // 开启sticky服务, 接收服务器下发的各种指令
+        sContext.startService(new Intent(sContext, SocketService.class));
     }
 
     /**

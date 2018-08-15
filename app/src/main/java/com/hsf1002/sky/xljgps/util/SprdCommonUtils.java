@@ -404,7 +404,7 @@ public class SprdCommonUtils {
                 char[] arrayOfChar = new char[30];
                 try {
                     String[] arrayOfString = new String(arrayOfChar, 0, localFileReader.read(arrayOfChar)).trim().split("\n");
-                    Log.i(TAG, "getCurrentBatteryCapacity: percent = " + arrayOfString[0]);
+                    //Log.i(TAG, "getCurrentBatteryCapacity: percent = " + arrayOfString[0]);
 
                     //can do run time test only when battery percent >= 40%
                     percent = Integer.parseInt(arrayOfString[0]);

@@ -1,10 +1,9 @@
 package com.hsf1002.sky.xljgps.service;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -20,8 +19,17 @@ import static com.hsf1002.sky.xljgps.util.Constant.BEATHEART_SERVICE_INTERVAL;
 
 public class BeatHeartService extends Service {
 
-    public static final String TAG = "BeatHeartService";
+    private static final String TAG = "BeatHeartService";
     private static int startServiceInterval = BEATHEART_SERVICE_INTERVAL;
+    private static Handler handler = null;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // 在主线程上创建Handler, 不然报错 Can't create handler inside thread that has not called Looper.prepare()
+        handler = new Handler();
+        handler.postDelayed(beatHeartTask, startServiceInterval);
+    }
 
     @Nullable
     @Override
@@ -31,14 +39,21 @@ public class BeatHeartService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "onStartCommand: reportBeatHeart");
-        SocketModel.getInstance().reportBeatHeart();
-
-        return super.onStartCommand(intent, flags, startId);
+        Log.i(TAG, "onStartCommand:");
+        //SocketModel.getInstance().reportBeatHeart();
+        return START_STICKY;// super.onStartCommand(intent, flags, startId);
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-15 下午7:41
+    *  desc:    用 handler.postDelayed 来替换 manager.setRepeating
+    *  param:
+    *  return:
+    */
     public static void setServiceAlarm(Context context, boolean isOn)
     {
+        /*
         Intent intent = new Intent(context, BeatHeartService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
@@ -53,6 +68,32 @@ public class BeatHeartService extends Service {
         {
             manager.cancel(pi);
             pi.cancel();
+        }*/
+
+        Intent intent = new Intent(context, BeatHeartService.class);
+        context.startService(intent);
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-15 下午7:19
+    *  desc:
+    *  param:
+    *  return:
+    */
+    private static Runnable beatHeartTask = new Runnable() {
+        @Override
+        public void run() {
+            Log.i(TAG, "task: postDelayed-------------------------------------------");
+            SocketModel.getInstance().reportBeatHeart();
+            handler.postDelayed(beatHeartTask, startServiceInterval);
         }
+    };
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        handler.removeCallbacks(beatHeartTask);
     }
 }

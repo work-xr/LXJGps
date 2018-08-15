@@ -1,10 +1,10 @@
-### LXJGps
+### 项目架构
 * 使用MVP架构
 * 使用AlarmService开启定位服务-GpsService
 * 使用AlarmService开启心跳服务-BeatHeartService
 * 使用AlarmService开启重连服务-ReconnectSocketService
-* 使用StickyService打开socket连接
-* 使用百度SDK定位  
+* 使用StickyService打开socket连接服务-SocketService
+* 使用百度SDK定位(本身支持基站定位, WIFI定位和GPS定位,为了最大限度降低功耗,仅使用基站定位模式)  
 ~~* 使用RxJava访问网络~~
 * 使用TCP-Socket与服务器通信
 
@@ -39,13 +39,15 @@
 
 ### 主要步骤
 1. 收到开机广播,同时开启定时服务和sticky service(会打开socket连接,准备接收服务器数据)
-2. 每隔30分钟启动一次服务
-3. 后台服务会开始用百度进行定位
-4. 如果定位失败如超时,则停止定位服务
+2. socket连接成功则开启心跳服务(五分钟启动一次), 连接失败则开启重连服务
+3. 每隔30分钟启动一次定位服务(后台服务会开始用百度进行定位)
+4. 如果定位失败如超时,则停止定位服务(百度定位服务在单独的进程)
 5. 如果定位成功,将定位信息上传到服务器,并停止定位服务
 6. 将本地孝老平台设置号码上传到服务器
 7. 如果客户按了SOS键,则将SOS定位信息上传到服务器
-8. 对sticky service的socket连接接收的数据进行解析
+8. socket有三个线程, 一个用于连接socket, 一个用于接收服务器指令并响应, 一个用于主动发送消息到服务器
+9. 对socket连接接收的数据进行解析, 判断是服务器主动发送的指令(此时要返回数据给服务器)还是客户端发送数据到服务器后服务器的返回数据(此时无需再向服务器写数据, 只打印出来即可)
+10. 如果接收到服务器的如下5种指令, 需要做出相应处理:  
 > 如果是修改设备亲情号码的指令: 将服务器上设置的号码同步到本地;   
 > 如果是查询位置指令: 将目前定位信息上传到服务器;  
 > 如果是修改设备定位上传频率指令: 则修改定时服务的时间间隔;  
@@ -54,33 +56,41 @@
 
 对传递到服务器的参数data,先转成JSON格式,再排序,然后按照UTF-8编码  
 ```
-ReportParamBean reportParamBean = new ReportParamBean(imei,
-                RXJAVAHTTP_COMPANY,
-                RXJAVAHTTP_TYPE_REPORT,
-                positionType,
-                time,
-                locType,
-                longitude,
-                latitude,
-                capacity
-        );
+SosPositionParam reportParamBean = new SosPositionParam(
+        imei,
+        SOCKET_COMPANY,
+        type,
+        positionType,
+        time,
+        locType,
+        longitude,
+        latitude,
+        capacity
+);
 
-String gsonString = ReportParamBean.getReportParamGson(reportParamBean);
-String sortedGsonString = getSortedParam(gsonString);
+final String gsonString = SosPositionParam.getReportParamGson(reportParamBean);
 
 try
 {
-    data = URLEncoder.encode(sortedGsonString, RXJAVAHTTP_ENCODE_TYPE);
+    encodedData = URLEncoder.encode(data, SOCKET_ENCODE_TYPE);
 }
 catch (UnsupportedEncodingException e)
 {
     e.printStackTrace();
 }
 ```
+再取整个编码后的数据长度,放到前四个字节一起传输:  
+```
+completedStr = getDataPrefix(encodedData) + encodedData;
+```
 ~~对传递到服务器的参数sign,需要进行MD5编码, 服务器端会用同样步骤生成sign, 和本地传递过去的sign进行对比, 以确认数据在网络传输过程中是否被修改~~    
 ```
 sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
 ```
+
+### 友情提示
+常用参数配置见Constant.java
+
 ### 问题汇总
 #### 接口调试中的问题
 ##### sos exits null
@@ -238,8 +248,143 @@ so库是NDK编译出来的动态链接库, 一些重要的加密算法或者核�
 
 如果socket连接的这两个操作只用一个线程来做读和写操作无法实现, 因为这个线程是个死循环, 客户端发送数据给服务器端后会处于阻塞状态, 无法退出, 而两个线程不能同时做读和写的操作, 否则会出现一个线程写入的数据, 被另一个线程读取了; 客户端发送的数据可以在一个线程处理, 只写不读, 另一个线程先读取服务器端发送的数据, 再解析其数据到底是服务器端主动发送的数据还是返回给客户端的消息
 
-#### 问题10 进入孝老平台界面无法退出
+#### 问题10 进入孝老平台主界面无法退出
 在onKeyDown中不小心返回了true, 又没有处理KEYCODE_BACK
+
+#### 问题11 孝老平台主界面RecyclerView添加选中框
+MainRecycleAdapter中添加:  
+```
+private int selectedPos = -1;
+private int oldPos = -1;
+
+@Override
+public void onBindViewHolder(ViewHolder holder, int position) {
+    ...
+    if(selectedPos == holder.getPosition()) {
+        holder.itemName.setBackgroundColor(GpsApplication.getAppContext().getResources().getColor(R.color.list_item_focuse));
+    } else {
+        holder.itemName.setBackgroundColor(GpsApplication.getAppContext().getResources().getColor(R.color.background_holo_light));
+    }
+}
+
+public void refreshItem(int position) {
+    if (selectedPos != -1) {
+        oldPos  = selectedPos;
+    }
+
+    selectedPos = position;
+
+    if (oldPos != -1) {
+        notifyItemChanged(oldPos);
+    }
+    notifyItemChanged(selectedPos);
+}
+```
+然后在MainActivity的onCreate中调用:  
+```
+adapter.refreshItem(currentPosition);
+
+```
+并添加onKeydown():
+```
+@Override
+public boolean onKeyDown(int keyCode, KeyEvent event) {
+    int count = getResources().getStringArray(R.array.main_item_name).length;
+    switch (keyCode)
+    {
+        case KEYCODE_DPAD_UP:
+            if (currentPosition == 0)
+            {
+                currentPosition = count - 1;
+            }
+            else
+            {
+                currentPosition--;
+            }
+            break;
+        case KEYCODE_DPAD_DOWN:
+            if (currentPosition == count - 1)
+            {
+                currentPosition = 0;
+            }
+            else
+            {
+                currentPosition++;
+            }
+            break;
+        case KEYCODE_DPAD_CENTER:
+            handlePlatformItems(currentPosition);
+            break;
+    }
+    adapter.refreshItem(currentPosition);
+    return super.onKeyDown(keyCode, event);
+```
+
+#### 问题12 AlarmService定时服务时间不准, 延迟严重
+使用AlarmService开启定时服务, `manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+startServiceInterval, startServiceInterval, pi);` 定时5分钟, 但是有时候6, 7分钟, 有时候长达15分钟才会运行一次
+```
+08-14 15:15:01.044 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+08-14 15:22:37.839 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+08-14 15:30:00.992 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+08-14 15:45:01.040 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+08-14 15:52:56.153 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+08-14 16:00:01.058 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+08-14 16:15:00.996 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+08-14 16:21:06.713 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+08-14 16:30:01.054 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+08-14 16:45:01.022 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
+```
+使用循环 handler.postDelayed(task, 1000 * 60);的结果, 误差不会超过50ms:  
+```
+08-15 17:18:05.724 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+08-15 17:19:05.752 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+08-15 17:20:05.761 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+08-15 17:21:05.769 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+08-15 17:22:05.768 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+08-15 17:23:05.787 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+08-15 17:24:05.795 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+08-15 17:25:05.804 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+08-15 17:26:05.812 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+08-15 17:27:05.821 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
+```
+使用 AlarmManager的 set 方法循环发送广播的方式:  
+```
+@Override
+public void onReceive(Context context, Intent intent) {
+    Log.e(TAG,"+++++++++++++++++++>>>onReceive");
+    mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+startServiceInterval,  mPendingIntent);
+}
+```
+误差还是比较大, 1分钟的定时服务, 有时候延迟 15秒:   
+```
+08-15 18:23:25.598 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:24:28.650 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:25:28.658 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:26:28.667 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:27:28.665 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:29:02.587 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:30:15.138 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:31:15.136 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:32:19.279 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:33:19.277 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+```
+如果将AlarmManager的 set 改为 setExact, 误差会小很多, 在60ms左右:  
+```
+08-15 18:55:48.514 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:56:48.582 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:57:48.631 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:58:48.689 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 18:59:48.748 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 19:00:48.776 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 19:01:48.825 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 19:02:48.894 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 19:03:48.962 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+08-15 19:04:49.021 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
+```
+根本原因:  
+从Android 4.4 版本开始，Alarm 任务的触发时间将会变得不准确，有可能会延迟一段时间后任务才能得到执行, 这是系统在耗电性方面进行的优化。系统会自动检测目前有多少Alarm 任务存在，然后将触发时间将近的几个任务放在一起执行，这就可以大幅度地减少CPU 被唤醒的次数，从而有效延长电池的使用时间。如果你要求Alarm 任务的执行时间必须准备无误，Android 仍然提供了解决方案。使用AlarmManager 的setExact()方法来替代set()方法  
+解决方案:  
+相对于定时的准确性而言, 功耗更为重要, 依然采用Android默认的处理方式
 
 ### HTTP 协议基础
 #### GET请求的特点:

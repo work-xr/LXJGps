@@ -90,6 +90,7 @@ public class SocketService extends Service {
         writeServerThread = new WriteDataThread();
         writeServerThread.start();
 
+        //  以下调用用于调试
         //SocketModel.getInstance().reportBeatHeart();
        // writeDataToServer(null);
         //SocketModel.getInstance().reportBeatHeart();
@@ -210,8 +211,8 @@ public class SocketService extends Service {
             if (sSocket != null) {
                 sSocket.close();
 
-                Log.d(TAG, "disConnectSocketServer: isConnected = " + sSocket.isConnected());
-                Log.d(TAG, "disConnectSocketServer: isClosed = " + sSocket.isClosed());
+                Log.i(TAG, "disConnectSocketServer: isConnected = " + sSocket.isConnected());
+                Log.i(TAG, "disConnectSocketServer: isClosed = " + sSocket.isClosed());
 
                 sSocket = null;
             }
@@ -261,13 +262,13 @@ public class SocketService extends Service {
         // 如果socket连上了, 且重连服务已经开启, 则关闭
         if (!disconnected && serviceStarted) {
             ReconnectSocketService.setServiceAlarm(sContext, false);
-            Log.d(TAG, "confirmSocketConnected: socket already connected, stopped reconncect service**********************************");
+            Log.i(TAG, "confirmSocketConnected: socket already connected, stopped reconncect service**********************************");
             return true;
         }
         // 如果socket断开了, 且重连服务没有开启, 则开启
         else if (disconnected && !serviceStarted) {
             ReconnectSocketService.setServiceAlarm(sContext, true);
-            Log.d(TAG, "confirmSocketConnected: start to reconncect service***********************************************************");
+            Log.i(TAG, "confirmSocketConnected: start to reconncect service***********************************************************");
         }
         // 如果socket连上了, 且重连服务已经断开或 socket断开了, 且重连服务已经开启, 不处理
         else
@@ -334,18 +335,18 @@ public class SocketService extends Service {
         try {
             dis.read(sizeBytes);
             String sizeStr = new String(sizeBytes);
-            Log.d(TAG, "getParseDataString: sizeStr = " + sizeStr);
+            Log.i(TAG, "getParseDataString: sizeStr = " + sizeStr);
 
             // 前4个字节应该都是数字,否则丢弃此次读取, 并且断开socket服务
             if (!TextUtils.isDigitsOnly(sizeStr))
             {
-                Log.d(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************!");
+                Log.i(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************!");
                 disConnectSocketServer();
                 return null;
             }
 
             size = Integer.valueOf(sizeStr);
-            Log.d(TAG, "getParseDataString: size = " + size);
+            Log.i(TAG, "getParseDataString: size = " + size);
 
             // 读取服务器发送的实际数据
             byte[] dataBytes = new byte[size - 4];
@@ -360,7 +361,7 @@ public class SocketService extends Service {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "getParseDataString: decodedStr = " + dencodedStr);
+        Log.i(TAG, "getParseDataString: decodedStr = " + dencodedStr);
 
         return dencodedStr;
     }
@@ -459,10 +460,10 @@ public class SocketService extends Service {
     {
         gsonString = data;
 
-        Log.d(TAG, "writeDataToServer: prepared.............................................");
+        Log.i(TAG, "writeDataToServer: prepared.............................................");
 
         if (writeServerThread != null ) {
-            Log.d(TAG, "writeDataToServer: isAlive = " + writeServerThread.isAlive());
+            Log.i(TAG, "writeDataToServer: isAlive = " + writeServerThread.isAlive());
             Log.i(TAG, "writeDataToServer: isInterrupted = " + writeServerThread.isInterrupted());
             writeServerThread.run();
         }
@@ -517,8 +518,6 @@ public class SocketService extends Service {
         String paramName = null;
         String paramNumber = null;
 
-        Log.i(TAG, "parseServerMsg: msg = " + msg);
-
         // 如果服务器下发的是修改亲情号码指令, 不能以 , 分割字符串, 需要单独处理
         if (msg.contains(RESULT_PARAM_NAME) && msg.contains(RESULT_PARAM_NUMBER))
         {
@@ -545,7 +544,7 @@ public class SocketService extends Service {
 
         if (paramType == null)
         {
-            Log.d(TAG, "parseServerMsg: no command");
+            Log.i(TAG, "parseServerMsg: no command");
             return null;
         }
 
@@ -555,16 +554,16 @@ public class SocketService extends Service {
 
         switch (command)
         {
-            // 从平台下载,再设置本地平台中心号码和亲情号码
+            // 收到平台指令: 从平台下载,再设置本地平台中心号码和亲情号码
             case SOCKET_TYPE_DOWNLOAD:
                 if (paramName == null)
                 {
-                    Log.d(TAG, "parseServerMsg: paramName is null");
+                    Log.i(TAG, "parseServerMsg: paramName is null");
                     return null;
                 }
                 if (paramNumber == null)
                 {
-                    Log.d(TAG, "parseServerMsg: paramNumber is null");
+                    Log.i(TAG, "parseServerMsg: paramNumber is null");
                     return null;
                 }
 
@@ -582,15 +581,15 @@ public class SocketService extends Service {
 
                 gsonStr = ResultServerDownloadNumberMsg.getResultServerDownloadNumberMsgGson(downloadNumberMsg);
                 break;
-            // 上传位置信息
+            // 收到平台指令: 上传位置信息
             case SOCKET_TYPE_CURRENT:
                 SocketModel.getInstance().reportPosition(SOCKET_TYPE_CURRENT, null);
                 break;
-            // 设置上报定位信息的频率
+            // 收到平台指令: 设置上报定位信息的频率
             case SOCKET_TYPE_INTERVAL:
                 if (paramInterval == null)
                 {
-                    Log.d(TAG, "parseServerMsg: paramInterval is null");
+                    Log.i(TAG, "parseServerMsg: paramInterval is null");
                     return null;
                 }
                 paramList = paramInterval.split(":");
@@ -604,7 +603,7 @@ public class SocketService extends Service {
 
                 gsonStr = ResultServerIntervalMsg.getResultServerIntervalMsgGson(intervalMsg);
                 break;
-            // 超出电子围栏, 给亲情号码发送短信通知
+            // 收到平台指令: 超出电子围栏, 给亲情号码发送短信通知
             case SOCKET_TYPE_OUTER_ELECTRIC_BAR:
                 SprdCommonUtils.getInstance().sendSosSms();
 
@@ -613,7 +612,7 @@ public class SocketService extends Service {
 
                 gsonStr = ResultServerOuterElectricMsg.getResultServerOuterElectricMsgGson(outerElectricMsg);
                 break;
-            // 获取设备状态信息, 再返回给服务器
+            // 收到平台指令: 获取设备状态信息, 再返回给服务器
             case SOCKET_TYPE_GET_STATUS_INFO:
                 ResultServerStatusInfoMsg statusInfoMsg = new ResultServerStatusInfoMsg();
                 statusInfoMsg.setMessage(RESULT_MSG_SUCCESS);
@@ -685,7 +684,7 @@ public class SocketService extends Service {
 
                         if (!TextUtils.isEmpty(decodedStr)) {
 
-                            Log.d(TAG, "readDataFromServer: dencodedStr = " + decodedStr);
+                            Log.i(TAG, "readDataFromServer: decodedStr = " + decodedStr);
                             // 3. 解析数据, 并将需要发送给服务器的数据返回
                             String gsonStr = parseServerMsg(decodedStr);
                             String completedStr = getCompletedString(gsonStr);
@@ -766,7 +765,7 @@ public class SocketService extends Service {
         //Log.e(TAG, "getOneParam: keyStartPos = " + keyStartPos + ", keyEndPos = " + keyEndPos + ", valueStartPos = " + valueStartPos + ", valueEndPos = " + valueEndPos);
         //HashMap<String, String> hashMap = new HashMap<String, String>();
         //hashMap.put(key, value);
-        //Log.d(TAG, "getOneParam: key = " + key + ":value = " + value);
+        //Log.i(TAG, "getOneParam: key = " + key + ":value = " + value);
 
         return key + ":" + value;
     }

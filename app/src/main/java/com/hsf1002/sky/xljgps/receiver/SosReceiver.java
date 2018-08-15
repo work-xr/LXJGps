@@ -16,7 +16,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_SOS;
  */
 
 public class SosReceiver extends BroadcastReceiver {
-    public static final String TAG = "SosReceiver";
+    private static final String TAG = "SosReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
