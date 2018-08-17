@@ -9,7 +9,12 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_INTERVAL;
+import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 
 /**
  * Created by hefeng on 18-8-10.
@@ -19,6 +24,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_INTE
 public class ReconnectSocketService extends Service {
     private static final String TAG = "ReconnectSocketService";
     private static int startServiceInterval = RECONNCET_SOCKET_SERVICE_INTERVAL;
+    private static ThreadPoolExecutor sThreadPool;
     private static int sConnectedCount = 0;
 
     @Nullable
@@ -27,9 +33,34 @@ public class ReconnectSocketService extends Service {
         return null;
     }
 
+    /**
+     *  author:  hefeng
+     *  created: 18-8-17 下午6:38
+     *  desc:    Caused by: android.os.NetworkOnMainThreadException
+     *  param:
+     *  return:
+     */
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        sThreadPool = new ThreadPoolExecutor(
+                1,
+                1,
+                THREAD_KEEP_ALIVE_TIMEOUT,
+                TimeUnit.SECONDS,
+                new LinkedBlockingDeque<Runnable>(),
+                new ThreadPoolExecutor.AbortPolicy());
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        SocketService.getInstance().reconnectSocketServer();
+        sThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                SocketService.getInstance().reconnectSocketServer();
+            }
+        });
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -50,9 +81,9 @@ public class ReconnectSocketService extends Service {
         sConnectedCount++;
         Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", sConnectedCount = " + sConnectedCount);
 
-        if  (isOn)
+        if (isOn)
         {
-            manager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), startServiceInterval * sConnectedCount * 2, pi);
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval * sConnectedCount * 2, pi);
         }
         else
         {
