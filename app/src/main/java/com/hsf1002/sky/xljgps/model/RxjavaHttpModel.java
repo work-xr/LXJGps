@@ -58,7 +58,7 @@ public class RxjavaHttpModel implements BaseModel {
         //String manufactory = SprdCommonUtils.getInstance().getManufactory();
         //String model = SprdCommonUtils.getInstance().getModel();
         String sosPhones = SprdCommonUtils.getInstance().getRelationNumber();
-        String sosPhoneNames = SprdCommonUtils.getInstance().getRelationNumberNames();
+        //String sosPhoneNames = SprdCommonUtils.getInstance().getRelationNumberNames();
         String encodedSosPhoneNames = null;
         String data = null;
         String sign = null;
@@ -70,16 +70,15 @@ public class RxjavaHttpModel implements BaseModel {
                 RXJAVAHTTP_COMPANY,
                 Integer.valueOf(RXJAVAHTTP_TYPE_UPLOAD),
                 sosPhones,
-                sosPhoneNames,
+                null,//sosPhoneNames,
                 time);
         String gsonString = UploadNumberParam.getSendParamGson(sendParam);
-        Log.i(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
+        Log.i(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", gson = " + gsonString);
         String sortedGsonString = getSortedParam(gsonString);
 
         try
         {
             data = URLEncoder.encode(sortedGsonString, RXJAVAHTTP_ENCODE_TYPE);
-            encodedSosPhoneNames = URLEncoder.encode(sosPhoneNames, RXJAVAHTTP_ENCODE_TYPE);
         }
         catch (UnsupportedEncodingException e)
         {

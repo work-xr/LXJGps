@@ -3,7 +3,6 @@ package com.hsf1002.sky.xljgps.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,7 +25,6 @@ import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
 import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
 import static android.view.KeyEvent.KEYCODE_DPAD_UP;
 import static com.hsf1002.sky.xljgps.util.Constant.REPORT_INFO_TO_PLATFORM_INDEX;
-import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER_INDEX;
 import static com.hsf1002.sky.xljgps.util.Constant.UPLOAD_INFO_TO_PLATFORM_INDEX;
 
 /**
@@ -123,9 +121,9 @@ public class MainActivity extends Activity implements BaseView{
     {
         switch (position)
         {
-            case SET_RELATION_NUMBER_INDEX:
+            /*case SET_RELATION_NUMBER_INDEX:
                 startActivity(new Intent(MainActivity.this, PlatformCenterActivity.class));
-                break;
+                break;*/
             case UPLOAD_INFO_TO_PLATFORM_INDEX:
                 uploadInfoToPlatform();
                 break;

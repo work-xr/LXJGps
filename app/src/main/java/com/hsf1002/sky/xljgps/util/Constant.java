@@ -6,9 +6,9 @@ package com.hsf1002.sky.xljgps.util;
 
 public class Constant {
     // 孝老平台主界面List三个菜单
-    public static final int SET_RELATION_NUMBER_INDEX = 0;
-    public static final int UPLOAD_INFO_TO_PLATFORM_INDEX = 1;
-    public static final int REPORT_INFO_TO_PLATFORM_INDEX = 2;
+    //public static final int SET_RELATION_NUMBER_INDEX = 0;
+    public static final int UPLOAD_INFO_TO_PLATFORM_INDEX = 0;
+    public static final int REPORT_INFO_TO_PLATFORM_INDEX = 1;
     // 孝老平台中心号码
     public static final String RELATION_NUMBER = "relation_number_";
     public static final String RELATION_NUMBER_COUNT = "relation_number_count";
@@ -29,6 +29,7 @@ public class Constant {
     public static final String SOCKET_COMPANY = "xiaolajiao";
     // 传输数据的编码类型
     public static final String SOCKET_ENCODE_TYPE = "UTF-8";
+    public static final int THREAD_KEEP_ALIVE_TIMEOUT = 60;
 
     // 每隔多久启动一次IntentService服务来开始定位,可由服务器端通过调用setStartServiceInterval进行设置更改
     public static final String BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME = "baidu_gps_scan_span_interval_name";
@@ -47,12 +48,18 @@ public class Constant {
     // 按键SOS后发此广播, 收到广播后,上传信息到平台
     public static final String ANCTION_SOS_REPORT_POSITION = "action.sos.report.position";
 
-    // 将SOS的三个紧急号码和紧急短信保存到SystemProperties, 该应用只读,写操作会发送广播让SOS模块实现
+    // 将SOS的一个紧急号码和紧急短信, 三个亲情号码保存到SystemProperties, 该应用只读,写操作会发送广播让SOS和SimpleLauncher模块实现
+    public static final String SOS_EMERGENCY_NUM_PROPERTY = "persist.sys.sos.emergency.num";
     public static final String SOS_NUM_PROPERTY_1 = "persist.sys.sos.num1";
     public static final String SOS_NUM_PROPERTY_2 = "persist.sys.sos.num2";
     public static final String SOS_NUM_PROPERTY_3 = "persist.sys.sos.num3";
+    public static final String SOS_NAME_PROPERTY_1 = "persist.sys.sos.name1";
+    public static final String SOS_NAME_PROPERTY_2 = "persist.sys.sos.name2";
+    public static final String SOS_NAME_PROPERTY_3 = "persist.sys.sos.name3";
     public static final String SOS_SMS_PROPERTY_MSG = "persist.sys.sos.msg";
     public static final String SOS_NUM_INVALID_VALUE = "FFFF";
+    public static final String SOS_NAME_INVALID_VALUE = "FFFF";
+    public static final String SOS_SMS_INVALID_VALUE = "FFFF";
     public static final int SOS_NUM_COUNT = 3;
     // 给SOS发送设置紧急呼叫号码的广播
     public static final String ACTION_SET_RELATION_NUMBER = "intent.action.SET_RELATION_NUMBER";

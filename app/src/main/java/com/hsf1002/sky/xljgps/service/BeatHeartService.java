@@ -47,7 +47,7 @@ public class BeatHeartService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-15 下午7:41
-    *  desc:    用 handler.postDelayed 来替换 manager.setRepeating
+    *  desc:    用轻量级的 handler.postDelayed 来替换重量级的 manager.setRepeating
     *  param:
     *  return:
     */
@@ -84,7 +84,7 @@ public class BeatHeartService extends Service {
     private static Runnable beatHeartTask = new Runnable() {
         @Override
         public void run() {
-            Log.i(TAG, "task: postDelayed-------------------------------------------");
+            Log.i(TAG, "task: beatHeartTask postDelayed-------------------------------------------");
             SocketModel.getInstance().reportBeatHeart();
             handler.postDelayed(beatHeartTask, startServiceInterval);
         }

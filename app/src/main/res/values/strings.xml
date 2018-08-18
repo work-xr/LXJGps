@@ -2,8 +2,8 @@
     <string name="app_name">platform center</string>
 
     <string-array name="main_item_name" >
-        <item>set platform center number</item>
-        <item>upload info to platform</item>
+        <!--item>set platform center number</item-->
+        <item>upload number to platform</item>
         <item>report position to platform</item>
     </string-array>
 
@@ -13,6 +13,8 @@
         <item>relation number 2</item>
         <item>relation number 3</item-->
     </string-array>
+
+    <string name="platform_center_number">platform center number</string>
 
     <string name="sure">sure</string>
     <string name="cancel">cancel</string>

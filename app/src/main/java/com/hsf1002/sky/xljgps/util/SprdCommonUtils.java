@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import static android.os.Build.MANUFACTURER;
@@ -29,11 +30,17 @@ import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_DEFAULT;
 import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_EMERGENCY_NUM_PROPERTY;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NAME_INVALID_VALUE;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NAME_PROPERTY_1;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NAME_PROPERTY_2;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_NAME_PROPERTY_3;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_INVALID_VALUE;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PROPERTY_1;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PROPERTY_2;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_NUM_PROPERTY_3;
+import static com.hsf1002.sky.xljgps.util.Constant.SOS_SMS_INVALID_VALUE;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_SMS_PROPERTY_MSG;
 
 /**
@@ -186,7 +193,7 @@ public class SprdCommonUtils {
                 }
             }
         }*/
-        verifyPropertyNumber(list);
+        verifyPropertyNameNumber(list, false);
 
         numberString.
                 append(list.get(0))
@@ -206,43 +213,23 @@ public class SprdCommonUtils {
     *  author:  hefeng
     *  created: 18-7-31 下午2:32
     *  desc:    从平台下载的号码设置到本地, 平台中心号码直接设置, 亲情号码发送广播到SOS去设置
-    *  param:
+    *  param:   {"imei":"869426020023138","command":103, "e_order":"老妈，老弟，老姐, 养老服务中心号码"，"sos_phone":",13555555553, 13555555553 , 13555555555，059612349","time":"20170504113555"}
     *  return:
     */
-    public void setRelationNumber(String relationNumber)
+    public void setRelationNumber(String relationNumberName)
     {
-        String[] list = relationNumber.split(",");
+        String[] list = relationNumberName.split("#");
+        String[] listNumber = list[0].split(",");
+        String[] listName = list[1].split(",");
 
-        try {
-            if (list.length != SOS_NUM_COUNT + 1) {
-                throw new Exception("relation number length error");
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        for (int i=1; i<SOS_NUM_COUNT + 1; ++i)
-        {
-            if (i == SOS_NUM_COUNT)
-            {
-                SharedPreUtils.getInstance().putString(RELATION_NUMBER, list[i]);
-            }
-
-            //else
-            //{
-                //sosNumSharedPreferences.edit().putString(SOS_NUM_PREFS_ + (i+1), list[i]);
-            //}
-        }
-        //sosNumSharedPreferences.edit().commit();
+        Log.i(TAG, "setRelationNumber: listNumber = " + Arrays.toString(listNumber));
+        Log.i(TAG, "setRelationNumber: listName = " + Arrays.toString(listName));
 
         Intent intent = new Intent();
-        relationNumber = relationNumber.substring(0, relationNumber.length() - list[SOS_NUM_COUNT].length() - 1);
         intent.setAction(ACTION_SET_RELATION_NUMBER);
-        intent.putExtra(SET_RELATION_NUMBER, relationNumber);
+        intent.putExtra(SET_RELATION_NUMBER, relationNumberName);
 
-        Log.i(TAG, "setRelationNumber: relationNumber = " + relationNumber);
+        Log.i(TAG, "setRelationNumber: relationNumberName = " + relationNumberName);
         sAppContext.sendBroadcast(intent);
     }
 
@@ -256,25 +243,20 @@ public class SprdCommonUtils {
     public void sendSosSms()
     {
         SmsManager manager = SmsManager.getDefault();
-        //String mSosMsg = sosMsgSharedPreferences.getString(SOS_SMS_PREFS_MSG, "");
         String mSosMsg = null;
         ArrayList<String> mSosNum = new ArrayList<String>();
 
         Log.e(TAG,"sendSosSms manager = " + manager);
 
-        //mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_1, ""));
-        //mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_2, ""));
-        //mSosNum.add(sosNumSharedPreferences.getString(SOS_NUM_PREFS_3, ""));
-
         mSosMsg = SystemProperties.get(SOS_SMS_PROPERTY_MSG, "");
 
-        if (mSosMsg.equals(SOS_NUM_INVALID_VALUE))
+        if (mSosMsg.equals(SOS_SMS_INVALID_VALUE))
         {
             mSosMsg = sAppContext.getResources().getString(R.string.sos_sms);
         }
         Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
 
-        verifyPropertyNumber(mSosNum);
+        verifyPropertyNameNumber(mSosNum, false);
 
         if(manager != null)
         {
@@ -301,39 +283,65 @@ public class SprdCommonUtils {
     *  param:
     *  return:
     */
-    private void verifyPropertyNumber(ArrayList<String> list)
+    private void verifyPropertyNameNumber(ArrayList<String> list, boolean isName)
     {
-        String numStr1 = SystemProperties.get(SOS_NUM_PROPERTY_1, "");
-        String numStr2 = SystemProperties.get(SOS_NUM_PROPERTY_2, "");
-        String numStr3 = SystemProperties.get(SOS_NUM_PROPERTY_3, "");
+        if (isName)
+        {
+            String nameStr1 = SystemProperties.get(SOS_NAME_PROPERTY_1, "");
+            String nameStr2 = SystemProperties.get(SOS_NAME_PROPERTY_2, "");
+            String nameStr3 = SystemProperties.get(SOS_NAME_PROPERTY_3, "");
 
-        Log.i(TAG, "verifyPropertyNumber: numStr1 = " + numStr1 + ", numStr2 = " + numStr2 + ", numStr3 = " + numStr3);
+            Log.i(TAG, "verifyPropertyNumber: nameStr1 = " + nameStr1 + ", nameStr2 = " + nameStr2 + ", nameStr3 = " + nameStr3);
 
-        if (numStr1.equals(SOS_NUM_INVALID_VALUE))
-        {
-            list.add("");
-        }
-        else
-        {
-            list.add(numStr1);
-        }
+            if (nameStr1.equals(SOS_NAME_INVALID_VALUE)) {
+                list.add("");
+            } else {
+                list.add(nameStr1);
+            }
 
-        if (numStr2.equals(SOS_NUM_INVALID_VALUE))
-        {
-            list.add("");
-        }
-        else
-        {
-            list.add(numStr2);
-        }
+            if (nameStr2.equals(SOS_NAME_INVALID_VALUE)) {
+                list.add("");
+            } else {
+                list.add(nameStr2);
+            }
 
-        if (numStr3.equals(SOS_NUM_INVALID_VALUE))
-        {
-            list.add("");
+            if (nameStr3.equals(SOS_NAME_INVALID_VALUE)) {
+                list.add("");
+            } else {
+                list.add(nameStr3);
+            }
         }
-        else
-        {
-            list.add(numStr3);
+        else {
+            String numStr1 = SystemProperties.get(SOS_NUM_PROPERTY_1, "");
+            String numStr2 = SystemProperties.get(SOS_NUM_PROPERTY_2, "");
+            String numStr3 = SystemProperties.get(SOS_NUM_PROPERTY_3, "");
+            String emergencyNumStr = SystemProperties.get(SOS_EMERGENCY_NUM_PROPERTY, "");
+
+            Log.i(TAG, "verifyPropertyNumber: numStr1 = " + numStr1 + ", numStr2 = " + numStr2 + ", numStr3 = " + numStr3 + ", emergencyNumStr = " + emergencyNumStr);
+
+            if (numStr1.equals(SOS_NUM_INVALID_VALUE)) {
+                list.add("");
+            } else {
+                list.add(numStr1);
+            }
+
+            if (numStr2.equals(SOS_NUM_INVALID_VALUE)) {
+                list.add("");
+            } else {
+                list.add(numStr2);
+            }
+
+            if (numStr3.equals(SOS_NUM_INVALID_VALUE)) {
+                list.add("");
+            } else {
+                list.add(numStr3);
+            }
+
+            if (emergencyNumStr.equals(SOS_NUM_INVALID_VALUE)) {
+                list.add("");
+            } else {
+                list.add(emergencyNumStr);
+            }
         }
     }
 
@@ -344,50 +352,38 @@ public class SprdCommonUtils {
     *  param:
     *  return:
     */
-    public String getRelationNumberNames()
+    public String getRelationNames()
     {
-        StringBuilder numberStringNames = new StringBuilder();
-        String[]  names = sAppContext.getResources().getStringArray(R.array.relation_item_name);
-        //int count = SOS_NUM_COUNT + 1;//getRelationNumberCount();
+        StringBuilder nameString = new StringBuilder();
+        String platformCenterNameStr = GpsApplication.getAppContext().getString(R.string.platform_center_number);
+        ArrayList<String> list = new ArrayList<String>();
 
-        for (int i=0; i<SOS_NUM_COUNT + 1; ++i)
-        {
-            if (i == SOS_NUM_COUNT)
-            {
-                numberStringNames.append(names[0]);
-            }
-            else
-            {
-                String itemName = sAppContext.getString(R.string.sos_number) + (i + 1);
-                numberStringNames.append(itemName);
-                numberStringNames.append(",");
-            }
-        }
+        verifyPropertyNameNumber(list, true);
 
-        Log.i(TAG, "getRelationNumberNames: = " + numberStringNames.toString());
-        return numberStringNames.toString();
+        nameString.
+                append(list.get(0))
+                .append(",")
+                .append(list.get(1))
+                .append(",")
+                .append(list.get(2))
+                .append(",")
+                .append(platformCenterNameStr);
+
+        Log.i(TAG, "getRelationNames: numberString = " + nameString.toString());
+
+        return nameString.toString();
     }
 
     /**
      *  author:  hefeng
      *  created: 18-7-31 下午2:32
-     *  desc:    获取孝老平台号码和亲情号码名称后设置到本地, 无用, 因为名称是固定的
+     *  desc:    统一和号码一起设置
      *  param:
      *  return:
      */
     @Deprecated
-    public void setRelationNumberNames(String relationNames)
+    public void setRelationNames(String relationNames)
     {
-        String[] list = relationNames.split(",");
-        int count = list.length;
-
-        for (int i=0; i<count; ++i)
-        {
-            Log.i(TAG, "setRelationNumberNames: list[" + i + "] = " + list[i]);
-            SharedPreUtils.getInstance().putString(RELATION_NAME + i, list[i]);
-        }
-
-        //SharedPreUtils.getInstance().putInt(RELATION_NAME_COUNT, count);
     }
 
     @TargetApi(19)

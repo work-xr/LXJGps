@@ -55,9 +55,11 @@ public class ReconnectSocketService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
         sThreadPool.execute(new Runnable() {
             @Override
             public void run() {
+                Log.i(TAG, "onStartCommand: startServiceInterval = " + startServiceInterval + ", sConnectedCount = " + sConnectedCount);
                 SocketService.getInstance().reconnectSocketServer();
             }
         });
@@ -83,7 +85,7 @@ public class ReconnectSocketService extends Service {
 
         if (isOn)
         {
-            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval * sConnectedCount * 2, pi);
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval * sConnectedCount, pi);
         }
         else
         {

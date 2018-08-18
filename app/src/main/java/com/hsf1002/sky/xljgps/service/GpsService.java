@@ -71,7 +71,7 @@ public class GpsService extends Service {
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval);
 
-        if  (isOn)
+        if (isOn)
         {
             manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+startServiceInterval, startServiceInterval, pi);
         }

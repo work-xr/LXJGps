@@ -2,8 +2,8 @@
     <string name="app_name">孝老平台中心</string>
 
     <string-array name="main_item_name" >
-        <item>设置孝老平台中心号码</item>
-        <item>上传信息到孝老平台</item>
+        <!--item>设置孝老平台中心号码</item-->
+        <item>上传亲情号码到孝老平台</item>
         <item>上报位置信息到孝老平台</item>
     </string-array>
 
@@ -13,6 +13,8 @@
         <item>亲情号码2</item>
         <item>亲情号码3</item-->
     </string-array>
+
+    <string name="platform_center_number">孝老平台中心号码</string>
 
     <string name="sure">确定</string>
     <string name="cancel">取消</string>

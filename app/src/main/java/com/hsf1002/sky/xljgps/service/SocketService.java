@@ -98,6 +98,7 @@ public class SocketService extends Service {
         //parseServerMsg("{\"interval\":\"3600\",\"command\":106,\"time\":\"20170102302022\"}");
         //parseServerMsg("{\"imei \":\"869938027477745\",\"command\":107,\"time\":\"20170102302022\"}");
         //parseServerMsg("{\"imei\":\"869938027477745\",\"command\":108,\"time\":\"20170102302022\"}");
+        
         //parseServerMsg("{\"sos_phone\":\"10086,12345,19968867878,059212349\",\"name\":\"亲1,亲2,亲3,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
     }
 
@@ -177,6 +178,8 @@ public class SocketService extends Service {
                 finally {
                     // 开启心跳定时服务, 默认每隔5分钟上报一次心跳
                     BeatHeartService.setServiceAlarm(sContext, true);
+
+                    parseServerMsg("{\"sos_phone\":\"10086,12345,19968867878,059212349\",\"name\":\"亲1,亲2,亲3,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
                 }
                 Log.i(TAG, "reconnectSocketServer: finished");
             }
@@ -299,9 +302,25 @@ public class SocketService extends Service {
         int size = data.length() + 4;
         String prefix = null;
 
-        if (size < 1000)
+        try
         {
-            if (size > 100)
+            if (size > 9999)
+            {
+                throw new IOException("data send to server too large");
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        if (size < 9999)
+        {
+            if (size > 1000)
+            {
+                Log.i(TAG, "getDataPrefix: do nothing");
+            }
+            else if (size > 100)
             {
                 prefix = "0" + String.valueOf(size);
             }
@@ -378,7 +397,7 @@ public class SocketService extends Service {
         String completedStr = null;
         String encodedData = null;
 
-        if (data == null)
+        if (TextUtils.isEmpty(data))
         {
             return null;
         }
@@ -480,10 +499,11 @@ public class SocketService extends Service {
     {
         StringBuilder commandBuilder = new StringBuilder();
         int length = value.length();
+        String oneChar;
 
         for(int i=0; i<length; ++i)
         {
-            String oneChar = value.substring(i, i+1);
+            oneChar = value.substring(i, i+1);
 
             if (TextUtils.isDigitsOnly(oneChar))
             {
@@ -518,6 +538,8 @@ public class SocketService extends Service {
         String paramName = null;
         String paramNumber = null;
 
+        Log.i(TAG, "parseServerMsg: start parsing msg.......................................");
+
         // 如果服务器下发的是修改亲情号码指令, 不能以 , 分割字符串, 需要单独处理
         if (msg.contains(RESULT_PARAM_NAME) && msg.contains(RESULT_PARAM_NUMBER))
         {
@@ -542,7 +564,7 @@ public class SocketService extends Service {
             }
         }
 
-        if (paramType == null)
+        if (TextUtils.isEmpty(paramType))
         {
             Log.i(TAG, "parseServerMsg: no command");
             return null;
@@ -574,7 +596,7 @@ public class SocketService extends Service {
 
                 Log.i(TAG, "parseServerMsg: name = " + name  + ", number = " + number);
 
-                SprdCommonUtils.getInstance().setRelationNumber(number);
+                SprdCommonUtils.getInstance().setRelationNumber(number + "#" + name);
 
                 ResultServerDownloadNumberMsg downloadNumberMsg = new ResultServerDownloadNumberMsg();
                 downloadNumberMsg.setSuccess(RESULT_SUCCESS_1);
@@ -593,9 +615,8 @@ public class SocketService extends Service {
                     return null;
                 }
                 paramList = paramInterval.split(":");
-                Log.i(TAG, "parseServerMsg: paramInterval = " + paramInterval);
                 int interval = Integer.valueOf(getParamValueOnlyDigit(paramList[1]));
-                Log.i(TAG, "parseServerMsg: interval = " + interval);
+                Log.i(TAG, "parseServerMsg: paramInterval = " + paramInterval + ", interval = " + interval);
                 GpsService.setStartServiceInterval(interval);
 
                 ResultServerIntervalMsg intervalMsg = new ResultServerIntervalMsg();
@@ -692,7 +713,7 @@ public class SocketService extends Service {
                             // 如果为空,表示此次读取数据的上一次操作是客户端主动发送消息到服务器, 而服务器没有返回任何数据
                             // (本来是有返回值的, 而且返回了客户端发送的command, 客户端收到数据后进行解析, 由于是根据command判断并做出响应,
                             // 又发送了一次数据给服务器端, 造成了死循环, 因此客户端要求服务器不要发送返回状态)
-                            if (completedStr == null)
+                            if (TextUtils.isEmpty(completedStr))
                             {
                                 Log.i(TAG, "readDataFromServer: completedStr == null, no need to send data to server");
                                 continue;
@@ -735,7 +756,7 @@ public class SocketService extends Service {
     */
     private String getOneParam(String params, int position)
     {
-        String param = null;
+        //String param = null;
         int startPos = 0;
         int endPos = 0;
 
@@ -746,14 +767,14 @@ public class SocketService extends Service {
         endPos = params.indexOf("\"", endPos + 1 );
         endPos = params.indexOf("\"", endPos + 1);
 
-        //Log.i(TAG, "getOneParam: startPos = " + startPos + ", endPos = " + endPos);
+        /*Log.i(TAG, "getOneParam: startPos = " + startPos + ", endPos = " + endPos);
         try {
             param = params.substring(startPos, endPos + 1);
         }
         catch (StringIndexOutOfBoundsException e)
         {
             e.printStackTrace();
-        }
+        }*/
 
         int keyStartPos = params.indexOf("\"", position);
         int keyEndPos = params.indexOf("\"", keyStartPos + 1);

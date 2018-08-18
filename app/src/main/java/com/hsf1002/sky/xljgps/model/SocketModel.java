@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_COMPANY;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_BEATHEART;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_UPLOAD;
+import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 
 /**
  * Created by hefeng on 18-8-9.
@@ -44,7 +45,7 @@ public class SocketModel implements BaseModel {
         sThreadPool = new ThreadPoolExecutor(
                 1,
                 1,
-                60,
+                THREAD_KEEP_ALIVE_TIMEOUT,
                  TimeUnit.SECONDS,
                  new LinkedBlockingDeque<Runnable>(),
                  new ThreadPoolExecutor.AbortPolicy());
@@ -127,7 +128,7 @@ public class SocketModel implements BaseModel {
         String imei = SprdCommonUtils.getInstance().getIMEI();
         String time = SprdCommonUtils.getInstance().getFormatCurrentTime();
         String sosPhones = SprdCommonUtils.getInstance().getRelationNumber();
-        String sosPhoneNames = SprdCommonUtils.getInstance().getRelationNumberNames();
+        String sosPhoneNames = SprdCommonUtils.getInstance().getRelationNames();
 
         UploadNumberParam sendParam = new UploadNumberParam(
                 imei,
