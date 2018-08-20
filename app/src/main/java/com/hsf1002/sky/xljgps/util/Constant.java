@@ -35,6 +35,9 @@ public class Constant {
     public static final String BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME = "baidu_gps_scan_span_interval_name";
     // 如果不用定时service,而且不停止百度service, 百度默认多久发起一次定位
     public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
+    // gps服务开始后过一段时间再开始定位
+    public static final int BAIDU_GPS_FIRST_WAIT_DURATION = 2 * 60 * 1000;
+
     // 百度定位方式, 目前只有lbs一种
     public static final String BAIDU_GPS_LOCATION_TYPE_GPS = "gps";
     public static final String BAIDU_GPS_LOCATION_TYPE_LBS = "lbs";
@@ -85,9 +88,11 @@ public class Constant {
     public static final String SOCKET_SERVER_ADDRESS_URL = "healthdata.4000300659.com";
     // 服务器端socket的端口
     public static final int SOCKET_SERVER_ADDRESS_PORT = 12004;
+    // 连接socket的服务,收到开机广播一分钟后开始连接socket
+    public static final int SOCKET_SERVER_CONNECT_WAIT_DURATION = 1 * 60 * 1000;
 
     // 心跳服务上报的时间间隔
-    public static final int BEATHEART_SERVICE_INTERVAL = 4 * 60 * 1000;
+    public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
     // 定位服务上报的时间间隔
     public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 3 * 60 * 1000;
     // 重连服务第一次连接等待时长

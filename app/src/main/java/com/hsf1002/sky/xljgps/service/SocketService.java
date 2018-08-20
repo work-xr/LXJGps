@@ -38,6 +38,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.RESULT_SUCCESS_1;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_ENCODE_TYPE;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_ADDRESS_PORT;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_ADDRESS_URL;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_CONNECT_WAIT_DURATION;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_BEATHEART;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_CURRENT;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_DOWNLOAD;
@@ -170,8 +171,15 @@ public class SocketService extends Service {
             if (sSocket == null) {
                  Log.i(TAG, "reconnectSocketServer: start");
                 try {
+                    Thread.sleep(SOCKET_SERVER_CONNECT_WAIT_DURATION);
                     sSocket = new Socket(SOCKET_SERVER_ADDRESS_URL, SOCKET_SERVER_ADDRESS_PORT);
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                catch (InterruptedException e)
+                {
                     e.printStackTrace();
                     return;
                 }
@@ -179,7 +187,7 @@ public class SocketService extends Service {
                     // 开启心跳定时服务, 默认每隔5分钟上报一次心跳
                     BeatHeartService.setServiceAlarm(sContext, true);
 
-                    parseServerMsg("{\"sos_phone\":\"10086,12345,19968867878,059212349\",\"name\":\"亲1,亲2,亲3,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
+                    //parseServerMsg("{\"sos_phone\":\"10086,12345,13410217009,059212349\",\"name\":\"亲21,亲22,亲23,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
                 }
                 Log.i(TAG, "reconnectSocketServer: finished");
             }

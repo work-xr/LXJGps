@@ -9,10 +9,19 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.hsf1002.sky.xljgps.app.GpsApplication;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
+import com.hsf1002.sky.xljgps.model.SocketModel;
 
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_FIRST_WAIT_DURATION;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SERVICE_SCAN_INTERVAL;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_POWERON;
+import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 import static com.hsf1002.sky.xljgps.util.SharedPreUtils.getInstance;
 
 /**
@@ -23,6 +32,30 @@ import static com.hsf1002.sky.xljgps.util.SharedPreUtils.getInstance;
 public class GpsService extends Service {
     private static final String TAG = "GpsService";
     private static int startServiceInterval = getInstance().getInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, BAIDU_GPS_SERVICE_SCAN_INTERVAL);
+    private static ThreadPoolExecutor sThreadPool;
+    private static boolean sIsFirst = true;
+    private static Context sContext = null;
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-20 上午8:43
+    *  desc:    如果是开机第一次上报数据, 一分钟之后再开始定位, 主要是等待socket连接成功, 并且网络已经连上, 确保第一次定位数据准确, 否则会得到一个定位是深圳的默认值
+    *  param:
+    *  return:
+    */
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        sContext = GpsApplication.getAppContext();
+        sThreadPool = new ThreadPoolExecutor(
+                1,
+                1,
+                THREAD_KEEP_ALIVE_TIMEOUT,
+                TimeUnit.SECONDS,
+                new LinkedBlockingDeque<Runnable>(),
+                new ThreadPoolExecutor.AbortPolicy());
+    }
 
     /**
     *  author:  hefeng
@@ -33,8 +66,27 @@ public class GpsService extends Service {
     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "onStartCommand: ");
-        BaiduGpsApp.getInstance().startBaiduGps();
+        Log.i(TAG, "onStartCommand:  sIsFirst = " + sIsFirst);
+
+        sThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (sIsFirst) {
+                    sIsFirst = false;
+                    try {
+                        Thread.sleep(BAIDU_GPS_FIRST_WAIT_DURATION);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    SocketModel.getInstance().reportPosition(SOCKET_TYPE_POWERON, null);
+                }
+                else
+                {
+                    BaiduGpsApp.getInstance().startBaiduGps();
+                }
+            }
+        });
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -73,7 +125,7 @@ public class GpsService extends Service {
 
         if (isOn)
         {
-            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+startServiceInterval, startServiceInterval, pi);
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);
         }
         else
         {
@@ -93,5 +145,10 @@ public class GpsService extends Service {
     {
         startServiceInterval = interval;
         getInstance().putInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, interval);
+
+        // 设置完时间间隔后, 先关闭服务
+        setServiceAlarm(sContext, false);
+        // 设置完时间间隔后, 再开启服务
+        setServiceAlarm(sContext, true);
     }
 }

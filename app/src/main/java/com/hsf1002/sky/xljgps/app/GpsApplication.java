@@ -32,11 +32,6 @@ public class GpsApplication extends Application {
 
         // 初始化百度SDK, 这里比 StartupReceiver 广播要早
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
-
-        // 开启定时服务, 默认每隔10分钟上报一次位置信息
-        //GpsService.setServiceAlarm(sContext, true);
-        // 开启sticky服务, 接收服务器下发的各种指令
-        //sContext.startService(new Intent(sContext, SocketService.class));
     }
 
     /**

@@ -77,7 +77,6 @@ public class SocketModel implements BaseModel {
     */
     private void postDataToServer(final String gsonString)
     {
-        //socketService.writeDataToServer(gsonString);
         sThreadPool.execute(new Runnable() {
             @Override
             public void run() {

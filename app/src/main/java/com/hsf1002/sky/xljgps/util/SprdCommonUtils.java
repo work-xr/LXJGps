@@ -170,7 +170,7 @@ public class SprdCommonUtils {
     public String getRelationNumber()
     {
         StringBuilder numberString = new StringBuilder();
-        String platformCenterNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER, RELATION_NUMBER_DEFAULT);
+        //String platformCenterNumberStr = SharedPreUtils.getInstance().getString(RELATION_NUMBER, RELATION_NUMBER_DEFAULT);
         ArrayList<String> list = new ArrayList<String>();
 
         //setSosContext();
@@ -202,7 +202,7 @@ public class SprdCommonUtils {
                 .append(",")
                 .append(list.get(2))
                 .append(",")
-                .append(platformCenterNumberStr);
+                .append(list.get(3));
 
         Log.i(TAG, "getRelationNumber: numberString = " + numberString.toString());
 
@@ -214,6 +214,9 @@ public class SprdCommonUtils {
     *  created: 18-7-31 下午2:32
     *  desc:    从平台下载的号码设置到本地, 平台中心号码直接设置, 亲情号码发送广播到SOS去设置
     *  param:   {"imei":"869426020023138","command":103, "e_order":"老妈，老弟，老姐, 养老服务中心号码"，"sos_phone":",13555555553, 13555555553 , 13555555555，059612349","time":"20170504113555"}
+     *  前三个号码是亲情号码, 前三个名称是亲情号码对应的通讯录中的姓名
+     *  第四个号码是紧急呼叫号码1, 默认的养老平台号码, 对应的名字,固定是孝老平台中心号码
+     *  此广播发送后, SimpleHome模块收到后,会设置更新前三个亲情号码和名字, SOS模块收到后会更新紧急呼叫号码1
     *  return:
     */
     public void setRelationNumber(String relationNumberName)
@@ -264,7 +267,7 @@ public class SprdCommonUtils {
 
             for (String num : mSosNum)
             {
-                if (TextUtils.isEmpty(num))
+                if (!TextUtils.isEmpty(num) && num.length() > 10)
                 {
                     for (String text : list)
                     {
