@@ -110,7 +110,6 @@ public class SocketService extends Service {
         return null;
     }
 
-
     /**
      *  author:  hefeng
      *  created: 18-8-8 下午4:06
@@ -186,8 +185,6 @@ public class SocketService extends Service {
                 finally {
                     // 开启心跳定时服务, 默认每隔5分钟上报一次心跳
                     BeatHeartService.setServiceAlarm(sContext, true);
-
-                    //parseServerMsg("{\"sos_phone\":\"10086,12345,13410217009,059212349\",\"name\":\"亲21,亲22,亲23,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
                 }
                 Log.i(TAG, "reconnectSocketServer: finished");
             }
@@ -199,6 +196,11 @@ public class SocketService extends Service {
     *  created: 18-8-8 下午6:10
     *  desc:    断开Socket连接, 目前在两个地方调用: onDestroy的时候以及读取服务器数据的时候, 如果读到的前四个字节不是数字, 则调用此方法
     *  param:
+     *
+     *  读取服务器数据是乱码, 即服务器断开了连接
+     08-21 14:58:58.958  3057  3072 I SocketService: getParseDataString: sizeStr = ÀÀÀÀ
+     08-21 14:58:58.958  3057  3072 I SocketService: getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************!
+     08-21 14:58:58.959  3057  3072 I SocketService: disConnectSocketServer: start*****************************************************************
     *  return:
     */
     private void disConnectSocketServer()
@@ -221,9 +223,6 @@ public class SocketService extends Service {
             }
             if (sSocket != null) {
                 sSocket.close();
-
-                Log.i(TAG, "disConnectSocketServer: isConnected = " + sSocket.isConnected());
-                Log.i(TAG, "disConnectSocketServer: isClosed = " + sSocket.isClosed());
 
                 sSocket = null;
             }
@@ -490,8 +489,8 @@ public class SocketService extends Service {
         Log.i(TAG, "writeDataToServer: prepared.............................................");
 
         if (writeServerThread != null ) {
-            Log.i(TAG, "writeDataToServer: isAlive = " + writeServerThread.isAlive());
-            Log.i(TAG, "writeDataToServer: isInterrupted = " + writeServerThread.isInterrupted());
+            //Log.i(TAG, "writeDataToServer: isAlive = " + writeServerThread.isAlive());
+            //Log.i(TAG, "writeDataToServer: isInterrupted = " + writeServerThread.isInterrupted());
             writeServerThread.run();
         }
     }
@@ -625,7 +624,7 @@ public class SocketService extends Service {
                 paramList = paramInterval.split(":");
                 int interval = Integer.valueOf(getParamValueOnlyDigit(paramList[1]));
                 Log.i(TAG, "parseServerMsg: paramInterval = " + paramInterval + ", interval = " + interval);
-                GpsService.setStartServiceInterval(interval);
+                GpsService.setStartServiceInterval(interval * 1000);
 
                 ResultServerIntervalMsg intervalMsg = new ResultServerIntervalMsg();
                 intervalMsg.setSuccess(RESULT_SUCCESS_1);
@@ -819,4 +818,3 @@ public class SocketService extends Service {
         disConnectSocketServer();
     }
 }
-
