@@ -91,6 +91,7 @@ public class ReconnectSocketService extends Service {
         {
             manager.cancel(pi);
             pi.cancel();
+            sConnectedCount = 0;
         }
     }
 

@@ -3,8 +3,10 @@ package com.hsf1002.sky.xljgps.service;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -35,6 +37,10 @@ public class GpsService extends Service {
     private static ThreadPoolExecutor sThreadPool;
     private static boolean sIsFirst = true;
     private static Context sContext = null;
+    private static final String ACTION_TIMING_REPORT_GPS_LOCATION = "action.timing.report.gps.location";
+    private static Intent intentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
+    private static PendingIntent pi = null;
+    private static AlarmManager manager = null;
 
     /**
     *  author:  hefeng
@@ -47,7 +53,6 @@ public class GpsService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        sContext = GpsApplication.getAppContext();
         sThreadPool = new ThreadPoolExecutor(
                 1,
                 1,
@@ -55,6 +60,33 @@ public class GpsService extends Service {
                 TimeUnit.SECONDS,
                 new LinkedBlockingDeque<Runnable>(),
                 new ThreadPoolExecutor.AbortPolicy());
+
+        registerGpsReceiver();
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-22 上午9:04
+    *  desc:
+    *  param:
+    *  return:
+    */
+    private void registerGpsReceiver()
+    {
+        IntentFilter intentFilter = new IntentFilter(ACTION_TIMING_REPORT_GPS_LOCATION);
+        sContext.registerReceiver(gpsReceiver, intentFilter);
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-22 上午9:04
+    *  desc:
+    *  param:
+    *  return:
+    */
+    private void unregisterGpsReceiver()
+    {
+        sContext.unregisterReceiver(gpsReceiver);
     }
 
     /**
@@ -66,11 +98,36 @@ public class GpsService extends Service {
     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "onStartCommand:  sIsFirst = " + sIsFirst);
+        Log.i(TAG, "onStartCommand: ");
+        return START_STICKY;// super.onStartCommand(intent, flags, startId);
+    }
 
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        unregisterGpsReceiver();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-22 上午10:30
+    *  desc:
+    *  param:
+    *  return:
+    */
+    private static void reportPosition()
+    {
         sThreadPool.execute(new Runnable() {
             @Override
             public void run() {
+                Log.i(TAG, "run: sIsFirst = " + sIsFirst);
+
                 if (sIsFirst) {
                     sIsFirst = false;
                     try {
@@ -86,46 +143,40 @@ public class GpsService extends Service {
                 }
             }
         });
-
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     /**
     *  author:  hefeng
     *  created: 18-8-15 下午7:29
     *  desc:
-     *  从Android 4.4 版本开始，Alarm 任务的触发时间将会变得不准确，有可能会延迟一段时间后任务才能得到执行,
+    0815  从Android 4.4 版本开始，Alarm 任务的触发时间将会变得不准确，有可能会延迟一段时间后任务才能得到执行,
      *  这是系统在耗电性方面进行的优化。系统会自动检测目前有多少Alarm 任务存在，然后将触发时间将近的几个任务放在一起执行，
      *  这就可以大幅度地减少CPU 被唤醒的次数，从而有效延长电池的使用时间。如果你要求Alarm 任务的执行时间必须准备无误，
      *  Android 仍然提供了解决方案。使用AlarmManager 的setExact()方法来替代set()方法
      *
      *  相对于定时的准确性而言, 功耗更为重要, 依然采用Android默认的处理方式
      *
+    0822  gps正式版本30分钟上报一次,可以改为 setExact
     *  param:
     *  return:
     */
     public static void setServiceAlarm(Context context, boolean isOn)
     {
         Intent intent = new Intent(context, GpsService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
+        //PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
+        sContext = GpsApplication.getAppContext();
+        sContext.startService(intent);
 
-        AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        intentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
+        pi = PendingIntent.getBroadcast(context, 0, intentReceiver, 0);
+
+        manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
 
         if (isOn)
         {
-            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);
+            //manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);
+            manager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pi);
         }
         else
         {
@@ -138,6 +189,7 @@ public class GpsService extends Service {
     *  author:  hefeng
     *  created: 18-8-6 下午2:09
     *  desc:    服务器下发指令的时候调用, 用于更改定位信息上报的时间间隔(正式版本默认是30分钟, 测试默认1分钟)
+     *   必须等上一次的时间到了之后, 才会开始生效
     *  param:
     *  return:
     */
@@ -147,8 +199,25 @@ public class GpsService extends Service {
         getInstance().putInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, interval);
 
         // 设置完时间间隔后, 先关闭服务
-        setServiceAlarm(sContext, false);
+        //setServiceAlarm(sContext, false);
+
         // 设置完时间间隔后, 再开启服务
-        setServiceAlarm(sContext, true);
+        //setServiceAlarm(sContext, true);
     }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-22 上午9:00
+    *  desc:    循环发送广播
+    *  param:
+    *  return:
+    */
+    private BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "onReceive: gpsReceiver startServiceInterval = " + startServiceInterval);
+            reportPosition();
+            manager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + startServiceInterval, pi);
+        }
+    };
 }
