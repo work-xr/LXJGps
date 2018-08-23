@@ -37,7 +37,7 @@
 
     <string name="center_number_cannot_empty">center number cannot be empty!</string>
     <string name="sos_number">sos number</string>
-    <string name="sos_sms">I need your help urgently!</string>
+    <string name="sos_sms">Hello, your family member is calling you, the center is connecting to him now, please keep in touch with him. tel: %s</string>
     <string name="sos_relation_number">relation number</string>
 
     <string name="get_gps_permission_fail">get gps permission failed!</string>

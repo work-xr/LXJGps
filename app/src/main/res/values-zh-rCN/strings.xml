@@ -37,7 +37,7 @@
 
     <string name="center_number_cannot_empty">孝老平台中心号码不能为空 !</string>
     <string name="sos_number">紧急呼叫号码</string>
-    <string name="sos_sms">我现在迫切需要你帮助 !</string>
+    <string name="sos_sms">您好,您的家人正进行紧急呼叫,中心正在和老人联系,请关注老人当前状况.电话:%s</string>
     <string name="sos_relation_number">亲情号</string>
 
     <string name="get_gps_permission_fail">获取权限失败 !</string>

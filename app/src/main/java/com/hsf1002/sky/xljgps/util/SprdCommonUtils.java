@@ -25,6 +25,7 @@ import java.util.Date;
 import static android.os.Build.MANUFACTURER;
 import static android.os.Build.MODEL;
 import static com.hsf1002.sky.xljgps.util.Constant.ACTION_SET_RELATION_NUMBER;
+import static com.hsf1002.sky.xljgps.util.Constant.ACTION_SOS_SEND_MSG;
 import static com.hsf1002.sky.xljgps.util.Constant.RELATION_NUMBER_COUNT;
 import static com.hsf1002.sky.xljgps.util.Constant.SET_RELATION_NUMBER;
 import static com.hsf1002.sky.xljgps.util.Constant.SOS_EMERGENCY_NUM_PROPERTY;
@@ -233,12 +234,32 @@ public class SprdCommonUtils {
     }
 
     /**
+    *  author:  hefeng
+    *  created: 18-8-22 下午7:18
+    *  desc:
+    *  param:
+    *  return:
+    */
+    public void sendSosSmsBroadcast()
+    {
+        Intent intent = new Intent();
+        intent.setAction(ACTION_SOS_SEND_MSG);
+
+        Log.i(TAG, "sendSosSmsBroadcast: ");
+        sAppContext.sendBroadcast(intent);
+    }
+
+    /**
      *  author:  hefeng
      *  created: 18-8-1 下午3:51
      *  desc:    发送短信给亲情号码
+     *
+     *  0822: 用户设置的短信可能很长, 编码之后的长度可能超过SystemPerperties能够设置的最大值: PROP_VALUE_MAX 93
+     *        此处不再发送短信, 只发广播, 让SOS去发送短信
      *  param:
      *  return:
      */
+    @Deprecated
     public void sendSosSms()
     {
         SmsManager manager = SmsManager.getDefault();
@@ -247,15 +268,15 @@ public class SprdCommonUtils {
 
         Log.e(TAG,"sendSosSms manager = " + manager);
 
+        verifyPropertyNameNumber(mSosNum, false);
+
         mSosMsg = SystemProperties.get(SOS_SMS_PROPERTY_MSG, "");
 
         if (mSosMsg.equals(SOS_SMS_INVALID_VALUE))
         {
-            mSosMsg = sAppContext.getResources().getString(R.string.sos_sms);
+            mSosMsg = sAppContext.getResources().getString(R.string.sos_sms, mSosNum.get(3));
         }
         Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
-
-        verifyPropertyNameNumber(mSosNum, false);
 
         if(manager != null)
         {

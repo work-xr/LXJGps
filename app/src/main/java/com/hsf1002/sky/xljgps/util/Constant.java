@@ -67,6 +67,8 @@ public class Constant {
     // 给SOS发送设置紧急呼叫号码的广播
     public static final String ACTION_SET_RELATION_NUMBER = "intent.action.SET_RELATION_NUMBER";
     public static final String SET_RELATION_NUMBER = "com.hsf1002.sky.xljgps.setrelationnumber";
+    // 给SOS发送广播,去给亲情号码发送短信
+    public static final String ACTION_SOS_SEND_MSG = "intent.action.SOS_SEND_MSG";
 
     // 返回给服务器的数据参数, 0表示失败, 1表示成功
     public static final int RESULT_SUCCESS_0 = 0;
@@ -94,7 +96,7 @@ public class Constant {
     // 心跳服务上报的时间间隔
     public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
     // 定位服务上报的时间间隔
-    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 10 * 60 * 1000;
+    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 30 * 60 * 1000;
     // 重连服务第一次连接等待时长
     public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 30 * 1000;
 

@@ -183,9 +183,5 @@ public class SocketModel implements BaseModel {
         Log.i(TAG, "reportPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
 
         postDataToServer(gsonString);
-
-        if (type == SOCKET_TYPE_TIMING) {
-            Toast.makeText(GpsApplication.getAppContext(), GpsApplication.getAppContext().getResources().getString(R.string.report_success), Toast.LENGTH_SHORT).show();
-        }
     }
 }

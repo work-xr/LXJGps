@@ -37,10 +37,17 @@ public class BeatHeartService extends Service {
         return null;
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-22 下午4:39
+    *  desc:    只会运行一次
+    *  param:
+    *  return:
+    */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand:");
-        //SocketModel.getInstance().reportBeatHeart();
+        SocketModel.getInstance().reportBeatHeart();
         return START_STICKY;// super.onStartCommand(intent, flags, startId);
     }
 

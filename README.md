@@ -386,6 +386,16 @@ public void onReceive(Context context, Intent intent) {
 解决方案:  
 相对于定时的准确性而言, 功耗更为重要, 依然采用Android默认的处理方式
 
+#### 问题13 SystemProperties.get报错
+```
+java.lang.RuntimeException: Failed to set property
+```
+key和value都有长度限制, 不能太长
+```
+public static final int PROP_NAME_MAX = 31;
+public static final int PROP_VALUE_MAX = 91;
+```
+
 ### HTTP 协议基础
 #### GET请求的特点:
 * GET请求能够被缓存

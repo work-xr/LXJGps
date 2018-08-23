@@ -348,7 +348,7 @@ public class SocketService extends Service {
     *  author:  hefeng
     *  created: 18-8-9 下午1:47
     *  desc:    对从服务器端读到的数据进行处理,先读取数据长度,再读取实际数据,最后解码转为String类型
-    *  param:
+    *  param:  getParseDataString: sizeStr = \C0\80\C0\80\C0\80\C0\80
     *  return:
     */
     private String getParseDataString(DataInputStream dis)
@@ -633,7 +633,7 @@ public class SocketService extends Service {
                 break;
             // 收到平台指令: 超出电子围栏, 给亲情号码发送短信通知
             case SOCKET_TYPE_OUTER_ELECTRIC_BAR:
-                SprdCommonUtils.getInstance().sendSosSms();
+                SprdCommonUtils.getInstance().sendSosSmsBroadcast();
 
                 ResultServerOuterElectricMsg outerElectricMsg = new ResultServerOuterElectricMsg();
                 outerElectricMsg.setSuccess(RESULT_SUCCESS_1);
