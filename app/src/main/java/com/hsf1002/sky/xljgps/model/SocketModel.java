@@ -95,7 +95,7 @@ public class SocketModel implements BaseModel {
                 }
 
                 // 先等待socket连接成功, 再进行读写操作
-                socketService.waitConnectThread();
+                //socketService.waitConnectThread();
                 // 上传信息到服务器
                 socketService.writeDataToServer(gsonString);
             }

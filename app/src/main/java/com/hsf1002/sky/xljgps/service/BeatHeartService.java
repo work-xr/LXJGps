@@ -1,9 +1,10 @@
 package com.hsf1002.sky.xljgps.service;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -21,14 +22,14 @@ public class BeatHeartService extends Service {
 
     private static final String TAG = "BeatHeartService";
     private static int startServiceInterval = BEATHEART_SERVICE_INTERVAL;
-    private static Handler handler = null;
+    //private static Handler handler = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
         // 在主线程上创建Handler, 不然报错 Can't create handler inside thread that has not called Looper.prepare()
-        handler = new Handler();
-        handler.postDelayed(beatHeartTask, startServiceInterval);
+        //handler = new Handler();
+        //handler.postDelayed(beatHeartTask, startServiceInterval);
     }
 
     @Nullable
@@ -40,7 +41,10 @@ public class BeatHeartService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-22 下午4:39
-    *  desc:    只会运行一次
+    *  desc:
+     *  startService调用一次,就会 运行一次
+     *  对于manager.setRepeating的定时服务而言, 每次唤醒一次, 都会调用一次
+     *  由系统进行回调,但是和第一次启动服务流程不同
     *  param:
     *  return:
     */
@@ -54,13 +58,14 @@ public class BeatHeartService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-15 下午7:41
-    *  desc:    用轻量级的 handler.postDelayed 来替换重量级的 manager.setRepeating
+    *  desc:
+     *  0818: 用轻量级的 handler.postDelayed 来替换重量级的 manager.setRepeating
+     *  0823: handler.postDelayed 的方式虽然时间准确, 但是在灭屏的时候无法唤醒AP,导致心跳无法上报
     *  param:
     *  return:
     */
     public static void setServiceAlarm(Context context, boolean isOn)
     {
-        /*
         Intent intent = new Intent(context, BeatHeartService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
@@ -69,16 +74,16 @@ public class BeatHeartService extends Service {
 
         if (isOn)
         {
-            manager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), startServiceInterval, pi);
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);
         }
         else
         {
             manager.cancel(pi);
             pi.cancel();
-        }*/
+        }
 
-        Intent intent = new Intent(context, BeatHeartService.class);
-        context.startService(intent);
+        //Intent intent = new Intent(context, BeatHeartService.class);
+        //context.startService(intent);
     }
 
     /**
@@ -88,6 +93,7 @@ public class BeatHeartService extends Service {
     *  param:
     *  return:
     */
+    /*
     private static Runnable beatHeartTask = new Runnable() {
         @Override
         public void run() {
@@ -101,6 +107,6 @@ public class BeatHeartService extends Service {
     public void onDestroy() {
         super.onDestroy();
 
-        handler.removeCallbacks(beatHeartTask);
-    }
+        //handler.removeCallbacks(beatHeartTask);
+    }*/
 }

@@ -36,7 +36,7 @@ public class Constant {
     // 如果不用定时service,而且不停止百度service, 百度默认多久发起一次定位
     public static final int BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL = 1 * 60 * 1000;
     // gps服务开始后过一段时间再开始定位
-    public static final int BAIDU_GPS_FIRST_WAIT_DURATION = 2 * 60 * 1000;
+    public static final int BAIDU_GPS_FIRST_WAIT_DURATION = 1 * 2 * 1000;
 
     // 百度定位方式, 目前只有lbs一种
     public static final String BAIDU_GPS_LOCATION_TYPE_GPS = "gps";

@@ -235,10 +235,11 @@ public class BaiduGpsApp {
                 setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locTypeStr, locationType);
 
                 // 上报定时定位信息
-                SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
+                // 在这上报定位,导致每次定位时间不确定, 因为每次百度定位的时间不确定
+                //SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
 
                 // 如果定位成功, 就停止百度服务(百度服务运行在一个单独的进程)
-                stopBaiduGps();
+                //stopBaiduGps();
             }
             else
             {

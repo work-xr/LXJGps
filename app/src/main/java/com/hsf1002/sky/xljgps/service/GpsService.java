@@ -3,15 +3,12 @@ package com.hsf1002.sky.xljgps.service;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.hsf1002.sky.xljgps.app.GpsApplication;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.model.SocketModel;
 
@@ -23,6 +20,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_FIRST_WAIT_DURATION
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SERVICE_SCAN_INTERVAL;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_POWERON;
+import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
 import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 import static com.hsf1002.sky.xljgps.util.SharedPreUtils.getInstance;
 
@@ -37,11 +35,11 @@ public class GpsService extends Service {
     private static ThreadPoolExecutor sThreadPool;
     private static boolean sIsFirst = true;
     private static Context sContext = null;
-    private static final String ACTION_TIMING_REPORT_GPS_LOCATION = "action.timing.report.gps.location";
+    /*private static final String ACTION_TIMING_REPORT_GPS_LOCATION = "action.timing.report.gps.location";
     private static Intent intentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
     private static PendingIntent pi = null;
     private static AlarmManager manager = null;
-
+*/
     /**
     *  author:  hefeng
     *  created: 18-8-20 上午8:43
@@ -52,7 +50,7 @@ public class GpsService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
+/*
         sThreadPool = new ThreadPoolExecutor(
                 1,
                 1,
@@ -60,89 +58,32 @@ public class GpsService extends Service {
                 TimeUnit.SECONDS,
                 new LinkedBlockingDeque<Runnable>(),
                 new ThreadPoolExecutor.AbortPolicy());
-
-        registerGpsReceiver();
+*/
+        //registerGpsReceiver();
     }
 
-    /**
-    *  author:  hefeng
-    *  created: 18-8-22 上午9:04
-    *  desc:
-    *  param:
-    *  return:
-    */
-    private void registerGpsReceiver()
-    {
-        IntentFilter intentFilter = new IntentFilter(ACTION_TIMING_REPORT_GPS_LOCATION);
-        sContext.registerReceiver(gpsReceiver, intentFilter);
-    }
-
-    /**
-    *  author:  hefeng
-    *  created: 18-8-22 上午9:04
-    *  desc:
-    *  param:
-    *  return:
-    */
-    private void unregisterGpsReceiver()
-    {
-        sContext.unregisterReceiver(gpsReceiver);
-    }
-
-    /**
-    *  author:  hefeng
-    *  created: 18-8-6 下午2:08
-    *  desc:    如果多次执行了Context的startService方法，那么Service的onStartCommand方法也会相应的多次调用
-    *  param:
-    *  return:
-    */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: ");
-        return START_STICKY;// super.onStartCommand(intent, flags, startId);
-    }
+        //reportPosition();
+        if (sIsFirst)
+        {
+            sIsFirst = false;
+            SocketModel.getInstance().reportPosition(SOCKET_TYPE_POWERON, null);
+        }
+        else
+        {
+            //BaiduGpsApp.getInstance().startBaiduGps();
+            SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
+        }
 
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-        unregisterGpsReceiver();
+        return START_STICKY;// super.onStartCommand(intent, flags, startId);
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    /**
-    *  author:  hefeng
-    *  created: 18-8-22 上午10:30
-    *  desc:
-    *  param:
-    *  return:
-    */
-    private static void reportPosition()
-    {
-        sThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.i(TAG, "run: sIsFirst = " + sIsFirst);
-
-                if (sIsFirst) {
-                    sIsFirst = false;
-                    try {
-                        Thread.sleep(BAIDU_GPS_FIRST_WAIT_DURATION);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    SocketModel.getInstance().reportPosition(SOCKET_TYPE_POWERON, null);
-                }
-                else
-                {
-                    BaiduGpsApp.getInstance().startBaiduGps();
-                }
-            }
-        });
     }
 
     /**
@@ -162,21 +103,24 @@ public class GpsService extends Service {
     */
     public static void setServiceAlarm(Context context, boolean isOn)
     {
-        Intent intent = new Intent(context, GpsService.class);
         //PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
+        /*Intent intent = new Intent(context, GpsService.class);
         sContext = GpsApplication.getAppContext();
         sContext.startService(intent);
 
         intentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
         pi = PendingIntent.getBroadcast(context, 0, intentReceiver, 0);
+*/
+        Intent intent = new Intent(context, GpsService.class);
+        PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
-        manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
 
         if (isOn)
         {
-            //manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);
-            manager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pi);
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);
+            //manager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pi);
         }
         else
         {
@@ -199,11 +143,88 @@ public class GpsService extends Service {
         getInstance().putInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, interval);
 
         // 设置完时间间隔后, 先关闭服务
-        //setServiceAlarm(sContext, false);
+        setServiceAlarm(sContext, false);
 
         // 设置完时间间隔后, 再开启服务
-        //setServiceAlarm(sContext, true);
+        setServiceAlarm(sContext, true);
     }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-8-22 上午10:30
+     *  desc:
+     *  param:
+     *  return:
+     */
+    @Deprecated
+    private static void reportPosition()
+    {
+        sThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.i(TAG, "run: sIsFirst = " + sIsFirst);
+
+                if (sIsFirst) {
+                    sIsFirst = false;
+                    try {
+                        // 这是心跳(5分钟)和定位(30分钟)两个服务 上报的时间间隔, 尽可能减短,
+                        // 系统才会在定位服务唤醒的时候和心跳服务一同唤醒, 不仅减少功耗, 还可提高定时服务准确性
+                        // 心跳数据300ms就上报结束并返回数据了, 默认设置为2秒
+                        Thread.sleep(BAIDU_GPS_FIRST_WAIT_DURATION);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    SocketModel.getInstance().reportPosition(SOCKET_TYPE_POWERON, null);
+                }
+                else
+                {
+                    BaiduGpsApp.getInstance().startBaiduGps();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        //unregisterGpsReceiver();
+    }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-8-22 上午9:04
+     *  desc:
+     *  param:
+     *  return:
+     */
+    /*
+    private void registerGpsReceiver()
+    {
+        IntentFilter intentFilter = new IntentFilter(ACTION_TIMING_REPORT_GPS_LOCATION);
+        sContext.registerReceiver(gpsReceiver, intentFilter);
+    }
+*/
+    /**
+     *  author:  hefeng
+     *  created: 18-8-22 上午9:04
+     *  desc:
+     *  param:
+     *  return:
+     */
+    /*
+    private void unregisterGpsReceiver()
+    {
+        sContext.unregisterReceiver(gpsReceiver);
+    }
+    */
+
+    /**
+     *  author:  hefeng
+     *  created: 18-8-6 下午2:08
+     *  desc:    如果多次执行了Context的startService方法，那么Service的onStartCommand方法也会相应的多次调用
+     *  param:
+     *  return:
+     */
 
     /**
     *  author:  hefeng
@@ -212,6 +233,7 @@ public class GpsService extends Service {
     *  param:
     *  return:
     */
+    /*
     private BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -219,5 +241,5 @@ public class GpsService extends Service {
             reportPosition();
             manager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + startServiceInterval, pi);
         }
-    };
+    };*/
 }

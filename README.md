@@ -396,6 +396,68 @@ public static final int PROP_NAME_MAX = 31;
 public static final int PROP_VALUE_MAX = 91;
 ```
 
+#### 问题14 灭屏状态下Socket会自动断开
+```
+08-22 15:30:44.693  2953  2969 W System.err: java.net.SocketException: recvfrom failed: ETIMEDOUT (Connection timed out)
+08-22 15:30:44.705  1694  2323 D NetworkController.MobileSignalController(1): getLabel[0]: 中国移动 4G color = -1
+08-22 15:30:44.713  2953  2969 W System.err: 	at libcore.io.IoBridge.maybeThrowAfterRecvfrom(IoBridge.java:588)
+08-22 15:30:44.713  2953  2969 W System.err: 	at libcore.io.IoBridge.recvfrom(IoBridge.java:552)
+08-22 15:30:44.713  2953  2969 W System.err: 	at java.net.PlainSocketImpl.read(PlainSocketImpl.java:481)
+08-22 15:30:44.714  2953  2969 W System.err: 	at java.net.PlainSocketImpl.-wrap0(PlainSocketImpl.java)
+08-22 15:30:44.714  2953  2969 W System.err: 	at java.net.PlainSocketImpl$PlainSocketInputStream.read(PlainSocketImpl.java:237)
+08-22 15:30:44.731  2953  2969 W System.err: 	at java.io.DataInputStream.read(DataInputStream.java:63)
+08-22 15:30:44.731  2953  2969 W System.err: 	at java.io.InputStream.read(InputStream.java:162)
+08-22 15:30:44.731  2953  2969 W System.err: 	at java.io.DataInputStream.read(DataInputStream.java:59)
+08-22 15:30:44.731  2953  2969 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService.getParseDataString(SocketService.java:362)
+
+08-22 15:30:44.765  2953  2969 I SocketService: readDataFromServer: waiting for server send data.....................blocked
+08-22 15:30:44.765  2953  2969 I SocketService: getParseDataString: sizeStr = \C0\80\C0\80\C0\80\C0\80
+08-22 15:30:44.766  2953  2969 I SocketService: getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************!
+08-22 15:30:44.766  1520  1533 D memtrack_sprd: sprd_check_memory begin,pid:2145, type:1, num records:2
+08-22 15:30:44.766  1520  1533 D memtrack_sprd: sprd_check_memory begin,pid:2145, type:1, num records:2
+08-22 15:30:44.766  2953  2969 I SocketService: disConnectSocketServer: start*****************************************************************
+```
+```
+08-23 09:19:51.432  2865  2952 I SocketService: readDataFromServer: waiting for server send data.....................blocked
+```
+```
+08-23 09:45:01.433  2865  2952 W System.err: java.net.SocketException: recvfrom failed: ETIMEDOUT (Connection timed out)
+```
+睡眠二十分钟后,睡眠期间并没有上报心跳,醒了之后从直观看,是读取到了非法字符(即前4个字节不是数据长度)  
+根本原因:   
+android系统将socket服务挂起，是出于节电考虑，手机通过数据线连接电脑调试的时候，手机熄灭屏幕后，socket服务是不会被自动挂起的，似乎在调试模式下，手机不会自动进入节电模式，但当连接数据线充电的的话，手机在熄屏后还是会将socket服务挂起的; 可以通过PowerManager设置电源模式，使cpu不进入节电模式，当然会非常耗电:  
+```
+PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
+wl.acquire();
+   ..screen will stay on during this section..
+wl.release();
+```
+解决方案:  
+找出android系统设定的在灭屏时关闭socket的时长, 把心跳频率设置在该时长以内
+
+#### 问题15 Socket断开-Connection reset by peer
+```
+08-23 21:42:33.436  2853  2888 W System.err: java.net.SocketException: recvfrom failed: ECONNRESET (Connection reset by peer)
+08-23 21:42:33.453  2853  2888 W System.err: 	at libcore.io.IoBridge.maybeThrowAfterRecvfrom(IoBridge.java:588)
+08-23 21:42:33.453  2853  2888 W System.err: 	at libcore.io.IoBridge.recvfrom(IoBridge.java:552)
+08-23 21:42:33.454  2853  2888 W System.err: 	at java.net.PlainSocketImpl.read(PlainSocketImpl.java:481)
+08-23 21:42:33.454  2853  2888 W System.err: 	at java.net.PlainSocketImpl.-wrap0(PlainSocketImpl.java)
+08-23 21:42:33.454  2853  2888 W System.err: 	at java.net.PlainSocketImpl$PlainSocketInputStream.read(PlainSocketImpl.java:237)
+08-23 21:42:33.454  2853  2888 W System.err: 	at java.io.DataInputStream.read(DataInputStream.java:63)
+08-23 21:42:33.454  2853  2888 W System.err: 	at java.io.InputStream.read(InputStream.java:162)
+08-23 21:42:33.454  2853  2888 W System.err: 	at java.io.DataInputStream.read(DataInputStream.java:59)
+08-23 21:42:33.454  2853  2888 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService.getParseDataString(SocketService.java:425)
+08-23 21:42:33.455  2853  2888 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService.access$1400(SocketService.java:62)
+08-23 21:42:33.455  2853  2888 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService$ReadServerThread.run(SocketService.java:785)
+08-23 21:42:33.455  2853  2888 W System.err: Caused by: android.system.ErrnoException: recvfrom failed: ECONNRESET (Connection reset by peer)
+08-23 21:42:33.455  2853  2888 W System.err: 	at libcore.io.Posix.recvfromBytes(Native Method)
+08-23 21:42:33.456  2853  2888 W System.err: 	at libcore.io.Posix.recvfrom(Posix.java:189)
+08-23 21:42:33.456  2853  2888 W System.err: 	at libcore.io.BlockGuardOs.recvfrom(BlockGuardOs.java:250)
+08-23 21:42:33.456  2853  2888 W System.err: 	at libcore.io.IoBridge.recvfrom(IoBridge.java:549)
+```
+服务器端主动断开了, 客户端启动重连服务即可
+
 ### HTTP 协议基础
 #### GET请求的特点:
 * GET请求能够被缓存
