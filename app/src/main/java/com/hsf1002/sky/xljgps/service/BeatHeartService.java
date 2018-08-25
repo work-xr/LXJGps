@@ -45,6 +45,17 @@ public class BeatHeartService extends Service {
      *  startService调用一次,就会 运行一次
      *  对于manager.setRepeating的定时服务而言, 每次唤醒一次, 都会调用一次
      *  由系统进行回调,但是和第一次启动服务流程不同
+     *  同一个线程, 同一个时间,为什么执行了三次:
+     08-23 20:44:00.896 2931-2945/com.hsf1002.sky.xljgps I/SocketService: connectSocketServer: success
+     08-23 20:44:00.900 2931-2945/com.hsf1002.sky.xljgps I/BeatHeartService: setServiceAlarm: startServiceInterval = 300000
+
+     08-23 20:44:00.896 2931-2945/com.hsf1002.sky.xljgps I/SocketService: connectSocketServer: success
+     08-23 20:44:00.900 2931-2945/com.hsf1002.sky.xljgps I/BeatHeartService: setServiceAlarm: startServiceInterval = 300000
+
+     08-23 20:44:00.896 2931-2945/com.hsf1002.sky.xljgps I/SocketService: connectSocketServer: success
+     08-23 20:44:00.900 2931-2945/com.hsf1002.sky.xljgps I/BeatHeartService: setServiceAlarm: startServiceInterval = 300000
+     *
+     *
     *  param:
     *  return:
     */
@@ -84,6 +95,21 @@ public class BeatHeartService extends Service {
 
         //Intent intent = new Intent(context, BeatHeartService.class);
         //context.startService(intent);
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-24 下午4:50
+    *  desc:
+    *  param:
+    *  return:
+    */
+    public static boolean isServiceAlarmOn(Context context)
+    {
+        Intent intent = new Intent(context, BeatHeartService.class);
+        PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
+
+        return pi != null;
     }
 
     /**

@@ -20,12 +20,12 @@ public class StartupReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive: ");
 
-        Context appContext = GpsApplication.getAppContext();
+        //Context appContext = GpsApplication.getAppContext();
 
         // 开启定时服务, 默认每隔10分钟上报一次位置信息
-        GpsService.setServiceAlarm(appContext, true);
+        //GpsService.setServiceAlarm(appContext, true);
 
         // 开启sticky服务, 接收服务器下发的各种指令
-        appContext.startService(new Intent(appContext, SocketService.class));
+        //appContext.startService(new Intent(appContext, SocketService.class));
     }
 }

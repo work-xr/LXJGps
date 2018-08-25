@@ -151,6 +151,21 @@ public class GpsService extends Service {
 
     /**
      *  author:  hefeng
+     *  created: 18-8-13 下午7:30
+     *  desc:    判断该服务是否已经开启
+     *  param:
+     *  return:
+     */
+    public static boolean isServiceAlarmOn(Context context)
+    {
+        Intent intent = new Intent(context, GpsService.class);
+        PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
+
+        return pi != null;
+    }
+
+    /**
+     *  author:  hefeng
      *  created: 18-8-22 上午10:30
      *  desc:
      *  param:

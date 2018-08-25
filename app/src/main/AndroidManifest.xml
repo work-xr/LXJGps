@@ -60,6 +60,12 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".receiver.NetworkReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+
         <!-- 定时默认5分钟 BEATHEART_SERVICE_INTERVAL 上报心跳信息, 此服务不会停止 -->
         <service android:name=".service.BeatHeartService" />
         <!-- 定时默认10分钟 BAIDU_GPS_SERVICE_SCAN_INTERVAL 上报定位信息, 此服务不会停止 -->

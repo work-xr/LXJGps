@@ -84,7 +84,7 @@ public class SocketModel implements BaseModel {
         sThreadPool.execute(new Runnable() {
             @Override
             public void run() {
-                // 由于开机会同时开启Socket服务, 并上报开机信息到服务器(会调用此方法), 如果不加此延迟, 可能Socket的三个线程还没有开始运行
+                // 由于会同时开启Socket服务, 并上报开机信息到服务器(会调用此方法), 如果不加此延迟, 可能Socket的三个线程还没有开始运行
                 try
                 {
                     Thread.sleep(100);

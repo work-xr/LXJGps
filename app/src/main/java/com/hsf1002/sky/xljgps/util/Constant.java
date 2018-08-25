@@ -91,14 +91,18 @@ public class Constant {
     // 服务器端socket的端口
     public static final int SOCKET_SERVER_ADDRESS_PORT = 12004;
     // 连接socket的服务,收到开机广播一分钟后开始连接socket
-    public static final int SOCKET_SERVER_CONNECT_WAIT_DURATION = 1 * 60 * 1000;
+    public static final int SOCKET_SERVER_CONNECT_WAIT_DURATION = 1 * 10 * 1000;
+    // 连接socket的超时时长, 与心跳时间间隔保持一致
+    public static final int SOCKET_SERVER_TIMEOUT = 5 * 60 * 1000;
 
     // 心跳服务上报的时间间隔
     public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
     // 定位服务上报的时间间隔
     public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 30 * 60 * 1000;
-    // 重连服务第一次连接等待时长
+    // 重连服务一次连接等待时长
     public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 30 * 1000;
+    // 重连服务休眠时长
+    public static final int RECONNCET_SOCKET_SERVICE_SLEEP = 1 * 5 * 1000;
 
 
     /********************************** 改为socket通信后, 这些就没用了 ************************************/

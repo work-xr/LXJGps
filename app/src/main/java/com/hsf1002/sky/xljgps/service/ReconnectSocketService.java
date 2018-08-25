@@ -1,6 +1,7 @@
 package com.hsf1002.sky.xljgps.service;
 
 import android.app.AlarmManager;
+import android.app.IntentService;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -14,6 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_INTERVAL;
+import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_SLEEP;
 import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 
 /**
@@ -44,27 +46,73 @@ public class ReconnectSocketService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        sThreadPool = new ThreadPoolExecutor(
-                1,
-                1,
-                THREAD_KEEP_ALIVE_TIMEOUT,
-                TimeUnit.SECONDS,
-                new LinkedBlockingDeque<Runnable>(),
-                new ThreadPoolExecutor.AbortPolicy());
+        //createThreadPool();
     }
 
+    /**
+    *  author:  hefeng
+    *  created: 18-8-24 上午11:15
+    *  desc:    setServiceAlarm调用之后,    onStartCommand有可能 没有被调用????????????????
+     * 怀疑是android系统为了优化电量, 多个service会一起启动, 导致多个service的  onStartCommand 会在同一时间调用
+    *  param:
+    *  return:
+    */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        sThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.i(TAG, "onStartCommand: startServiceInterval = " + startServiceInterval + ", sConnectedCount = " + sConnectedCount);
-                SocketService.getInstance().reconnectSocketServer();
-            }
-        });
-
+        Log.i(TAG, "onStartCommand: " );
+        reconnectSocket();
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-24 下午4:37
+    *  desc:
+    *  param:
+    *  return:
+    */
+    private static void createThreadPool()
+    {
+        if (sThreadPool == null) {
+            sThreadPool = new ThreadPoolExecutor(
+                    1,
+                    1,
+                    THREAD_KEEP_ALIVE_TIMEOUT,
+                    TimeUnit.SECONDS,
+                    new LinkedBlockingDeque<Runnable>(),
+                    new ThreadPoolExecutor.AbortPolicy());
+        }
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-24 下午4:37
+    *  desc:
+    *  param:
+    *  return:
+    */
+    private static void reconnectSocket()
+    {
+        if (sThreadPool != null) {
+            sThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try
+                    {
+                        sConnectedCount++;
+                        Log.i(TAG, "reconnectSocket: startServiceInterval = " + startServiceInterval + ", sConnectedCount = " + sConnectedCount);
+                        // 通过延迟来实现每次重连服务的间隔越来越长
+                        Thread.sleep(RECONNCET_SOCKET_SERVICE_SLEEP);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                    SocketService.getInstance().reconnectSocketServer();
+                }
+            });
+        }
     }
 
     /**
@@ -80,15 +128,17 @@ public class ReconnectSocketService extends Service {
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        sConnectedCount++;
-        Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", sConnectedCount = " + sConnectedCount);
 
         if (isOn)
         {
-            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval * sConnectedCount, pi);
+            createThreadPool();
+            Log.i(TAG, "setServiceAlarm open alarm : startServiceInterval = " + startServiceInterval);
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);
+            reconnectSocket();
         }
         else
         {
+            Log.i(TAG, "setServiceAlarm close alarm : ");
             manager.cancel(pi);
             pi.cancel();
             sConnectedCount = 0;
