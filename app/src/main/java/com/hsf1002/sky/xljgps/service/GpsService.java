@@ -9,19 +9,12 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
+import com.hsf1002.sky.xljgps.app.GpsApplication;
 import com.hsf1002.sky.xljgps.model.SocketModel;
 
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_FIRST_WAIT_DURATION;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SERVICE_SCAN_INTERVAL;
-import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_POWERON;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
-import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 import static com.hsf1002.sky.xljgps.util.SharedPreUtils.getInstance;
 
 /**
@@ -32,8 +25,6 @@ import static com.hsf1002.sky.xljgps.util.SharedPreUtils.getInstance;
 public class GpsService extends Service {
     private static final String TAG = "GpsService";
     private static int startServiceInterval = getInstance().getInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, BAIDU_GPS_SERVICE_SCAN_INTERVAL);
-    private static ThreadPoolExecutor sThreadPool;
-    private static boolean sIsFirst = true;
     private static Context sContext = null;
     /*private static final String ACTION_TIMING_REPORT_GPS_LOCATION = "action.timing.report.gps.location";
     private static Intent intentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
@@ -50,34 +41,14 @@ public class GpsService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-/*
-        sThreadPool = new ThreadPoolExecutor(
-                1,
-                1,
-                THREAD_KEEP_ALIVE_TIMEOUT,
-                TimeUnit.SECONDS,
-                new LinkedBlockingDeque<Runnable>(),
-                new ThreadPoolExecutor.AbortPolicy());
-*/
-        //registerGpsReceiver();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: ");
-        //reportPosition();
-        if (sIsFirst)
-        {
-            sIsFirst = false;
-            SocketModel.getInstance().reportPosition(SOCKET_TYPE_POWERON, null);
-        }
-        else
-        {
-            //BaiduGpsApp.getInstance().startBaiduGps();
-            SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
-        }
+        SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
 
-        return START_STICKY;// super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Nullable
@@ -111,6 +82,8 @@ public class GpsService extends Service {
         intentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
         pi = PendingIntent.getBroadcast(context, 0, intentReceiver, 0);
 */
+        sContext = GpsApplication.getAppContext();
+
         Intent intent = new Intent(context, GpsService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
@@ -162,41 +135,6 @@ public class GpsService extends Service {
         PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
 
         return pi != null;
-    }
-
-    /**
-     *  author:  hefeng
-     *  created: 18-8-22 上午10:30
-     *  desc:
-     *  param:
-     *  return:
-     */
-    @Deprecated
-    private static void reportPosition()
-    {
-        sThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.i(TAG, "run: sIsFirst = " + sIsFirst);
-
-                if (sIsFirst) {
-                    sIsFirst = false;
-                    try {
-                        // 这是心跳(5分钟)和定位(30分钟)两个服务 上报的时间间隔, 尽可能减短,
-                        // 系统才会在定位服务唤醒的时候和心跳服务一同唤醒, 不仅减少功耗, 还可提高定时服务准确性
-                        // 心跳数据300ms就上报结束并返回数据了, 默认设置为2秒
-                        Thread.sleep(BAIDU_GPS_FIRST_WAIT_DURATION);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    SocketModel.getInstance().reportPosition(SOCKET_TYPE_POWERON, null);
-                }
-                else
-                {
-                    BaiduGpsApp.getInstance().startBaiduGps();
-                }
-            }
-        });
     }
 
     @Override

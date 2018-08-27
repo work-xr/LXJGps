@@ -43,13 +43,16 @@ public class Constant {
     public static final String BAIDU_GPS_LOCATION_TYPE_LBS = "lbs";
     public static final String BAIDU_GPS_LOCATION_TYPE_WIFI = "wifi";
     // 由于上传给服务器的数据不能为空, 定位数据的默认值
-    public static final String BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE = "113.957178";
-    public static final String BAIDU_GPS_LOCATION_DEFAULT_LANTITUDE = "22.537702";
+    public static final String BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE = "114.071044";
+    public static final String BAIDU_GPS_LOCATION_DEFAULT_LANTITUDE = "22.522705";
     public static final String BAIDU_GPS_LOCATION_DEFAULT_LOCTYPE = "1";    // 1: baidu map  2: gaode map
     public static final String BAIDU_GPS_LOCATION_DEFAULT_POSITIONTYPE = "lbs";
 
     // 按键SOS后发此广播, 收到广播后,上传信息到平台
-    public static final String ANCTION_SOS_REPORT_POSITION = "action.sos.report.position";
+    public static final String ACTION_SOS_REPORT_POSITION = "action.sos.report.position";
+    // 按键保存亲情号码和紧急呼叫号码发送此广播, 收到广播后, 上传信息到平台
+    public static final String ACTION_SOS_REPORT_NUMBER = "android.intent.action.REPORT_RELATION_NUMBER";
+    public static final String ACTION_POWER_ON = "android.intent.action.BOOT_COMPLETED";
 
     // 将SOS的一个紧急号码和紧急短信, 三个亲情号码保存到SystemProperties, 该应用只读,写操作会发送广播让SOS和SimpleLauncher模块实现
     public static final String SOS_EMERGENCY_NUM_PROPERTY = "persist.sys.sos.emergency.num";
@@ -92,17 +95,19 @@ public class Constant {
     public static final int SOCKET_SERVER_ADDRESS_PORT = 12004;
     // 连接socket的服务,收到开机广播一分钟后开始连接socket
     public static final int SOCKET_SERVER_CONNECT_WAIT_DURATION = 1 * 10 * 1000;
-    // 连接socket的超时时长, 与心跳时间间隔保持一致
-    public static final int SOCKET_SERVER_TIMEOUT = 5 * 60 * 1000;
+    // 连接socket的超时时长, 与心跳时间间隔保持一致, 否则会出现 SocketTimeoutException
+    public static final int SOCKET_SERVER_TIMEOUT = 10 * 60 * 1000;
 
     // 心跳服务上报的时间间隔
     public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
     // 定位服务上报的时间间隔
-    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 30 * 60 * 1000;
+    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 10 * 60 * 1000;
     // 重连服务一次连接等待时长
     public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 30 * 1000;
     // 重连服务休眠时长
     public static final int RECONNCET_SOCKET_SERVICE_SLEEP = 1 * 5 * 1000;
+    // 开机等待多久开始上报定位信息
+    public static final int POWERON_REPORT_POSITION_SLEEP = 1 * 30 * 1000;
 
 
     /********************************** 改为socket通信后, 这些就没用了 ************************************/

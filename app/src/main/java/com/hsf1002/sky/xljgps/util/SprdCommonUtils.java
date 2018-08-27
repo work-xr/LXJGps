@@ -3,6 +3,7 @@ package com.hsf1002.sky.xljgps.util;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.telephony.SmsManager;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
+import static android.content.Context.BATTERY_SERVICE;
 import static android.os.Build.MANUFACTURER;
 import static android.os.Build.MODEL;
 import static com.hsf1002.sky.xljgps.util.Constant.ACTION_SET_RELATION_NUMBER;
@@ -407,7 +409,7 @@ public class SprdCommonUtils {
     {
     }
 
-    @TargetApi(19)
+    //@TargetApi(19)
     public /*String */ int getCurrentBatteryCapacity()
     {
         int percent = 0;
@@ -433,8 +435,8 @@ public class SprdCommonUtils {
             }
         }
         else {
-            //BatteryManager batteryManager = (BatteryManager)sAppContext.getSystemService(BATTERY_SERVICE);
-            //percent = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+            BatteryManager batteryManager = (BatteryManager)sAppContext.getSystemService(BATTERY_SERVICE);
+            percent = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
         }
 
         Log.i(TAG, "getCurrentBatteryCapacity: battery = " + percent);

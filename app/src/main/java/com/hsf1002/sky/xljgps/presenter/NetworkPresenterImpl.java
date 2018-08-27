@@ -50,28 +50,30 @@ public class NetworkPresenterImpl implements
 
     @Override
     public void reportSosPosition() {
-        model.reportPosition(SOCKET_TYPE_TIMING, this);
+        //model.reportPosition(SOCKET_TYPE_TIMING, this);
         context = GpsApplication.getAppContext();
         Toast.makeText(context, context.getResources().getString(R.string.report_success), Toast.LENGTH_SHORT).show();
-/*
+
+        SocketService socketService = new SocketService();
+
         switch (count) {
             case 0:
                 SprdCommonUtils.getInstance().sendSosSmsBroadcast();
                 break;
             case 1:
-                SocketService.getInstance().parseServerMsg("{\"imei\":\"867400020316620\",\"time\":\"20180810155626\",\"command\":101}");
+                socketService.parseServerMsg("{\"imei\":\"867400020316620\",\"time\":\"20180810155626\",\"command\":101}");
                 break;
             case 2:
-                SocketService.getInstance().parseServerMsg("{\"interval\":\"3600\",\"command\":106,\"time\":\"20170102302022\"}");
+                socketService.parseServerMsg("{\"interval\":\"3600\",\"command\":106,\"time\":\"20170102302022\"}");
                 break;
             case 3:
-                SocketService.getInstance().parseServerMsg("{\"imei \":\"869938027477745\",\"command\":107,\"time\":\"20170102302022\"}");
+                socketService.parseServerMsg("{\"imei \":\"869938027477745\",\"command\":107,\"time\":\"20170102302022\"}");
                 break;
             case 4:
-                SocketService.getInstance().parseServerMsg("{\"imei\":\"869938027477745\",\"command\":108,\"time\":\"20170102302022\"}");
+                socketService.parseServerMsg("{\"imei\":\"869938027477745\",\"command\":108,\"time\":\"20170102302022\"}");
                 break;
             case 5:
-                SocketService.getInstance().parseServerMsg("{\"sos_phone\":\"10086,12345,19968867878,059212349\",\"name\":\"亲1,亲2,亲3,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
+                socketService.parseServerMsg("{\"sos_phone\":\"10086,12345,19968867878,059212349\",\"name\":\"亲1,亲2,亲3,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
                 break;
             default:
                 break;
@@ -82,7 +84,6 @@ public class NetworkPresenterImpl implements
         {
             count = 0;
         }
-*/
     }
 
     @Override

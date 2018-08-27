@@ -81,7 +81,7 @@ public class BeatHeartService extends Service {
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval);
+        Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
 
         if (isOn)
         {

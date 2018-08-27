@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.service.BeatHeartService;
 import com.hsf1002.sky.xljgps.service.GpsService;
 import com.hsf1002.sky.xljgps.service.SocketService;
@@ -39,6 +40,9 @@ public class NetworkReceiver extends BroadcastReceiver {
                         Log.d(TAG, "onReceive: NetworkInfo.State.CONNECTED info.type = TYPE_WIFI");
                     }
 
+                    // 开启百度定位服务, 默认1分钟发起一次
+                    BaiduGpsApp.getInstance().startBaiduGps();
+
                     // 开启定时服务, 默认每隔10分钟上报一次位置信息
                     if (!GpsService.isServiceAlarmOn(appContext)) {
                         GpsService.setServiceAlarm(appContext, true);
@@ -52,8 +56,10 @@ public class NetworkReceiver extends BroadcastReceiver {
                 if (NetworkInfo.State.DISCONNECTED == info.getState())
                 {
                     Log.d(TAG, "onReceive: NetworkInfo.State.DISCONNECTED ***************************");
-                    SocketService.getInstance().stopSocketService();
-                    //GpsService.setServiceAlarm(appContext, false);
+                    BaiduGpsApp.getInstance().stopBaiduGps();
+                    SocketService socketService = new SocketService();
+                    socketService.stopSocketService();
+                    GpsService.setServiceAlarm(appContext, false);
                     BeatHeartService.setServiceAlarm(appContext, false);
                     return;
                 }

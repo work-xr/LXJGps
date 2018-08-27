@@ -108,8 +108,8 @@ public class ReconnectSocketService extends Service {
                     {
                         e.printStackTrace();
                     }
-
-                    SocketService.getInstance().reconnectSocketServer();
+                    SocketService socketService = new SocketService();
+                    socketService.reconnectSocketServer();
                 }
             });
         }

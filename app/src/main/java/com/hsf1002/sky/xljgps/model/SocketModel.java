@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_COMPANY;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_BEATHEART;
-import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_UPLOAD;
 import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 

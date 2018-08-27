@@ -230,7 +230,7 @@ public class BaiduGpsApp {
 
             if (locType == BDLocation.TypeGpsLocation || locType == BDLocation.TypeNetWorkLocation)
             {
-                Log.i(TAG, "onReceiveLocation:  get location success, stop gps service");
+                //Log.i(TAG, "onReceiveLocation:  get location success, stop gps service");
                 // 保存定位信息
                 setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locTypeStr, locationType);
 

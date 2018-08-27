@@ -30,7 +30,7 @@ public class GpsApplication extends Application {
         Log.i(TAG, "onCreate: ...................................");
         sContext = getApplicationContext();
 
-        // 初始化百度SDK, 这里比 StartupReceiver 广播要早
+        // 初始化百度SDK, 这里比 ReportNumberReceiver 广播要早
         BaiduGpsApp.getInstance().initBaiduSDK(sContext);
     }
 

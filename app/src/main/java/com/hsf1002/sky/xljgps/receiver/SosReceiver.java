@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.hsf1002.sky.xljgps.model.SocketModel;
 
-import static com.hsf1002.sky.xljgps.util.Constant.ANCTION_SOS_REPORT_POSITION;
+import static com.hsf1002.sky.xljgps.util.Constant.ACTION_SOS_REPORT_POSITION;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_SOS;
 
 /**
@@ -24,7 +24,7 @@ public class SosReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         Log.d(TAG, "onReceive: action = " + action);
 
-        if (action.equals(ANCTION_SOS_REPORT_POSITION))
+        if (action.equals(ACTION_SOS_REPORT_POSITION))
         {
             SocketModel.getInstance().reportPosition(SOCKET_TYPE_SOS, null);
         }

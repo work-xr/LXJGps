@@ -48,15 +48,21 @@
         <activity android:name=".ui.PlatformCenterActivity" >
         </activity>
 
-        <receiver android:name=".receiver.StartupReceiver" >
+        <receiver android:name=".receiver.ReportNumberReceiver" >
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.REPORT_RELATION_NUMBER" />
             </intent-filter>
         </receiver>
 
         <receiver android:name=".receiver.SosReceiver" >
             <intent-filter>
                 <action android:name="action.sos.report.position" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".receiver.StartupReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
