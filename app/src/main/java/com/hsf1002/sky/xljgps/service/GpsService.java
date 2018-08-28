@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.hsf1002.sky.xljgps.app.GpsApplication;
+import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.model.SocketModel;
 
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME;
@@ -46,6 +47,8 @@ public class GpsService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: ");
+        // 开启百度定位服务, 默认1分钟发起一次
+        BaiduGpsApp.getInstance().startBaiduGps();
         SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
 
         return START_STICKY;
@@ -83,7 +86,6 @@ public class GpsService extends Service {
         pi = PendingIntent.getBroadcast(context, 0, intentReceiver, 0);
 */
         sContext = GpsApplication.getAppContext();
-
         Intent intent = new Intent(context, GpsService.class);
         PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
 

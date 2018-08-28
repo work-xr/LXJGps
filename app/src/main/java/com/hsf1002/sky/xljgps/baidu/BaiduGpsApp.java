@@ -237,15 +237,14 @@ public class BaiduGpsApp {
                 // 上报定时定位信息
                 // 在这上报定位,导致每次定位时间不确定, 因为每次百度定位的时间不确定
                 //SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
-
-                // 如果定位成功, 就停止百度服务(百度服务运行在一个单独的进程)
-                //stopBaiduGps();
             }
             else
             {
                 // 如果定位失败, 隔一段时间会重新发起定位请求, 目前默认设置为1分钟 BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL
                 Log.i(TAG, "onReceiveLocation:  get location failed, stop gps service");
             }
+            // 不管定位成功还是失败, 都停止百度服务(百度服务运行在一个单独的进程)
+            stopBaiduGps();
         }
 
         @Override

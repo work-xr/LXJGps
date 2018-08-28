@@ -91,6 +91,7 @@ public class SocketService extends Service {
     // 读的线程是否进入了wait阻塞状态
     private static boolean isReadThreadWaited = false;
 
+
     // 如果连接断开了, 阻塞在读的线程, 等连接成功后, 继续执行
     //private Object lockReadWaitConntected = new Object();
 
@@ -144,16 +145,31 @@ public class SocketService extends Service {
      */
     private void runThreads()
     {
-        if (connectServerThread != null) {
-            connectServerThread.run();
-        }
+        Thread runThread = new RunThread();
+        runThread.start();
+    }
 
-        if (readServerThread != null) {
-            readServerThread.run();
-        }
+    private class RunThread extends Thread
+    {
+        @Override
+        public void run() {
+            if (connectServerThread != null) {
+                if (!connectServerThread.isAlive()) {
+                    connectServerThread.run();
+                }
+            }
 
-        if (writeServerThread != null) {
-            writeServerThread.run();
+            if (readServerThread != null) {
+                if (!readServerThread.isAlive()) {
+                    readServerThread.run();
+                }
+            }
+
+            if (writeServerThread != null) {
+                if (!writeServerThread.isAlive()) {
+                    writeServerThread.run();
+                }
+            }
         }
     }
 
@@ -208,7 +224,7 @@ public class SocketService extends Service {
             if (sSocket == null) {
                 if (!reconnectFlag)
                 {
-                    Log.i(TAG, "ConnectServerThread: start first enter, sleep 10 seconds *************");
+                    Log.i(TAG, "ConnectServerThread: start first enter, sleep 10 seconds ***********");
                     // 如果是网络断开后的连接, 加点延迟10s, 如果是服务器端断开重新连接, 直接连
                     try {
                         Thread.sleep(SOCKET_SERVER_CONNECT_WAIT_DURATION);
@@ -237,13 +253,13 @@ public class SocketService extends Service {
                 }
                 finally {
                     if (sSocket != null && sSocket.isConnected()) {
-                        Log.i(TAG, "ConnectServerThread: success**************************************");
-                        // 如果没有开启心跳定时服务, 开启, 默认每隔5分钟上报一次心跳
+                        Log.i(TAG, "ConnectServerThread: success^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                        // 如果没有开启心跳定时服务, 开启
                         if (!BeatHeartService.isServiceAlarmOn(sContext)) {
                             BeatHeartService.setServiceAlarm(sContext, true);
                         }
 
-                        // 如果开启了重连服务, 关闭
+                        // 如果开启了重连定时服务, 关闭
                         if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
                             ReconnectSocketService.setServiceAlarm(sContext, false);
                         }
@@ -255,13 +271,15 @@ public class SocketService extends Service {
                                 lockReadWaitConntected.notify();
                             }*/
                         }
+                        // 让读的线程开始运行
+                        isRunning = true;
                     }
                     else {
-                        Log.i(TAG, "ConnectServerThread: failed, ready to continue ********************");
+                        Log.i(TAG, "ConnectServerThread: failed, ready to continue*********************");
                     }
                 }
             }
-            Log.i(TAG, "ConnectServerThread: stopped*****************************************");
+            Log.i(TAG, "ConnectServerThread: stopped****************************************");
         }
     }
 
@@ -276,12 +294,15 @@ public class SocketService extends Service {
      08-21 14:58:58.958  3057  3072 I SocketService: getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************!
      08-21 14:58:58.959  3057  3072 I SocketService: disConnectSocketServer: start*****************************************************************
 
-     0823: 目前的断开有两种,一种是服务器主动断开, 报错: Connection reset by peer; 另一种是客户端断开, 报错: Connection timed out
+     0823: 目前的断开有三种,
+     一种是服务器主动断开, 报错: Connection reset by peer;
+     一种是客户端断开, 报错: Connection timed out;
+     一种是断开, 报错: java.net.SocketException: sendto failed: EPIPE (Broken pipe)
     *  return:
     */
     private void disConnectSocketServer()
     {
-        Log.i(TAG, "disConnectSocketServer: start*****************************************************************");
+        Log.i(TAG, "disConnectSocketServer: start*******************************************");
 
         try
         {
@@ -307,7 +328,7 @@ public class SocketService extends Service {
             e.printStackTrace();
         }
 
-        Log.i(TAG, "disConnectSocketServer: finished***************************************************************");
+        Log.i(TAG, "disConnectSocketServer: finished****************************************");
     }
 
     /**
@@ -319,7 +340,7 @@ public class SocketService extends Service {
     */
     public void stopSocketService()
     {
-        Log.i(TAG, "stopSocketService: ***************************************************************");
+        Log.i(TAG, "stopSocketService: ******************************************************");
         if (writeServerThread != null) {
             try {
                 writeServerThread.join();
@@ -329,7 +350,8 @@ public class SocketService extends Service {
         }
 
         if (readServerThread != null) {
-            isRunning = false;
+            // 在这赋值没有用, 主线程写, 在子线程读不到
+            //isRunning = false;
             Log.i(TAG, "stopSocketService: readServerThread, isRunning = " + isRunning);
 
             try {
@@ -342,13 +364,14 @@ public class SocketService extends Service {
         // 必须等停止服务(读,写,连接三个线程停止之后)成功之后, 再断开连接, 因为读的线程一直在运行, 断网时间太久, 写的线程也会运行
         //synchronized (this)
         {
-            Log.i(TAG, "stopSocketService: start to stop socket service, isRunning = " + isRunning);
+            //Log.i(TAG, "stopSocketService: start to stop socket service, isRunning = " + isRunning);
             //stopSelf();
-            Log.i(TAG, "stopSocketService: socket service has stopped, isRunning = " + isRunning);
+            //Log.i(TAG, "stopSocketService: socket service has stopped, isRunning = " + isRunning);
         }
 
-        // getParseDataString已经调用了
-        // disConnectSocketServer();
+        // 虽然getParseDataString已经调用了
+        // 但是对于 java.net.SocketException: sendto failed: EPIPE (Broken pipe) 的错误,缺没有调用
+        disConnectSocketServer();
         // 手动调用onDestroy没用, 再次启动Service还是不会调用onCreate
         //onDestroy();
     }
@@ -371,11 +394,11 @@ public class SocketService extends Service {
 
         if (isConnected)
         {
-            Log.i(TAG, "socket server: connected successfully ************************** ");
+            Log.i(TAG, "socket server: connected normally***********************************");
         }
         else
         {
-            Log.i(TAG, "socket server: connected failed ******************************** ");
+            Log.i(TAG, "socket server: connected failed*************************************");
         }
 
         return isConnected;// confirmSocketConnected();
@@ -480,6 +503,7 @@ public class SocketService extends Service {
     *  author:  hefeng
     *  created: 18-8-9 下午1:47
     *  desc:    对从服务器端读到的数据进行处理,先读取数据长度,再读取实际数据,最后解码转为String类型
+     *  返回数据格式: 0054{"success":1,"company":"xiaolajiao","command":301}
     *  param:  getParseDataString: sizeStr = \C0\80\C0\80\C0\80\C0\80
     *  return:
     */
@@ -523,7 +547,13 @@ public class SocketService extends Service {
             // 读取服务器发送的实际数据
             byte[] dataBytes = new byte[size - 4];
             dis.read(dataBytes);
-
+            // 有时候会把前四个字节给删掉?????
+            /*
+            08-27 23:06:29.534 2804-3100/com.hsf1002.sky.xljgps I/SocketService: getParseDataString: sizeStr = 0054
+            08-27 23:06:29.534 2804-3108/com.hsf1002.sky.xljgps I/SocketService: getParseDataString: sizeStr = {"su
+            08-27 23:06:29.534 2804-3100/com.hsf1002.sky.xljgps I/SocketService: getParseDataString: size = 54
+            08-27 23:06:29.535 2804-3100/com.hsf1002.sky.xljgps I/SocketService: getParseDataString: decodedStr = ccess":1,"company":"xiaolajiao","command":301}��������
+            * */
             // 用UTF-8进行解码
             dencodedStr = new String(dataBytes);
             dencodedStr = URLDecoder.decode(dencodedStr, SOCKET_ENCODE_TYPE);
@@ -639,7 +669,7 @@ public class SocketService extends Service {
                     e.printStackTrace();
                 }
             }
-            Log.i(TAG, "WriteDataThread: thread stopped, ready to connect...................");
+            Log.i(TAG, "WriteDataThread: thread stopped, ready..............................");
         }
     }
 
@@ -654,7 +684,7 @@ public class SocketService extends Service {
     {
         gsonString = data;
 
-        Log.i(TAG, "writeDataToServer: prepared.............................................");
+        Log.i(TAG, "writeDataToServer: prepared.........................................");
 
         if (writeServerThread != null ) {
             //Log.i(TAG, "writeDataToServer: isAlive = " + writeServerThread.isAlive());
@@ -872,7 +902,7 @@ public class SocketService extends Service {
             while (isRunning)
             {
                 long startTime = System.currentTimeMillis();
-                Log.i(TAG, "ReadServerThread  isRunning = " + isRunning);
+                Log.i(TAG, "ReadServerThread: isRunning = " + isRunning);
                 // 0. 先等待socket连接成功, 再进行读写操作
                 waitConnectThread();
 

@@ -40,7 +40,7 @@ public class NetworkReceiver extends BroadcastReceiver {
                         Log.d(TAG, "onReceive: NetworkInfo.State.CONNECTED info.type = TYPE_WIFI");
                     }
 
-                    // 开启百度定位服务, 默认1分钟发起一次
+                    // 开启定位服务, 为了开机上报的定位信息能够成功
                     BaiduGpsApp.getInstance().startBaiduGps();
 
                     // 开启定时服务, 默认每隔10分钟上报一次位置信息
@@ -56,7 +56,6 @@ public class NetworkReceiver extends BroadcastReceiver {
                 if (NetworkInfo.State.DISCONNECTED == info.getState())
                 {
                     Log.d(TAG, "onReceive: NetworkInfo.State.DISCONNECTED ***************************");
-                    BaiduGpsApp.getInstance().stopBaiduGps();
                     SocketService socketService = new SocketService();
                     socketService.stopSocketService();
                     GpsService.setServiceAlarm(appContext, false);

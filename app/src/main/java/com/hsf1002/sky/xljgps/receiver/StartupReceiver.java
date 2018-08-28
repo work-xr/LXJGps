@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.model.SocketModel;
 import com.hsf1002.sky.xljgps.service.SocketService;
 
