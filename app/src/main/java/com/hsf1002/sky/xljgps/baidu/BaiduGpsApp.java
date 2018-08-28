@@ -11,7 +11,6 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.hsf1002.sky.xljgps.app.GpsApplication;
-import com.hsf1002.sky.xljgps.model.SocketModel;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 
 import static android.content.Context.WIFI_SERVICE;
@@ -23,10 +22,9 @@ import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_GPS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_LBS;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_LOCATION_TYPE_WIFI;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL;
-import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
 
 /**
- * Created by hefeng on 18-6-6.
+ * Created by hefeng on 18-8-6.
  */
 
 public class BaiduGpsApp {
@@ -230,21 +228,17 @@ public class BaiduGpsApp {
 
             if (locType == BDLocation.TypeGpsLocation || locType == BDLocation.TypeNetWorkLocation)
             {
-                //Log.i(TAG, "onReceiveLocation:  get location success, stop gps service");
+                Log.i(TAG, "onReceiveLocation:  get location success, stop gps service");
                 // 保存定位信息
                 setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locTypeStr, locationType);
-
-                // 上报定时定位信息
-                // 在这上报定位,导致每次定位时间不确定, 因为每次百度定位的时间不确定
-                //SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
+                // 定位成功, 停止百度服务(百度服务运行在一个单独的进程), 如果定位失败, 隔一分钟继续定位,直到成功再停止
+                stopBaiduGps();
             }
             else
             {
                 // 如果定位失败, 隔一段时间会重新发起定位请求, 目前默认设置为1分钟 BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL
                 Log.i(TAG, "onReceiveLocation:  get location failed, stop gps service");
             }
-            // 不管定位成功还是失败, 都停止百度服务(百度服务运行在一个单独的进程)
-            stopBaiduGps();
         }
 
         @Override

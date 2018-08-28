@@ -42,7 +42,12 @@ public class StartupReceiver extends BroadcastReceiver {
     *  author:  hefeng
     *  created: 18-8-27 下午8:25
     *  desc:    收到开机广播, 等待30秒, 如果socket已经连接, 就上报开机定位信息, 如果socket没有连接, 就不上报了
-    *  param:
+     *  08-28 12:19:47.827 2828-2828/com.hsf1002.sky.xljgps D/StartupReceiver: onReceive: action = android.intent.action.BOOT_COMPLETED
+     *  08-28 12:19:54.667 2828-2828/com.hsf1002.sky.xljgps D/NetworkReceiver: onReceive: NetworkInfo.State.CONNECTED info.type = TYPE_MOBILE
+        08-28 12:19:57.807 2828-2828/com.hsf1002.sky.xljgps I/BaiduGpsApp: onReceiveLocation: locType = 161, latitude = 22.537829, longitude = 113.957068, address = 中国深圳市南山区科技南十二路, locationType = lbs, getLocType = 161
+        08-28 12:20:07.054 2828-3114/com.hsf1002.sky.xljgps I/SocketService: ConnectServerThread: success^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        08-28 12:20:17.953 2828-2843/com.hsf1002.sky.xljgps I/SocketModel: reportPosition: imei = 864727030038001, time = 20180828122017, capacity = 100, gson = {"company":"xiaolajiao","imei":"864727030038001","power":100,"time":"20180828122017","type":100,"lat":"22.537829","loc_type":"1","lon":"113.957068","position_type":"lbs"}
+     *  param:
     *  return:
     */
     private void reportPosition()

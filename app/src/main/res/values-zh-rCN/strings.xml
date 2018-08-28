@@ -28,7 +28,7 @@
     <string name="set_relation_number_success">设置成功!</string>
     <string name="set_platform_center_number">设置孝老平台中心号码</string>
 
-    <string name="upload_success">上传成功 !</string>
+    <string name="upload_success">号码上传服务器成功 !</string>
     <string name="upload_failed">上传失败 !</string>
     <string name="download_success">下载成功 !</string>
     <string name="download_failed">下载失败 !</string>

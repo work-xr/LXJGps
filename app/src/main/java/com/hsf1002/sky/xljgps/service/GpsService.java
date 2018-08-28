@@ -72,6 +72,7 @@ public class GpsService extends Service {
      *  相对于定时的准确性而言, 功耗更为重要, 依然采用Android默认的处理方式
      *
     0822  gps正式版本30分钟上报一次,可以改为 setExact
+    0825  setExact将在灭屏状态下无法唤醒service, 只能用 setRepeating
     *  param:
     *  return:
     */
@@ -94,7 +95,8 @@ public class GpsService extends Service {
 
         if (isOn)
         {
-            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);
+            // 刚开机, 刚开启定时定位服务的第一次, 不上报定位信息, 30分钟后再上报
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + startServiceInterval, startServiceInterval, pi);
             //manager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pi);
         }
         else

@@ -60,9 +60,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_UPLOAD;
 /**
 *  author:  hefeng
 *  created: 18-8-2 下午5:16
-*  desc: 这是个sticky service, 始终伴随着应用(应用在收到开机广播就会启动)一起启动, 永远都不会停止
- *  但是sticky service的管理不方便, 不容易判断sticky service是否已经启动, 好在该服务无需判断状态
- *  替代架构可以用普通的service或者IntentService, 只是要每次开机重新启动
+*
 */
 
 public class SocketService extends Service {
@@ -90,10 +88,6 @@ public class SocketService extends Service {
     private volatile boolean isRunning = true;
     // 读的线程是否进入了wait阻塞状态
     private static boolean isReadThreadWaited = false;
-
-
-    // 如果连接断开了, 阻塞在读的线程, 等连接成功后, 继续执行
-    //private Object lockReadWaitConntected = new Object();
 
 
     @Override
@@ -259,6 +253,11 @@ public class SocketService extends Service {
                             BeatHeartService.setServiceAlarm(sContext, true);
                         }
 
+                        // 如果没有开启定位定时服务, 开启
+                        if (!GpsService.isServiceAlarmOn(sContext)) {
+                            GpsService.setServiceAlarm(sContext, true);
+                        }
+
                         // 如果开启了重连定时服务, 关闭
                         if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
                             ReconnectSocketService.setServiceAlarm(sContext, false);
@@ -294,10 +293,10 @@ public class SocketService extends Service {
      08-21 14:58:58.958  3057  3072 I SocketService: getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************!
      08-21 14:58:58.959  3057  3072 I SocketService: disConnectSocketServer: start*****************************************************************
 
-     0823: 目前的断开有三种,
+     0823: 目前的socket断开原因有三种,
      一种是服务器主动断开, 报错: Connection reset by peer;
      一种是客户端断开, 报错: Connection timed out;
-     一种是断开, 报错: java.net.SocketException: sendto failed: EPIPE (Broken pipe)
+     一种是(USB切换或息屏时导致Socket端口关闭, 这个错误的可能性原因比较多)断开, 报错: java.net.SocketException: sendto failed: EPIPE (Broken pipe)
     *  return:
     */
     private void disConnectSocketServer()
@@ -363,11 +362,11 @@ public class SocketService extends Service {
 
         // 必须等停止服务(读,写,连接三个线程停止之后)成功之后, 再断开连接, 因为读的线程一直在运行, 断网时间太久, 写的线程也会运行
         //synchronized (this)
-        {
+        //{
             //Log.i(TAG, "stopSocketService: start to stop socket service, isRunning = " + isRunning);
             //stopSelf();
             //Log.i(TAG, "stopSocketService: socket service has stopped, isRunning = " + isRunning);
-        }
+        //}
 
         // 虽然getParseDataString已经调用了
         // 但是对于 java.net.SocketException: sendto failed: EPIPE (Broken pipe) 的错误,缺没有调用
@@ -517,12 +516,12 @@ public class SocketService extends Service {
         try {
             dis.read(sizeBytes);
             String sizeStr = new String(sizeBytes);
-            Log.i(TAG, "getParseDataString: sizeStr = " + sizeStr);
+            Log.i(TAG, "getParseDataString: sizeStr = " + sizeStr + ", dis.available = " + dis.available());
 
             // 前4个字节应该都是数字,否则丢弃此次读取, 并且断开socket服务
             if (!TextUtils.isDigitsOnly(sizeStr))
             {
-                Log.i(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected*************!");
+                Log.i(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected!");
                 disConnectSocketServer();
 
                 if (NetworkUtils.isNetworkAvailable())

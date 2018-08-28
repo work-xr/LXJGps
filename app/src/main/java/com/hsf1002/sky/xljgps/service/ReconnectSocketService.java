@@ -20,7 +20,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 
 /**
  * Created by hefeng on 18-8-10.
- * desc: 如果检测到Socket服务断开了, 每隔一段时间就重新连接一次Socket, 第一次是30秒, 第二次是1分钟, 2, 4, 8, 16....
+ * desc: 如果检测到Socket服务断开了, 每隔一段时间就重新连接一次Socket
  */
 
 public class ReconnectSocketService extends Service {
@@ -101,7 +101,6 @@ public class ReconnectSocketService extends Service {
                     {
                         sConnectedCount++;
                         Log.i(TAG, "reconnectSocket: startServiceInterval = " + startServiceInterval + ", sConnectedCount = " + sConnectedCount);
-                        // 通过延迟来实现每次重连服务的间隔越来越长
                         Thread.sleep(RECONNCET_SOCKET_SERVICE_SLEEP);
                     }
                     catch (InterruptedException e)
@@ -131,6 +130,7 @@ public class ReconnectSocketService extends Service {
 
         if (isOn)
         {
+            // 为啥要在创建线程池, 就开始重连? 因为有时候onStartCommand不会被调用
             createThreadPool();
             Log.i(TAG, "setServiceAlarm open alarm : startServiceInterval = " + startServiceInterval);
             manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);

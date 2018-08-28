@@ -18,6 +18,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_REPORT_POSITION_SLEEP;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_COMPANY;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_BEATHEART;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_UPLOAD;
@@ -80,25 +81,21 @@ public class SocketModel implements BaseModel {
     */
     private void postDataToServer(final String gsonString)
     {
-        sThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                // 由于会同时开启Socket服务, 并上报开机信息到服务器(会调用此方法), 如果不加此延迟, 可能Socket的三个线程还没有开始运行
-                try
-                {
-                    Thread.sleep(100);
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
+        if (sThreadPool != null) {
+            sThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    // 此延迟为了等待百度定位成功
+                    try {
+                        Thread.sleep(BAIDU_REPORT_POSITION_SLEEP);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
-                // 先等待socket连接成功, 再进行读写操作
-                //socketService.waitConnectThread();
-                // 上传信息到服务器
-                socketService.writeDataToServer(gsonString);
-            }
-        });
+                    socketService.writeDataToServer(gsonString);
+                }
+            });
+        }
     }
 
     /**
@@ -115,7 +112,15 @@ public class SocketModel implements BaseModel {
         final String gsonString = BeatHeartParam.getBeatHeartParamGson(beatHeartParam);
         Log.i(TAG, "reportBeatHeart: gsonString = " + gsonString);
 
-        postDataToServer(gsonString);
+        if (sThreadPool != null) {
+            sThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    socketService.writeDataToServer(gsonString);
+                }
+            });
+        }
+
     }
 
     /**
@@ -142,7 +147,14 @@ public class SocketModel implements BaseModel {
         final String gsonString = UploadNumberParam.getSendParamGson(sendParam);
         Log.i(TAG, "uploadRelationNumber: imei = " + imei + ", time = " + time + ", sosPhone = " + sosPhones + ", sosPhoneNames = " + sosPhoneNames+ ", gson = " + gsonString);
 
-        postDataToServer(gsonString);
+        if (sThreadPool != null) {
+            sThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    socketService.writeDataToServer(gsonString);
+                }
+            });
+        }
 
         Toast.makeText(GpsApplication.getAppContext(), GpsApplication.getAppContext().getResources().getString(R.string.upload_success), Toast.LENGTH_SHORT).show();
     }

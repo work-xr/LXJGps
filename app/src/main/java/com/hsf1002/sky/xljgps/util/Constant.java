@@ -43,8 +43,8 @@ public class Constant {
     public static final String BAIDU_GPS_LOCATION_TYPE_LBS = "lbs";
     public static final String BAIDU_GPS_LOCATION_TYPE_WIFI = "wifi";
     // 由于上传给服务器的数据不能为空, 定位数据的默认值
-    public static final String BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE = "114.071044";
-    public static final String BAIDU_GPS_LOCATION_DEFAULT_LANTITUDE = "22.522705";
+    public static final String BAIDU_GPS_LOCATION_DEFAULT_LONGITUDE = "4.9E-324";   // 114.044044
+    public static final String BAIDU_GPS_LOCATION_DEFAULT_LANTITUDE = "4.9E-324";   // 22.522522
     public static final String BAIDU_GPS_LOCATION_DEFAULT_LOCTYPE = "1";    // 1: baidu map  2: gaode map
     public static final String BAIDU_GPS_LOCATION_DEFAULT_POSITIONTYPE = "lbs";
 
@@ -101,14 +101,15 @@ public class Constant {
     // 心跳服务上报的时间间隔
     public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
     // 定位服务上报的时间间隔
-    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 3 * 60 * 1000;
+    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 30 * 60 * 1000;
     // 重连服务一次连接等待时长
-    public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 30 * 1000;
-    // 重连服务休眠时长
-    public static final int RECONNCET_SOCKET_SERVICE_SLEEP = 1 * 5 * 1000;
+    public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 60 * 1000;
+    // 重连服务休眠时长,因为只有网络状态正常连接的时候才会启动重连服务, 等待2s足够
+    public static final int RECONNCET_SOCKET_SERVICE_SLEEP = 1 * 2 * 1000;
     // 开机等待多久开始上报定位信息
-    public static final int POWERON_REPORT_POSITION_SLEEP = 1 * 30 * 1000;
-
+    public static final int POWERON_REPORT_POSITION_SLEEP = 1 * 60 * 1000;
+    // 每次定时服务时间到了之后等待多久开始上报定位信息, 为了等百度定位成功后
+    public static final int BAIDU_REPORT_POSITION_SLEEP = 1 * 5 * 1000;
 
     /********************************** 改为socket通信后, 这些就没用了 ************************************/
     public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaolajiaotest/";

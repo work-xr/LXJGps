@@ -39,14 +39,8 @@ public class NetworkReceiver extends BroadcastReceiver {
                     if (info.getType() == ConnectivityManager.TYPE_WIFI) {
                         Log.d(TAG, "onReceive: NetworkInfo.State.CONNECTED info.type = TYPE_WIFI");
                     }
-
                     // 开启定位服务, 为了开机上报的定位信息能够成功
                     BaiduGpsApp.getInstance().startBaiduGps();
-
-                    // 开启定时服务, 默认每隔10分钟上报一次位置信息
-                    if (!GpsService.isServiceAlarmOn(appContext)) {
-                        GpsService.setServiceAlarm(appContext, true);
-                    }
                     // 开启sticky服务, 接收服务器下发的各种指令
                     appContext.startService(new Intent(appContext, SocketService.class));
                     return;
@@ -56,9 +50,12 @@ public class NetworkReceiver extends BroadcastReceiver {
                 if (NetworkInfo.State.DISCONNECTED == info.getState())
                 {
                     Log.d(TAG, "onReceive: NetworkInfo.State.DISCONNECTED ***************************");
+                    // 断开socket服务, 实际上无法停止service, 只能让连接, 读和写的线程停止, 连上网后再重新运行这三个线程
                     SocketService socketService = new SocketService();
                     socketService.stopSocketService();
+                    // 关闭定时定位服务
                     GpsService.setServiceAlarm(appContext, false);
+                    // 关闭定时心跳服务
                     BeatHeartService.setServiceAlarm(appContext, false);
                     return;
                 }

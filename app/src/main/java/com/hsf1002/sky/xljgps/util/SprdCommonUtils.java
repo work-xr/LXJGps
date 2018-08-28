@@ -312,26 +312,29 @@ public class SprdCommonUtils {
             String nameStr1 = SystemProperties.get(SOS_NAME_PROPERTY_1, "");
             String nameStr2 = SystemProperties.get(SOS_NAME_PROPERTY_2, "");
             String nameStr3 = SystemProperties.get(SOS_NAME_PROPERTY_3, "");
-            String defaultStr = GpsApplication.getAppContext().getResources().getString(R.string.sos_relation_number);
+            String defaultStr = "";//GpsApplication.getAppContext().getResources().getString(R.string.sos_relation_number);
 
             Log.i(TAG, "verifyPropertyNumber: nameStr1 = " + nameStr1 + ", nameStr2 = " + nameStr2 + ", nameStr3 = " + nameStr3);
 
             if (nameStr1.equals(SOS_NAME_INVALID_VALUE)) {
-                list.add(defaultStr + 1);
+                //list.add(defaultStr + 1);
+                list.add(defaultStr);
             } else {
                 list.add(nameStr1);
             }
 
             if (nameStr2.equals(SOS_NAME_INVALID_VALUE)) {
-                list.add(defaultStr + 2);
+                //list.add(defaultStr + 2);
+                list.add(defaultStr);
             } else {
                 list.add(nameStr2);
             }
 
             if (nameStr3.equals(SOS_NAME_INVALID_VALUE)) {
-                list.add(defaultStr + 3);
+                //list.add(defaultStr + 3);
+                list.add(defaultStr);
             } else {
-                list.add(nameStr3);
+                //list.add(nameStr3);
             }
         }
         else {

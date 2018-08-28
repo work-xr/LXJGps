@@ -425,7 +425,7 @@ public static final int PROP_VALUE_MAX = 91;
 ```
 睡眠二十分钟后,睡眠期间并没有上报心跳,醒了之后从直观看,是读取到了非法字符(即前4个字节不是数据长度)  
 根本原因:   
-android系统将socket服务挂起，是出于节电考虑，手机通过数据线连接电脑调试的时候，手机熄灭屏幕后，socket服务是不会被自动挂起的，似乎在调试模式下，手机不会自动进入节电模式，但当连接数据线充电的的话，手机在熄屏后还是会将socket服务挂起的; 可以通过PowerManager设置电源模式，使cpu不进入节电模式，当然会非常耗电:  
+系统添加了灭屏20分钟关闭数据业务的功能; 还有的可能是android系统将socket服务挂起，是出于节电考虑，手机通过数据线连接电脑调试的时候，手机熄灭屏幕后，socket服务是不会被自动挂起的，似乎在调试模式下，手机不会自动进入节电模式，但当连接数据线充电的的话，手机在熄屏后还是会将socket服务挂起的; 可以通过PowerManager设置电源模式，使cpu不进入节电模式，当然会非常耗电:  
 ```
 PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
@@ -434,9 +434,9 @@ wl.acquire();
 wl.release();
 ```
 解决方案:  
-找出android系统设定的在灭屏时关闭socket的时长, 把心跳频率设置在该时长以内
+灭屏20分钟不要关闭数据业务
 
-#### 问题15 Socket断开-Connection reset by peer
+#### 问题15 Socket断开-SocketException-Connection reset by peer
 ```
 08-23 21:42:33.436  2853  2888 W System.err: java.net.SocketException: recvfrom failed: ECONNRESET (Connection reset by peer)
 08-23 21:42:33.453  2853  2888 W System.err: 	at libcore.io.IoBridge.maybeThrowAfterRecvfrom(IoBridge.java:588)
@@ -456,7 +456,77 @@ wl.release();
 08-23 21:42:33.456  2853  2888 W System.err: 	at libcore.io.BlockGuardOs.recvfrom(BlockGuardOs.java:250)
 08-23 21:42:33.456  2853  2888 W System.err: 	at libcore.io.IoBridge.recvfrom(IoBridge.java:549)
 ```
-服务器端主动断开了, 客户端启动重连服务即可
+可能的原因有:
+* 服务器的并发连接数超过了其承载量，服务器会将其中一些连接关闭
+* 网络连接非常慢的时候
+* 下载大文件时，频繁请求服务器，请求的端口一直被占用
+
+#### 问题16 Socket断开-SocketException-Connection timed out
+```
+08-26 18:21:44.757  4869  4885 W System.err: java.net.SocketException: recvfrom failed: ETIMEDOUT (Connection timed out)
+08-26 18:21:44.876  4869  4885 W System.err: 	at libcore.io.IoBridge.maybeThrowAfterRecvfrom(IoBridge.java:588)
+08-26 18:21:44.876  4869  4885 W System.err: 	at libcore.io.IoBridge.recvfrom(IoBridge.java:552)
+08-26 18:21:44.877  4869  4885 W System.err: 	at java.net.PlainSocketImpl.read(PlainSocketImpl.java:481)
+08-26 18:21:44.877  4869  4885 W System.err: 	at java.net.PlainSocketImpl.-wrap0(PlainSocketImpl.java)
+08-26 18:21:44.877  4869  4885 W System.err: 	at java.net.PlainSocketImpl$PlainSocketInputStream.read(PlainSocketImpl.java:237)
+08-26 18:21:44.879  4869  4885 W System.err: 	at java.io.DataInputStream.read(DataInputStream.java:63)
+08-26 18:21:44.880  4869  4885 W System.err: 	at java.io.InputStream.read(InputStream.java:162)
+08-26 18:21:44.880  4869  4885 W System.err: 	at java.io.DataInputStream.read(DataInputStream.java:59)
+08-26 18:21:44.880  4869  4885 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService.getParseDataString(SocketService.java:461)
+08-26 18:21:44.880  4869  4885 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService.access$1400(SocketService.java:66)
+08-26 18:21:44.880  4869  4885 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService$ReadServerThread.run(SocketService.java:837)
+08-26 18:21:44.884  4869  4885 W System.err: Caused by: android.system.ErrnoException: recvfrom failed: ETIMEDOUT (Connection timed out)
+08-26 18:21:44.884  4869  4885 W System.err: 	at libcore.io.Posix.recvfromBytes(Native Method)
+08-26 18:21:44.884  4869  4885 W System.err: 	at libcore.io.Posix.recvfrom(Posix.java:189)
+08-26 18:21:44.885  4869  4885 W System.err: 	at libcore.io.BlockGuardOs.recvfrom(BlockGuardOs.java:250)
+08-26 18:21:44.885  4869  4885 W System.err: 	at libcore.io.IoBridge.recvfrom(IoBridge.java:549)
+```
+可能的原因有:
+* 网络连接负载过重
+* 服务器负载过重
+* 连接会话设置了不合适的超时参数
+* Android4.4以及之前的版本, 需检查是否关联了DNS双缓存
+
+#### 问题17 Socket断开-ConnectException-Connection timed out
+```
+08-27 00:12:37.664  4869  9717 W System.err: java.net.ConnectException: failed to connect to healthdata.4000300659.com/117.29.170.58 (port 12004): connect failed: ETIMEDOUT (Connection timed out)
+08-27 00:12:37.859  4869  9717 W System.err: 	at libcore.io.IoBridge.connect(IoBridge.java:124)
+08-27 00:12:37.860  4869  9717 W System.err: 	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:183)
+08-27 00:12:37.860  4869  9717 W System.err: 	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:163)
+08-27 00:12:37.860  4869  9717 W System.err: 	at java.net.Socket.startupSocket(Socket.java:592)
+08-27 00:12:37.860  4869  9717 W System.err: 	at java.net.Socket.tryAllAddresses(Socket.java:128)
+08-27 00:12:37.860  4869  9717 W System.err: 	at java.net.Socket.<init>(Socket.java:178)
+08-27 00:12:37.860  4869  9717 W System.err: 	at java.net.Socket.<init>(Socket.java:150)
+08-27 00:12:37.860  4869  9717 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService$ConnectServerThread.run(SocketService.java:202)
+08-27 00:12:37.861  4869  9717 W System.err: Caused by: android.system.ErrnoException: connect failed: ETIMEDOUT (Connection timed out)
+08-27 00:12:37.865  4869  9717 W System.err: 	at libcore.io.Posix.connect(Native Method)
+08-27 00:12:37.865  4869  9717 W System.err: 	at libcore.io.BlockGuardOs.connect(BlockGuardOs.java:111)
+08-27 00:12:37.865  4869  9717 W System.err: 	at libcore.io.IoBridge.connectErrno(IoBridge.java:137)
+08-27 00:12:37.865  4869  9717 W System.err: 	at libcore.io.IoBridge.connect(IoBridge.java:122)
+```
+没有网络的时候去连socket会有此异常
+
+#### 问题18 Socket断开-SocketException-sendto failed: EPIPE (Broken pipe)
+```
+08-28 01:30:00.261  2804  3153 W System.err: java.net.SocketException: sendto failed: EPIPE (Broken pipe)
+08-28 01:30:00.262  2804  3153 W System.err: 	at libcore.io.IoBridge.maybeThrowAfterSendto(IoBridge.java:542)
+08-28 01:30:00.262  2804  3153 W System.err: 	at libcore.io.IoBridge.sendto(IoBridge.java:511)
+08-28 01:30:00.262  2804  3153 W System.err: 	at java.net.PlainSocketImpl.write(PlainSocketImpl.java:500)
+08-28 01:30:00.262  2804  3153 W System.err: 	at java.net.PlainSocketImpl.-wrap1(PlainSocketImpl.java)
+08-28 01:30:00.262  2804  3153 W System.err: 	at java.net.PlainSocketImpl$PlainSocketOutputStream.write(PlainSocketImpl.java:266)
+08-28 01:30:00.262  2804  3153 W System.err: 	at java.io.OutputStream.write(OutputStream.java:82)
+08-28 01:30:00.262  2804  3153 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService$WriteDataThread.run(SocketService.java:635)
+08-28 01:30:00.262  2804  3153 W System.err: 	at com.hsf1002.sky.xljgps.service.SocketService.writeDataToServer(SocketService.java:672)
+08-28 01:30:00.263  2804  3153 W System.err: 	at com.hsf1002.sky.xljgps.model.SocketModel$1.run(SocketModel.java:99)
+08-28 01:30:00.263  2804  3153 W System.err: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1113)
+08-28 01:30:00.263  2804  3153 W System.err: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:588)
+08-28 01:30:00.263  2804  3153 W System.err: 	at java.lang.Thread.run(Thread.java:818)
+08-28 01:30:00.263  2804  3153 W System.err: Caused by: android.system.ErrnoException: sendto failed: EPIPE (Broken pipe)
+08-28 01:30:00.263  2804  3153 W System.err: 	at libcore.io.Posix.sendtoBytes(Native Method)
+08-28 01:30:00.263  2804  3153 W System.err: 	at libcore.io.Posix.sendto(Posix.java:211)
+08-28 01:30:00.263  2804  3153 W System.err: 	at libcore.io.BlockGuardOs.sendto(BlockGuardOs.java:278)
+08-28 01:30:00.264  2804  3153 W System.err: 	at libcore.io.IoBridge.sendto(IoBridge.java:509)
+```
 
 ### HTTP 协议基础
 #### GET请求的特点:
