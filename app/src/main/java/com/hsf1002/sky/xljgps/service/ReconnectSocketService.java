@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -14,6 +15,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_INTERVAL;
 import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_SLEEP;
 import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
@@ -124,21 +126,20 @@ public class ReconnectSocketService extends Service {
     public static void setServiceAlarm(Context context, boolean isOn)
     {
         Intent intent = new Intent(context, ReconnectSocketService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
+        PendingIntent pi = PendingIntent.getService(context, 0, intent, FLAG_UPDATE_CURRENT);
 
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        Log.e(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
 
         if (isOn)
         {
             // 为啥要在创建线程池, 就开始重连? 因为有时候onStartCommand不会被调用,有时候又连续调用两次
             createThreadPool();
-            Log.i(TAG, "setServiceAlarm open alarm : startServiceInterval = " + startServiceInterval);
-            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);
+            manager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.currentThreadTimeMillis(), startServiceInterval, pi);
             reconnectSocket();
         }
         else
         {
-            Log.i(TAG, "setServiceAlarm close alarm : ");
             manager.cancel(pi);
             pi.cancel();
             sConnectedCount = 0;

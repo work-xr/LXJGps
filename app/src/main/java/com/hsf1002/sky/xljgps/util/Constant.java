@@ -101,7 +101,7 @@ public class Constant {
     // 心跳服务上报的时间间隔
     public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
     // 定位服务上报的时间间隔
-    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 6 * 60 * 1000;
+    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 30 * 60 * 1000;
     // 重连服务一次连接等待时长
     public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 60 * 1000;
     // 重连服务休眠时长,因为只有网络状态正常连接的时候才会启动重连服务, 等待2s足够

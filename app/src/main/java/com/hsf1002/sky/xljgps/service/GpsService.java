@@ -14,6 +14,7 @@ import com.hsf1002.sky.xljgps.app.GpsApplication;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.model.SocketModel;
 
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SERVICE_SCAN_INTERVAL;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
@@ -89,10 +90,10 @@ public class GpsService extends Service {
 */
         sContext = GpsApplication.getAppContext();
         Intent intent = new Intent(context, GpsService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
+        PendingIntent pi = PendingIntent.getService(context, 0, intent, FLAG_UPDATE_CURRENT);
 
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
+        Log.e(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
 
         if (isOn)
         {

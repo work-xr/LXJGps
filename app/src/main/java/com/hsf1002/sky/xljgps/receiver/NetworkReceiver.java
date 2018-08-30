@@ -59,9 +59,9 @@ public class NetworkReceiver extends BroadcastReceiver {
                     // 关闭定时心跳服务
                     BeatHeartService.setServiceAlarm(appContext, false);
                     // 如果重连服务开启了, 关闭
-                    if (ReconnectSocketService.isServiceAlarmOn(appContext)) {
+                    //if (ReconnectSocketService.isServiceAlarmOn(appContext)) {
                         ReconnectSocketService.setServiceAlarm(appContext, false);
-                    }
+                    //}
                     return;
                 }
             }

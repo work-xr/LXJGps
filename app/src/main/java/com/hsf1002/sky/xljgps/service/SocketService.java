@@ -218,7 +218,7 @@ public class SocketService extends Service {
             if (sSocket == null) {
                 if (!sReconnectFlag)
                 {
-                    Log.i(TAG, "ConnectServerThread: start first enter, do not sleep*****************");
+                    Log.i(TAG, "ConnectServerThread: start first enter, do not sleep****************");
                     // 如果是网络断开后的连接, 加点延迟10s, 如果是服务器端断开重新连接, 直接连
                     /*try {
                         Thread.sleep(SOCKET_SERVER_CONNECT_WAIT_DURATION);
@@ -245,28 +245,26 @@ public class SocketService extends Service {
                 finally {
                     if (sSocket != null && sSocket.isConnected()) {
                         Log.i(TAG, "ConnectServerThread: success^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+
+                        // 如果没有开启心跳定时服务, 开启
+                        //if (!BeatHeartService.isServiceAlarmOn(sContext)) {
+                            BeatHeartService.setServiceAlarm(sContext, true);
+                        //}
+
+                        // 如果没有开启定位定时服务, 开启
+                        //if (!GpsService.isServiceAlarmOn(sContext)) {
+                            GpsService.setServiceAlarm(sContext, true);
+                        //}
+
+                        // 如果开启了重连定时服务, 关闭
+                        //if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
+                            ReconnectSocketService.setServiceAlarm(sContext, false);
+                        //}
+
                         // 让读的线程开始运行
                         Log.i(TAG, "ConnectServerThread ReadThread isRunning = " + isRunning);
                         if (!isRunning) {
                             isRunning = true;
-                            if (!sReadServerThread.isAlive()) {
-                                sReadServerThread.run();
-                            }
-                        }
-
-                        // 如果没有开启心跳定时服务, 开启
-                        if (!BeatHeartService.isServiceAlarmOn(sContext)) {
-                            BeatHeartService.setServiceAlarm(sContext, true);
-                        }
-
-                        // 如果没有开启定位定时服务, 开启
-                        if (!GpsService.isServiceAlarmOn(sContext)) {
-                            GpsService.setServiceAlarm(sContext, true);
-                        }
-
-                        // 如果开启了重连定时服务, 关闭
-                        if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
-                            ReconnectSocketService.setServiceAlarm(sContext, false);
                         }
 
                         if (sIsReadThreadWaited) {
@@ -612,23 +610,25 @@ public class SocketService extends Service {
             if (isSocketConnected())
             {
                 Log.i(TAG, tag + " network available, socket service already started");
+                ReconnectSocketService.setServiceAlarm(sContext, false);
                 // 如果重连服务已经开启, 关闭
-                if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
+                /*if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
                     Log.i(TAG, tag + " network available, reconnect service already started, stop it");
                     ReconnectSocketService.setServiceAlarm(sContext, false);
                 } else {
                     Log.i(TAG, tag + " network available, reconnect service did not start, ok");
-                }
+                }*/
             }
             else {
                 // 如果重连服务已经关闭, 开启
                 Log.i(TAG, tag + " network available, socket service stopped");
-                if (!ReconnectSocketService.isServiceAlarmOn(sContext)) {
+                ReconnectSocketService.setServiceAlarm(sContext, true);
+                /*if (!ReconnectSocketService.isServiceAlarmOn(sContext)) {
                     Log.i(TAG, tag + " network available, reconnect service did not start, start it");
                     ReconnectSocketService.setServiceAlarm(sContext, true);
                 } else {
                     Log.i(TAG, tag + " network available, reconnect service already started, ok");
-                }
+                }*/
             }
         }
         else

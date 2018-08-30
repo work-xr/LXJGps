@@ -12,6 +12,8 @@ import android.util.Log;
 
 import com.hsf1002.sky.xljgps.model.SocketModel;
 
+import static android.app.PendingIntent.FLAG_NO_CREATE;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.hsf1002.sky.xljgps.util.Constant.BEATHEART_SERVICE_INTERVAL;
 
 /**
@@ -78,14 +80,15 @@ public class BeatHeartService extends Service {
     public static void setServiceAlarm(Context context, boolean isOn)
     {
         Intent intent = new Intent(context, BeatHeartService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
+        PendingIntent pi = PendingIntent.getService(context, 0, intent, FLAG_UPDATE_CURRENT);
 
         AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Log.i(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
+        Log.e(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
 
         if (isOn)
         {
             manager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.currentThreadTimeMillis(), startServiceInterval, pi);
+            //manager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.currentThreadTimeMillis(), pi);
         }
         else
         {
@@ -107,9 +110,11 @@ public class BeatHeartService extends Service {
     public static boolean isServiceAlarmOn(Context context)
     {
         Intent intent = new Intent(context, BeatHeartService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
+        PendingIntent pi = PendingIntent.getService(context, 0, intent, FLAG_NO_CREATE);
+        boolean result = (pi != null);
+        Log.i(TAG, "isServiceAlarmOn: result = " + result);
 
-        return pi != null;
+        return result;
     }
 
     /**
