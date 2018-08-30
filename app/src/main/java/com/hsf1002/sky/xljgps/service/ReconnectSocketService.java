@@ -130,7 +130,7 @@ public class ReconnectSocketService extends Service {
 
         if (isOn)
         {
-            // 为啥要在创建线程池, 就开始重连? 因为有时候onStartCommand不会被调用
+            // 为啥要在创建线程池, 就开始重连? 因为有时候onStartCommand不会被调用,有时候又连续调用两次
             createThreadPool();
             Log.i(TAG, "setServiceAlarm open alarm : startServiceInterval = " + startServiceInterval);
             manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), startServiceInterval, pi);

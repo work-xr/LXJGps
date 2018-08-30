@@ -74,20 +74,21 @@ public class SocketService extends Service {
     private DataInputStream dis = null;
 
     // 用于连接socket, 以及断开时重新连接
-    private static Thread connectServerThread;
+    private static Thread sConnectServerThread;
     // 用于从服务器端读取数据, 解析后再返回数据到服务器端
-    private static Thread readServerThread;
+    private static Thread sReadServerThread;
     // 用于给服务器端写数据
-    private static Thread writeServerThread;
-    // 用于保存从其他地方传递过来的数据, 然后在线程中写到服务器端
-    private static String gsonString = null;
-    // 用于标记这是个重连服务, 而不是第一次连接
-    private static boolean reconnectFlag = false;
+    private static Thread sWriteServerThread;
+    // 用于保存从其他地方传递过来的数据, 然后写到服务器端
+    private static String sGsonString = null;
+    // 用于标记这是个重连服务(网络正常情况下出现的各种异常的时候才会启动重连服务), 而不是开机第一次连接或断开后的重连
+    private static boolean sReconnectFlag = false;
     // 如果连接断开了, 在写数据前加锁, 连接成功后解锁,保证当连接重新连上后定时数据还可以上传
     //private Object lockWaitConntected = new Object();
+    // 用于标记读的线程是否在运行, 置为false即停止, 待socket重新连接上之后再重新运行
     private volatile boolean isRunning = true;
     // 读的线程是否进入了wait阻塞状态
-    private static boolean isReadThreadWaited = false;
+    private static boolean sIsReadThreadWaited = false;
 
 
     @Override
@@ -108,25 +109,25 @@ public class SocketService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-27 下午7:53
-    *  desc:
+    *  desc:    该服务调用onCreate的时候调用此函数, 不会停止运行
     *  param:
     *  return:
     */
     private void startThreads()
     {
-        if (connectServerThread == null) {
-            connectServerThread = new ConnectServerThread();
-            connectServerThread.start();
+        if (sConnectServerThread == null) {
+            sConnectServerThread = new ConnectServerThread();
+            sConnectServerThread.start();
         }
 
-        if (readServerThread == null) {
-            readServerThread = new ReadServerThread();
-            readServerThread.start();
+        if (sReadServerThread == null) {
+            sReadServerThread = new ReadServerThread();
+            sReadServerThread.start();
         }
 
-        if (writeServerThread == null) {
-            writeServerThread = new WriteDataThread();
-            writeServerThread.start();
+        if (sWriteServerThread == null) {
+            sWriteServerThread = new WriteDataThread();
+            sWriteServerThread.start();
         }
     }
 
@@ -134,6 +135,7 @@ public class SocketService extends Service {
      *  author:  hefeng
      *  created: 18-8-27 下午7:53
      *  desc:   断开网络重新连接的时候, 重新运行三个线程
+     *          由于 onStartCommand 的调用是混乱的, 有时候不调用, 有时候连续调用多次
      *  param:
      *  return:
      */
@@ -147,21 +149,21 @@ public class SocketService extends Service {
     {
         @Override
         public void run() {
-            if (connectServerThread != null) {
-                if (!connectServerThread.isAlive()) {
-                    connectServerThread.run();
+            if (sConnectServerThread != null) {
+                if (!sConnectServerThread.isAlive()) {
+                    sConnectServerThread.run();
                 }
             }
 
-            if (readServerThread != null) {
-                if (!readServerThread.isAlive()) {
-                    readServerThread.run();
+            if (sReadServerThread != null) {
+                if (!sReadServerThread.isAlive()) {
+                    sReadServerThread.run();
                 }
             }
 
-            if (writeServerThread != null) {
-                if (!writeServerThread.isAlive()) {
-                    writeServerThread.run();
+            if (sWriteServerThread != null) {
+                if (!sWriteServerThread.isAlive()) {
+                    sWriteServerThread.run();
                 }
             }
         }
@@ -178,35 +180,33 @@ public class SocketService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: start service...............");
         runThreads();
-        return super.onStartCommand(intent, flags, startId); //START_STICKY
+        return START_STICKY;
     }
 
     /**
     *  author:  hefeng
     *  created: 18-8-3 上午10:00
-    *  desc:    重新连接socket
+    *  desc:    重新连接socket, 供重连服务ReconnectSocketService调用 
     *  param:
     *  return:
     */
     public void reconnectSocketServer()
     {
-        reconnectFlag = true;
-
+        sReconnectFlag = true;
         Log.i(TAG, "reconnectSocketServer: start............................................");
-
-        if (connectServerThread != null) {
-            if (!connectServerThread.isAlive()) {
-                connectServerThread.run();
+        if (sConnectServerThread != null) {
+            if (!sConnectServerThread.isAlive()) {
+                sConnectServerThread.run();
             }
         }
-
-        reconnectFlag = false;
+        Log.i(TAG, "reconnectSocketServer: end..............................................");
+        sReconnectFlag = false;
     }
 
     /**
     *  author:  hefeng
     *  created: 18-8-13 下午7:50
-    *  desc:    连接socket的线程, 连接成功后, 开启心跳服务, 等待一分钟为了让网络准备好
+    *  desc:    连接socket的线程, 连接成功后, 开启心跳服务
     *  param:
     *  return:
     */
@@ -216,38 +216,44 @@ public class SocketService extends Service {
         public void run() {
             Log.i(TAG, "ConnectServerThread: start******************************************");
             if (sSocket == null) {
-                if (!reconnectFlag)
+                if (!sReconnectFlag)
                 {
-                    Log.i(TAG, "ConnectServerThread: start first enter, sleep 10 seconds ***********");
+                    Log.i(TAG, "ConnectServerThread: start first enter, do not sleep*****************");
                     // 如果是网络断开后的连接, 加点延迟10s, 如果是服务器端断开重新连接, 直接连
-                    try {
+                    /*try {
                         Thread.sleep(SOCKET_SERVER_CONNECT_WAIT_DURATION);
                     }
                     catch (InterruptedException e)
                     {
                         e.printStackTrace();
                         return;
-                    }
+                    }*/
+                }
+                else
+                {
+                    Log.i(TAG, "ConnectServerThread reconnect start*************************");
                 }
                 try {
                     sSocket = new Socket(SOCKET_SERVER_ADDRESS_URL, SOCKET_SERVER_ADDRESS_PORT);
                     sSocket.setKeepAlive(true);
-                    sSocket.setSoTimeout(SOCKET_SERVER_TIMEOUT);
+                    //sSocket.setSoTimeout(SOCKET_SERVER_TIMEOUT);
                 }
                 catch (IOException e) {
-                    e.printStackTrace();
-                    if (e instanceof SocketTimeoutException) {
-                        disConnectSocketServer();
-                    } else if (e instanceof NoRouteToHostException) {
-                        stopSelf();
-                    } else if (e instanceof ConnectException) {
-                        stopSelf();
-                    }
+                    handleException(e, "ConnectServerThread: ");
                     return;
                 }
                 finally {
                     if (sSocket != null && sSocket.isConnected()) {
                         Log.i(TAG, "ConnectServerThread: success^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                        // 让读的线程开始运行
+                        Log.i(TAG, "ConnectServerThread ReadThread isRunning = " + isRunning);
+                        if (!isRunning) {
+                            isRunning = true;
+                            if (!sReadServerThread.isAlive()) {
+                                sReadServerThread.run();
+                            }
+                        }
+
                         // 如果没有开启心跳定时服务, 开启
                         if (!BeatHeartService.isServiceAlarmOn(sContext)) {
                             BeatHeartService.setServiceAlarm(sContext, true);
@@ -263,22 +269,23 @@ public class SocketService extends Service {
                             ReconnectSocketService.setServiceAlarm(sContext, false);
                         }
 
-                        if (isReadThreadWaited) {
+                        if (sIsReadThreadWaited) {
                             Log.i(TAG, "ConnectServerThread: lockReadWaitConntected notify*************");
+                            // 如果上报信息如心跳的时候,socket断开了,就阻塞在那里, 在这里激活
                             /*synchronized (lockReadWaitConntected) {
-                                isReadThreadWaited = false;
+                                sIsReadThreadWaited = false;
                                 lockReadWaitConntected.notify();
                             }*/
                         }
-                        // 让读的线程开始运行
-                        isRunning = true;
                     }
-                    else {
-                        Log.i(TAG, "ConnectServerThread: failed, ready to continue*********************");
+                    else
+                    {
+                        Log.i(TAG, "ConnectServerThread: failed, ready to connect again*************");
+                        startReconnect("ConnectServerThread:");
                     }
                 }
             }
-            Log.i(TAG, "ConnectServerThread: stopped****************************************");
+            Log.i(TAG, "ConnectServerThread: stopped***************************************");
         }
     }
 
@@ -294,8 +301,8 @@ public class SocketService extends Service {
      08-21 14:58:58.959  3057  3072 I SocketService: disConnectSocketServer: start*****************************************************************
 
      0823: 目前的socket断开原因有三种,
-     一种是服务器主动断开, 报错: Connection reset by peer;
-     一种是客户端断开, 报错: Connection timed out;
+     一种是服务器主动断开, 报错: Connection reset by peer
+     一种是客户端断开, 报错: Connection timed out
      一种是(USB切换或息屏时导致Socket端口关闭, 这个错误的可能性原因比较多)断开, 报错: java.net.SocketException: sendto failed: EPIPE (Broken pipe)
     *  return:
     */
@@ -307,15 +314,19 @@ public class SocketService extends Service {
         {
             if (is != null) {
                 is.close();
+                is = null;
             }
             if (dis != null) {
                 dis.close();
+                dis = null;
             }
             if (os != null) {
                 os.close();
+                os = null;
             }
             if (br != null) {
                 br.close();
+                br = null;
             }
             if (sSocket != null) {
                 sSocket.close();
@@ -334,27 +345,29 @@ public class SocketService extends Service {
     *  author:  hefeng
     *  created: 18-8-25 下午12:50
     *  desc:   确保连接, 读, 写三个线程都已经正常退出即可, 因为service无法停止
+     *     当网络断开的时候调用, 用于让三个线程都停止, 确保网络连上的时候调用 onStartCommand的时候
+     *     三个线程重新开始运行能够正常
     *  param:
     *  return:
     */
     public void stopSocketService()
     {
         Log.i(TAG, "stopSocketService: ******************************************************");
-        if (writeServerThread != null) {
+        if (sWriteServerThread != null) {
             try {
-                writeServerThread.join();
+                sWriteServerThread.join();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        if (readServerThread != null) {
+        if (sReadServerThread != null) {
             // 在这赋值没有用, 主线程写, 在子线程读不到
             //isRunning = false;
-            Log.i(TAG, "stopSocketService: readServerThread, isRunning = " + isRunning);
+            Log.i(TAG, "stopSocketService: sReadServerThread, isRunning = " + isRunning);
 
             try {
-                readServerThread.join();
+                sReadServerThread.join();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -402,54 +415,6 @@ public class SocketService extends Service {
 
         return isConnected;// confirmSocketConnected();
     }
-
-    /**
-    *  author:  hefeng
-    *  created: 18-8-11 上午11:27
-    *  desc:  判断Socket是否处于连接状态, 如果处于连接状态, 则返回true, 如果处于断开状态, 则开启重连服务
-    *  param:
-    *  return:
-    */
-    @Deprecated
-    private boolean confirmSocketConnected()
-    {
-        boolean disconnected = false;
-
-        if (sSocket == null)
-        {
-            disconnected = true;
-        }
-        boolean serviceStarted = ReconnectSocketService.isServiceAlarmOn(sContext);
-
-        Log.i(TAG, "confirmSocketConnected: disconnected = " + disconnected + ", serviceStarted = " + serviceStarted);
-
-        // 如果socket连上了, 且重连服务已经开启, 则关闭
-        if (!disconnected && serviceStarted) {
-            ReconnectSocketService.setServiceAlarm(sContext, false);
-            Log.i(TAG, "confirmSocketConnected: socket already connected, stopped reconncect service**********************************");
-            return true;
-        }
-        // 如果socket断开了, 且重连服务没有开启, 则开启
-        else if (disconnected && !serviceStarted) {
-            ReconnectSocketService.setServiceAlarm(sContext, true);
-            Log.i(TAG, "confirmSocketConnected: start to reconncect service***********************************************************");
-        }
-        // 如果socket连上了, 且重连服务已经断开或 socket断开了, 且重连服务已经开启, 不处理
-        else
-        {
-            if (!disconnected)
-            {
-                Log.i(TAG, "confirmSocketConnected: socket already connected, continue**************************************************");
-            }
-            else
-            {
-                //Log.i(TAG, "confirmSocketConnected:  connected socket failed, continue************************************************");
-            }
-        }
-
-        return !disconnected;
-    }
-
 
     /**
     *  author:  hefeng
@@ -506,14 +471,16 @@ public class SocketService extends Service {
     *  param:  getParseDataString: sizeStr = \C0\80\C0\80\C0\80\C0\80
     *  return:
     */
-    private String getParseDataString(DataInputStream dis)
+    private String getParseDataString(DataInputStream dis) throws IOException
     {
         String dencodedStr = null;
         // 开始的4个字节是数据总长度
         byte[] sizeBytes = new byte[4];
         int size = 0;
 
-        try {
+        // 不在此处抛出异常, 统一在 ReadServerThread 中处理
+        //try
+        {
             dis.read(sizeBytes);
             String sizeStr = new String(sizeBytes);
             Log.i(TAG, "getParseDataString: sizeStr = " + sizeStr + ", dis.available = " + dis.available());
@@ -523,20 +490,7 @@ public class SocketService extends Service {
             {
                 Log.i(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected!");
                 disConnectSocketServer();
-
-                if (NetworkUtils.isNetworkAvailable())
-                {
-                    // 如果服务器断开了, 没有开启重连服务时, 开启
-                    if (!ReconnectSocketService.isServiceAlarmOn(sContext)) {
-                        ReconnectSocketService.setServiceAlarm(sContext, true);
-                    }
-                }
-                // 如果网络断开了, 不开启重连服务
-                else
-                {
-                    // 直接停止读线程即可
-                }
-
+                startReconnect("");
                 return null;
             }
 
@@ -557,7 +511,7 @@ public class SocketService extends Service {
             dencodedStr = new String(dataBytes);
             dencodedStr = URLDecoder.decode(dencodedStr, SOCKET_ENCODE_TYPE);
         }
-        catch (SocketTimeoutException e)
+        /*catch (SocketTimeoutException e)
         {
             e.printStackTrace();
         }
@@ -569,7 +523,7 @@ public class SocketService extends Service {
         catch (IOException e)
         {
             e.printStackTrace();
-        }
+        }*/
 
         Log.i(TAG, "getParseDataString: decodedStr = " + dencodedStr);
 
@@ -606,6 +560,82 @@ public class SocketService extends Service {
 
         return completedStr;
     }
+    
+    /**
+    *  author:  hefeng
+    *  created: 18-8-29 下午7:06
+    *  desc:       
+    *  param:   
+    *  return:  
+    */
+    private void handleException(Exception e, String tag)
+    {
+        e.printStackTrace();
+        
+        if (e instanceof SocketTimeoutException) 
+        {
+            Log.i(TAG, tag + " SocketTimeoutException********************");
+        } 
+        else if (e instanceof NoRouteToHostException)
+        {
+            Log.i(TAG, tag + " NoRouteToHostException********************");
+        }
+        else if (e instanceof ConnectException)
+        {
+            Log.i(TAG, tag + " ConnectException**************************");
+        }
+        else if (e instanceof SocketException) 
+        {
+            Log.i(TAG, tag + " SocketException***************************");
+        }
+        else
+        {
+            Log.i(TAG, tag + " Other IOException*************************");
+        }
+        disConnectSocketServer();
+        startReconnect(tag);
+    }
+    
+    /**
+    *  author:  hefeng
+    *  created: 18-8-29 下午7:17
+    *  desc:    如果网络断开了, 不开启重连服务, 网络连上时, 才试图去连
+     *          如果网络正常 才去重连
+     *  param:
+    *  return:  
+    */
+    private void startReconnect(String tag)
+    {
+        if (NetworkUtils.isNetworkAvailable())
+        {
+            Log.i(TAG, tag + " network available, start to reconnect");
+            if (isSocketConnected())
+            {
+                Log.i(TAG, tag + " network available, socket service already started");
+                // 如果重连服务已经开启, 关闭
+                if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
+                    Log.i(TAG, tag + " network available, reconnect service already started, stop it");
+                    ReconnectSocketService.setServiceAlarm(sContext, false);
+                } else {
+                    Log.i(TAG, tag + " network available, reconnect service did not start, ok");
+                }
+            }
+            else {
+                // 如果重连服务已经关闭, 开启
+                Log.i(TAG, tag + " network available, socket service stopped");
+                if (!ReconnectSocketService.isServiceAlarmOn(sContext)) {
+                    Log.i(TAG, tag + " network available, reconnect service did not start, start it");
+                    ReconnectSocketService.setServiceAlarm(sContext, true);
+                } else {
+                    Log.i(TAG, tag + " network available, reconnect service already started, ok");
+                }
+            }
+        }
+        else
+        {
+            Log.i(TAG, tag + " network is not available, waiting");
+        }
+    }
 
     /**
     *  author:  hefeng
@@ -623,7 +653,7 @@ public class SocketService extends Service {
             // 0. 先等待socket连接成功, 再进行写操作
             waitConnectThread();
             Log.i(TAG, "WriteDataThread: start..............................................");
-            // 如果断开了, 就阻塞在这里
+            // 如果断开了, 就阻塞在这里, 直到重新连接成功
             /*if (!WriteDataThread())
             {
 
@@ -640,12 +670,11 @@ public class SocketService extends Service {
 
             }*/
 
-            // 直到重新连接成功
             if (isSocketConnected())
             {
                 try {
                     // 1 将完整数据进行编码(发送的数据之前4个字节要添加数据的长度)
-                    String completedStr = getCompletedString(gsonString);
+                    String completedStr = getCompletedString(sGsonString);
 
                     // 2. 打开输出流, 将数据写入
                     if (!TextUtils.isEmpty(completedStr)) {
@@ -663,35 +692,50 @@ public class SocketService extends Service {
                     }
                     // 3. 对服务器返回的数据进行读取, 不能在此处处理, 否则可能被读的线程读到数据
                 }
-                catch (IOException e)
+                // 插上USB线会导致这个异常
+                /*catch (SocketException e)
                 {
                     e.printStackTrace();
                 }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }*/
+                // java.net.SocketException: sendto failed: EPIPE (Broken pipe)                 Caused by: android.system.ErrnoException: sendto failed: EPIPE (Broken pipe)
+                // java.net.SocketException: sendto failed: ETIMEDOUT (Connection timed out)    Caused by: android.system.ErrnoException: sendto failed: ETIMEDOUT (Connection timed out)
+                catch (IOException e)
+                {
+                    handleException(e, "WriteDataThread:");
+                }
             }
-            Log.i(TAG, "WriteDataThread: thread stopped, ready..............................");
+            else
+            {
+                startReconnect("WriteDataThread:");
+            }
+            Log.i(TAG, "WriteDataThread: thread stopped, ready to run again.................");
         }
     }
 
     /**
     *  author:  hefeng
     *  created: 18-8-8 下午1:26
-    *  desc:    其他类会通过此接口, 将开机信息, 定位信息 上传到服务器
+    *  desc:    其他类会通过此接口, 将开机信息, 定位信息, SOS信息, 亲情号码和紧急号码 上传到服务器
     *  param:
     *  return:
     */
     public void writeDataToServer(final String data)
     {
-        gsonString = data;
+        sGsonString = data;
 
-        Log.i(TAG, "writeDataToServer: prepared.........................................");
+        Log.i(TAG, "writeDataToServer: prepared to write with gson .........................");
 
-        if (writeServerThread != null ) {
-            //Log.i(TAG, "writeDataToServer: isAlive = " + writeServerThread.isAlive());
-            //Log.i(TAG, "writeDataToServer: isInterrupted = " + writeServerThread.isInterrupted());
-            writeServerThread.run();
+        if (sWriteServerThread != null ) {
+            if (!sWriteServerThread.isAlive()) {
+                sWriteServerThread.run();
+            }
         }
 
-        gsonString = null;
+        sGsonString = null;
     }
 
     /**
@@ -874,10 +918,10 @@ public class SocketService extends Service {
     *  param:
     *  return:
     */
-    public void waitConnectThread()
+    private void waitConnectThread()
     {
         try {
-            connectServerThread.join();
+            sConnectServerThread.join();
         }
         catch (InterruptedException e)
         {
@@ -896,19 +940,17 @@ public class SocketService extends Service {
     {
         @Override
         public void run(){
-            Log.i(TAG, "ReadServerThread: thread start......................................");
+            Log.i(TAG, "ReadServerThread: thread start, isRunning = " + isRunning + ".......");
 
             while (isRunning)
             {
-                long startTime = System.currentTimeMillis();
-                Log.i(TAG, "ReadServerThread: isRunning = " + isRunning);
                 // 0. 先等待socket连接成功, 再进行读写操作
                 waitConnectThread();
 
                 if (isSocketConnected()) {
                     try {
                         // 1. 打开输入流, 从服务器端接收数据
-                        Log.i(TAG, "ReadServerThread: waiting for server send data.....................blocked");
+                        Log.i(TAG, "ReadServerThread: waiting for server send data.............blocked");
                         is = sSocket.getInputStream();
                         // java.net.SocketException: recvfrom failed: ECONNRESET (Connection reset by peer)
                         dis = new DataInputStream(is);
@@ -947,12 +989,14 @@ public class SocketService extends Service {
                         }
                         else
                         {
-                            Log.i(TAG, "ReadServerThread: read from server empty!");
+                            Log.i(TAG, "ReadServerThread: data empty, no need to send!");
                         }
 
                         Thread.sleep(100);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    }
+                    catch (IOException e)
+                    {
+                        handleException(e, "ReadServerThread:");
                     }
                     catch (InterruptedException e)
                     {
@@ -965,16 +1009,18 @@ public class SocketService extends Service {
                     Log.i(TAG, "ReadServerThread: connected to server failed, lockReadWaitConntected waiting...... isRunning = " + isRunning);
                     /*synchronized (lockReadWaitConntected) {
                         try {
-                            isReadThreadWaited = true;
+                            sIsReadThreadWaited = true;
                             lockReadWaitConntected.wait();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }*/
+
+                    startReconnect("ReadServerThread:");
                 }
             }
 
-            Log.i(TAG, "ReadServerThread: thread stopped, ready to connect..................");
+            Log.i(TAG, "ReadServerThread: thread stopped, ready to run again................");
         }
     }
 

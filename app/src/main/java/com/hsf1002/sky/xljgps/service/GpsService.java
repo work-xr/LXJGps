@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -96,7 +97,7 @@ public class GpsService extends Service {
         if (isOn)
         {
             // 刚开机, 刚开启定时定位服务的第一次, 不上报定位信息, 30分钟后再上报
-            manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + startServiceInterval, startServiceInterval, pi);
+            manager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.currentThreadTimeMillis() + startServiceInterval, startServiceInterval, pi);
             //manager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pi);
         }
         else

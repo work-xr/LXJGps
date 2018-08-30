@@ -70,7 +70,7 @@ public class Constant {
     // 给SOS发送设置紧急呼叫号码的广播
     public static final String ACTION_SET_RELATION_NUMBER = "intent.action.SET_RELATION_NUMBER";
     public static final String SET_RELATION_NUMBER = "com.hsf1002.sky.xljgps.setrelationnumber";
-    // 给SOS发送广播,去给亲情号码发送短信
+    // 给SOS发送广播,去给亲情号码发送短信, 通报老人已经超出电子围栏
     public static final String ACTION_SOS_SEND_MSG = "intent.action.SOS_SEND_MSG";
 
     // 返回给服务器的数据参数, 0表示失败, 1表示成功
@@ -92,7 +92,7 @@ public class Constant {
     // 服务器端socket的地址
     public static final String SOCKET_SERVER_ADDRESS_URL = "healthdata.4000300659.com";
     // 服务器端socket的端口
-    public static final int SOCKET_SERVER_ADDRESS_PORT = 12004;
+    public static final int SOCKET_SERVER_ADDRESS_PORT = 12005;// debug: 12004; release: 12005
     // 连接socket的服务,收到开机广播一分钟后开始连接socket
     public static final int SOCKET_SERVER_CONNECT_WAIT_DURATION = 1 * 10 * 1000;
     // 连接socket的超时时长, 与心跳时间间隔保持一致, 否则会出现 SocketTimeoutException
@@ -101,13 +101,13 @@ public class Constant {
     // 心跳服务上报的时间间隔
     public static final int BEATHEART_SERVICE_INTERVAL = 5 * 60 * 1000;
     // 定位服务上报的时间间隔
-    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 30 * 60 * 1000;
+    public static final int BAIDU_GPS_SERVICE_SCAN_INTERVAL = 6 * 60 * 1000;
     // 重连服务一次连接等待时长
     public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 60 * 1000;
     // 重连服务休眠时长,因为只有网络状态正常连接的时候才会启动重连服务, 等待2s足够
-    public static final int RECONNCET_SOCKET_SERVICE_SLEEP = 1 * 2 * 1000;
+    public static final int RECONNCET_SOCKET_SERVICE_SLEEP = 1 * 2;
     // 开机等待多久开始上报定位信息
-    public static final int POWERON_REPORT_POSITION_SLEEP = 1 * 60 * 1000;
+    public static final int POWERON_REPORT_POSITION_SLEEP = 2 * 60 * 1000;
     // 每次定时服务时间到了之后等待多久开始上报定位信息, 为了等百度定位成功后
     public static final int BAIDU_REPORT_POSITION_SLEEP = 1 * 5 * 1000;
 

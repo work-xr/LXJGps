@@ -528,6 +528,7 @@ wl.release();
 08-28 01:30:00.264  2804  3153 W System.err: 	at libcore.io.IoBridge.sendto(IoBridge.java:509)
 ```
 
+
 ### HTTP 协议基础
 #### GET请求的特点:
 * GET请求能够被缓存

@@ -276,7 +276,7 @@ public class SprdCommonUtils {
 
         if (mSosMsg.equals(SOS_SMS_INVALID_VALUE))
         {
-            mSosMsg = sAppContext.getResources().getString(R.string.sos_sms, mSosNum.get(3));
+            mSosMsg = sAppContext.getResources().getString(R.string.sos_sms/*, mSosNum.get(3)*/);
         }
         Log.e(TAG,"sendSosSms mSosMsg = " + mSosMsg);
 
@@ -334,7 +334,7 @@ public class SprdCommonUtils {
                 //list.add(defaultStr + 3);
                 list.add(defaultStr);
             } else {
-                //list.add(nameStr3);
+                list.add(nameStr3);
             }
         }
         else {

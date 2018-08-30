@@ -54,8 +54,11 @@ public class NetworkPresenterImpl implements
         context = GpsApplication.getAppContext();
         Toast.makeText(context, context.getResources().getString(R.string.report_success), Toast.LENGTH_SHORT).show();
 
-        SocketService socketService = new SocketService();
+        //SocketService socketService = new SocketService();
+        //socketService.parseServerMsg("{\"sos_phone\":\"10086,12345,19968867878,059212349\",\"name\":\"亲1,亲2,亲3,养老服务中心号码\",\"imei\":\"867400020316620\",\"time\":\"20180811123608\",\"command\":103}");
+        //socketService.parseServerMsg("{\"imei \":\"869938027477745\",\"command\":107,\"time\":\"20170102302022\"}");
 
+/*
         switch (count) {
             case 0:
                 SprdCommonUtils.getInstance().sendSosSmsBroadcast();
@@ -83,7 +86,7 @@ public class NetworkPresenterImpl implements
         if (count == 6)
         {
             count = 0;
-        }
+        }*/
     }
 
     @Override

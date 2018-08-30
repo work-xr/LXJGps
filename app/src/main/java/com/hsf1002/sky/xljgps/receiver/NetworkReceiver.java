@@ -10,6 +10,7 @@ import android.util.Log;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.service.BeatHeartService;
 import com.hsf1002.sky.xljgps.service.GpsService;
+import com.hsf1002.sky.xljgps.service.ReconnectSocketService;
 import com.hsf1002.sky.xljgps.service.SocketService;
 
 /**
@@ -57,6 +58,10 @@ public class NetworkReceiver extends BroadcastReceiver {
                     GpsService.setServiceAlarm(appContext, false);
                     // 关闭定时心跳服务
                     BeatHeartService.setServiceAlarm(appContext, false);
+                    // 如果重连服务开启了, 关闭
+                    if (ReconnectSocketService.isServiceAlarmOn(appContext)) {
+                        ReconnectSocketService.setServiceAlarm(appContext, false);
+                    }
                     return;
                 }
             }
