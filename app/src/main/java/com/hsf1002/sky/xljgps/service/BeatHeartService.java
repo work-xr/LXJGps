@@ -3,13 +3,16 @@ package com.hsf1002.sky.xljgps.service;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.hsf1002.sky.xljgps.app.GpsApplication;
 import com.hsf1002.sky.xljgps.model.SocketModel;
 
 import static android.app.PendingIntent.FLAG_NO_CREATE;
@@ -25,14 +28,16 @@ public class BeatHeartService extends Service {
 
     private static final String TAG = "BeatHeartService";
     private static int startServiceInterval = BEATHEART_SERVICE_INTERVAL;
-    //private static Handler handler = null;
+    private static Context sContext = null;
+    private static final String ACTION_TIMING_REPORT_BEATHEART = "action.timing.report.beatheart";
+    private static Intent sIntentReceiver = new Intent(ACTION_TIMING_REPORT_BEATHEART);
+    private static PendingIntent sPendingIntent = null;
+    private static AlarmManager sManager = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        // 在主线程上创建Handler, 不然报错 Can't create handler inside thread that has not called Looper.prepare()
-        //handler = new Handler();
-        //handler.postDelayed(beatHeartTask, startServiceInterval);
+        registerBeatheartReceiver();
     }
 
     @Nullable
@@ -48,23 +53,14 @@ public class BeatHeartService extends Service {
      *  startService调用一次,就会 运行一次
      *  对于manager.setRepeating的定时服务而言, 每次唤醒一次, 都会调用一次
      *  由系统进行回调,但是和第一次启动服务流程不同
-     *  同一个线程, 同一个时间,为什么执行了三次:
-     08-23 20:44:00.896 2931-2945/com.hsf1002.sky.xljgps I/SocketService: connectSocketServer: success
-     08-23 20:44:00.900 2931-2945/com.hsf1002.sky.xljgps I/BeatHeartService: setServiceAlarm: startServiceInterval = 300000
-
-     08-23 20:44:00.896 2931-2945/com.hsf1002.sky.xljgps I/SocketService: connectSocketServer: success
-     08-23 20:44:00.900 2931-2945/com.hsf1002.sky.xljgps I/BeatHeartService: setServiceAlarm: startServiceInterval = 300000
-
-     08-23 20:44:00.896 2931-2945/com.hsf1002.sky.xljgps I/SocketService: connectSocketServer: success
-     08-23 20:44:00.900 2931-2945/com.hsf1002.sky.xljgps I/BeatHeartService: setServiceAlarm: startServiceInterval = 300000
-     *
+     *  有时候并不会调用, 有时候又连续调用2次
     *  param:
     *  return:
     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand:");
-        SocketModel.getInstance().reportBeatHeart();
+        //SocketModel.getInstance().reportBeatHeart();
         return START_STICKY;// super.onStartCommand(intent, flags, startId);
     }
 
@@ -79,25 +75,30 @@ public class BeatHeartService extends Service {
     */
     public static void setServiceAlarm(Context context, boolean isOn)
     {
-        Intent intent = new Intent(context, BeatHeartService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, FLAG_UPDATE_CURRENT);
+        //Intent intent = new Intent(context, BeatHeartService.class);
+        //PendingIntent pi = PendingIntent.getService(context, 0, intent, FLAG_UPDATE_CURRENT);
+        //AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 
-        AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, BeatHeartService.class);
+        sContext = GpsApplication.getAppContext();
+        sContext.startService(intent);
+
+        sIntentReceiver = new Intent(ACTION_TIMING_REPORT_BEATHEART);
+        sPendingIntent = PendingIntent.getBroadcast(context, 0, sIntentReceiver, FLAG_UPDATE_CURRENT);
+
+        sManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Log.e(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
 
         if (isOn)
         {
-            manager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.currentThreadTimeMillis(), startServiceInterval, pi);
-            //manager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.currentThreadTimeMillis(), pi);
+            //manager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), startServiceInterval, pi);
+            sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), sPendingIntent);
         }
         else
         {
-            manager.cancel(pi);
-            pi.cancel();
+            sManager.cancel(sPendingIntent);
+            sPendingIntent.cancel();
         }
-
-        //Intent intent = new Intent(context, BeatHeartService.class);
-        //context.startService(intent);
     }
 
     /**
@@ -119,25 +120,49 @@ public class BeatHeartService extends Service {
 
     /**
     *  author:  hefeng
-    *  created: 18-8-15 下午7:19
+    *  created: 18-8-30 下午9:12
     *  desc:
     *  param:
     *  return:
     */
-    /*
-    private static Runnable beatHeartTask = new Runnable() {
+    private void registerBeatheartReceiver()
+    {
+        IntentFilter intentFilter = new IntentFilter(ACTION_TIMING_REPORT_BEATHEART);
+        sContext.registerReceiver(beatheartReceiver, intentFilter);
+    }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-8-22 上午9:04
+     *  desc:
+     *  param:
+     *  return:
+     */
+    private void unregisterBeatheartReceiver()
+    {
+        sContext.unregisterReceiver(beatheartReceiver);
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-8-30 下午9:12
+    *  desc:
+    *  param:
+    *  return:
+    */
+    private BroadcastReceiver beatheartReceiver = new BroadcastReceiver() {
         @Override
-        public void run() {
-            Log.i(TAG, "task: beatHeartTask postDelayed-------------------------------------------");
+        public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "onReceive: beatheartReceiver startServiceInterval = " + startServiceInterval);
+
             SocketModel.getInstance().reportBeatHeart();
-            handler.postDelayed(beatHeartTask, startServiceInterval);
+            sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, sPendingIntent);
         }
     };
 
     @Override
     public void onDestroy() {
+        unregisterBeatheartReceiver();
         super.onDestroy();
-
-        //handler.removeCallbacks(beatHeartTask);
-    }*/
+    }
 }
