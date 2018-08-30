@@ -3,8 +3,10 @@ package com.hsf1002.sky.xljgps.service;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
@@ -14,7 +16,6 @@ import com.hsf1002.sky.xljgps.app.GpsApplication;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.model.SocketModel;
 
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SERVICE_SCAN_INTERVAL;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
@@ -29,29 +30,31 @@ public class GpsService extends Service {
     private static final String TAG = "GpsService";
     private static int startServiceInterval = getInstance().getInt(BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME, BAIDU_GPS_SERVICE_SCAN_INTERVAL);
     private static Context sContext = null;
-    /*private static final String ACTION_TIMING_REPORT_GPS_LOCATION = "action.timing.report.gps.location";
-    private static Intent intentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
-    private static PendingIntent pi = null;
-    private static AlarmManager manager = null;
-*/
+    private static final String ACTION_TIMING_REPORT_GPS_LOCATION = "action.timing.report.gps.location";
+    private static Intent sIntentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
+    private static PendingIntent sPendingIntent = null;
+    private static AlarmManager sManager = null;
+
     /**
     *  author:  hefeng
     *  created: 18-8-20 上午8:43
-    *  desc:    如果是开机第一次上报数据, 一分钟之后再开始定位, 主要是等待socket连接成功, 并且网络已经连上, 确保第一次定位数据准确, 否则会得到一个定位是深圳的默认值
+    *  desc:
     *  param:
     *  return:
     */
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(TAG, "onCreate: ");
+        registerGpsReceiver();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: ");
         // 开启百度定位服务, 默认1分钟发起一次
-        BaiduGpsApp.getInstance().startBaiduGps();
-        SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
+        //BaiduGpsApp.getInstance().startBaiduGps();
+        //SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
 
         return START_STICKY;
     }
@@ -74,37 +77,41 @@ public class GpsService extends Service {
      *  相对于定时的准确性而言, 功耗更为重要, 依然采用Android默认的处理方式
      *
     0822  gps正式版本30分钟上报一次,可以改为 setExact
-    0825  setExact将在灭屏状态下无法唤醒service, 只能用 setRepeating
+    0825  setExact将在灭屏状态下无法唤醒service,  setRepeating 可以
+    0830  setExactAndAllowWhileIdle  在灭屏状态下可以唤醒, 而且时间准确, 功耗待测
+      开机第一次 只上报开机定位信息, 30分钟之后才开始上报定位信息
     *  param:
     *  return:
     */
     public static void setServiceAlarm(Context context, boolean isOn)
     {
         //PendingIntent pi = PendingIntent.getService(context, 0, intent, 0);
-        /*Intent intent = new Intent(context, GpsService.class);
+        Intent intent = new Intent(context, GpsService.class);
         sContext = GpsApplication.getAppContext();
         sContext.startService(intent);
 
-        intentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
-        pi = PendingIntent.getBroadcast(context, 0, intentReceiver, 0);
-*/
-        sContext = GpsApplication.getAppContext();
-        Intent intent = new Intent(context, GpsService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, FLAG_UPDATE_CURRENT);
 
-        AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        sIntentReceiver = new Intent(ACTION_TIMING_REPORT_GPS_LOCATION);
+        sPendingIntent = PendingIntent.getBroadcast(context, 0, sIntentReceiver, 0);
+
+        //sContext = GpsApplication.getAppContext();
+        //Intent intent = new Intent(context, GpsService.class);
+        //PendingIntent pi = PendingIntent.getService(context, 0, intent, FLAG_UPDATE_CURRENT);
+
+        sManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Log.e(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
 
         if (isOn)
         {
             // 刚开机, 刚开启定时定位服务的第一次, 不上报定位信息, 30分钟后再上报
-            manager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.currentThreadTimeMillis() + startServiceInterval, startServiceInterval, pi);
-            //manager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pi);
+            //sManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, startServiceInterval, pi);
+            //sManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), pi);
+            sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, sPendingIntent);
         }
         else
         {
-            manager.cancel(pi);
-            pi.cancel();
+            sManager.cancel(sPendingIntent);
+            sPendingIntent.cancel();
         }
     }
 
@@ -146,7 +153,7 @@ public class GpsService extends Service {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        //unregisterGpsReceiver();
+        unregisterGpsReceiver();
     }
 
     /**
@@ -156,13 +163,12 @@ public class GpsService extends Service {
      *  param:
      *  return:
      */
-    /*
     private void registerGpsReceiver()
     {
         IntentFilter intentFilter = new IntentFilter(ACTION_TIMING_REPORT_GPS_LOCATION);
         sContext.registerReceiver(gpsReceiver, intentFilter);
     }
-*/
+
     /**
      *  author:  hefeng
      *  created: 18-8-22 上午9:04
@@ -170,20 +176,10 @@ public class GpsService extends Service {
      *  param:
      *  return:
      */
-    /*
     private void unregisterGpsReceiver()
     {
         sContext.unregisterReceiver(gpsReceiver);
     }
-    */
-
-    /**
-     *  author:  hefeng
-     *  created: 18-8-6 下午2:08
-     *  desc:    如果多次执行了Context的startService方法，那么Service的onStartCommand方法也会相应的多次调用
-     *  param:
-     *  return:
-     */
 
     /**
     *  author:  hefeng
@@ -192,13 +188,18 @@ public class GpsService extends Service {
     *  param:
     *  return:
     */
-    /*
+
     private BroadcastReceiver gpsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "onReceive: gpsReceiver startServiceInterval = " + startServiceInterval);
-            reportPosition();
-            manager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + startServiceInterval, pi);
+
+            BaiduGpsApp.getInstance().startBaiduGps();
+            SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);
+
+            // setExact 无法唤醒
+            //sManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + startServiceInterval, sPendingIntent);
+            sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, sPendingIntent);
         }
-    };*/
+    };
 }
