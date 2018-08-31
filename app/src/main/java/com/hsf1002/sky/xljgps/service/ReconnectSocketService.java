@@ -1,24 +1,21 @@
 package com.hsf1002.sky.xljgps.service;
 
 import android.app.AlarmManager;
-import android.app.IntentService;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import com.hsf1002.sky.xljgps.app.GpsApplication;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_INTERVAL;
-import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_SLEEP;
-import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 
 /**
  * Created by hefeng on 18-8-10.
@@ -28,8 +25,11 @@ import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 public class ReconnectSocketService extends Service {
     private static final String TAG = "ReconnectSocketService";
     private static int startServiceInterval = RECONNCET_SOCKET_SERVICE_INTERVAL;
-    private static ThreadPoolExecutor sThreadPool;
-    private static int sConnectedCount = 0;
+    private static Context sContext = null;
+    private static final String ACTION_TIMING_RECONNECT_SOCKET = "action.timing.reconnect.socket";
+    private static Intent sIntentReceiver = new Intent(ACTION_TIMING_RECONNECT_SOCKET);
+    private static PendingIntent sPendingIntent = null;
+    private static AlarmManager sManager = null;
 
     @Nullable
     @Override
@@ -40,15 +40,14 @@ public class ReconnectSocketService extends Service {
     /**
      *  author:  hefeng
      *  created: 18-8-17 下午6:38
-     *  desc:    Caused by: android.os.NetworkOnMainThreadException
+     *  desc:
      *  param:
      *  return:
      */
     @Override
     public void onCreate() {
         super.onCreate();
-
-        //createThreadPool();
+        registerReconnectReceiver();
     }
 
     /**
@@ -62,28 +61,8 @@ public class ReconnectSocketService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: " );
-        reconnectSocket();
+        //reconnectSocket();
         return super.onStartCommand(intent, flags, startId);
-    }
-
-    /**
-    *  author:  hefeng
-    *  created: 18-8-24 下午4:37
-    *  desc:
-    *  param:
-    *  return:
-    */
-    private static void createThreadPool()
-    {
-        if (sThreadPool == null) {
-            sThreadPool = new ThreadPoolExecutor(
-                    1,
-                    1,
-                    THREAD_KEEP_ALIVE_TIMEOUT,
-                    TimeUnit.SECONDS,
-                    new LinkedBlockingDeque<Runnable>(),
-                    new ThreadPoolExecutor.AbortPolicy());
-        }
     }
 
     /**
@@ -95,25 +74,8 @@ public class ReconnectSocketService extends Service {
     */
     private static void reconnectSocket()
     {
-        if (sThreadPool != null) {
-            sThreadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try
-                    {
-                        sConnectedCount++;
-                        Log.i(TAG, "reconnectSocket: startServiceInterval = " + startServiceInterval + ", sConnectedCount = " + sConnectedCount);
-                        Thread.sleep(RECONNCET_SOCKET_SERVICE_SLEEP);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                    SocketService socketService = new SocketService();
-                    socketService.reconnectSocketServer();
-                }
-            });
-        }
+        SocketService socketService = new SocketService();
+        socketService.reconnectSocketServer();
     }
 
     /**
@@ -126,23 +88,24 @@ public class ReconnectSocketService extends Service {
     public static void setServiceAlarm(Context context, boolean isOn)
     {
         Intent intent = new Intent(context, ReconnectSocketService.class);
-        PendingIntent pi = PendingIntent.getService(context, 0, intent, FLAG_UPDATE_CURRENT);
+        sContext = GpsApplication.getAppContext();
+        sContext.startService(intent);
 
-        AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        sIntentReceiver = new Intent(ACTION_TIMING_RECONNECT_SOCKET);
+        sPendingIntent = PendingIntent.getBroadcast(context, 0, sIntentReceiver, FLAG_UPDATE_CURRENT);
+
+        sManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Log.e(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
 
         if (isOn)
         {
-            // 为啥要在创建线程池, 就开始重连? 因为有时候onStartCommand不会被调用,有时候又连续调用两次
-            createThreadPool();
-            manager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.currentThreadTimeMillis(), startServiceInterval, pi);
             reconnectSocket();
+            sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), sPendingIntent);
         }
         else
         {
-            manager.cancel(pi);
-            pi.cancel();
-            sConnectedCount = 0;
+            sManager.cancel(sPendingIntent);
+            sPendingIntent.cancel();
         }
     }
 
@@ -159,5 +122,52 @@ public class ReconnectSocketService extends Service {
         PendingIntent pi = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
 
         return pi != null;
+    }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-8-30 下午9:12
+     *  desc:
+     *  param:
+     *  return:
+     */
+    private void registerReconnectReceiver()
+    {
+        IntentFilter intentFilter = new IntentFilter(ACTION_TIMING_RECONNECT_SOCKET);
+        sContext.registerReceiver(reconnectReceiver, intentFilter);
+    }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-8-22 上午9:04
+     *  desc:
+     *  param:
+     *  return:
+     */
+    private void unregisterReconnectReceiver()
+    {
+        sContext.unregisterReceiver(reconnectReceiver);
+    }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-8-30 下午9:12
+     *  desc:
+     *  param:
+     *  return:
+     */
+    private BroadcastReceiver reconnectReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "onReceive: reconnectReceiver startServiceInterval = " + startServiceInterval);
+            reconnectSocket();
+            sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, sPendingIntent);
+        }
+    };
+
+    @Override
+    public void onDestroy() {
+        unregisterReconnectReceiver();
+        super.onDestroy();
     }
 }
