@@ -484,7 +484,7 @@ public class SocketService extends Service {
             Log.i(TAG, "getParseDataString: sizeStr = " + sizeStr + ", dis.available = " + dis.available());
 
             // 前4个字节应该都是数字,否则丢弃此次读取, 并且断开socket服务
-            if (!TextUtils.isDigitsOnly(sizeStr))
+            if ( !TextUtils.isDigitsOnly(sizeStr) && !sizeStr.equals("{\"su") )
             {
                 Log.i(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected!");
                 disConnectSocketServer();
@@ -496,7 +496,11 @@ public class SocketService extends Service {
             Log.i(TAG, "getParseDataString: size = " + size);
 
             // 读取服务器发送的实际数据
-            byte[] dataBytes = new byte[size - 4];
+            if (!sizeStr.equals("{\"su"))
+            {
+                size -= 4;
+            }
+            byte[] dataBytes = new byte[size];
             dis.read(dataBytes);
             // 有时候会把前四个字节给删掉?????
             /*
