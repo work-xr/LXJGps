@@ -228,16 +228,24 @@ public class BaiduGpsApp {
 
             if (locType == BDLocation.TypeGpsLocation || locType == BDLocation.TypeNetWorkLocation)
             {
-                Log.i(TAG, "onReceiveLocation:  get location success, stop gps service");
+                Log.i(TAG, "onReceiveLocation:  get location success, baidu service continue");
                 // 保存定位信息
                 setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locTypeStr, locationType);
-                // 定位成功, 停止百度服务(百度服务运行在一个单独的进程), 如果定位失败, 隔一分钟继续定位,直到成功再停止
-                stopBaiduGps();
+                // 0805 定位成功, 停止百度服务(百度服务运行在一个单独的进程), 如果定位失败, 隔一分钟继续定位,直到成功再停止
+                // 0825 不要stop, 否则会报异常, 导致整个应用死掉:
+                /*08-30 21:54:51.894  2851  2851 I BaiduGpsApp: onReceiveLocation:  get location success, stop gps service
+                08-30 21:54:51.894  2851  2851 I BaiduGpsApp: stopBaiduGps: isStarted = true
+                08-30 21:54:51.898  7635  7635 D baidu_location_service: baidu location service stop ...
+                08-30 21:54:51.906  7635  7635 I GpsApplication: onTrimMemory: ..................................
+                08-30 21:54:51.938  7635  7648 D baidu_location_service: baidu location service has stoped ...
+                08-30 21:54:51.939  7635  7648 I Process : Sending signal. PID: 7635 SIG: 9
+                */
+                //stopBaiduGps();
             }
             else
             {
                 // 如果定位失败, 隔一段时间会重新发起定位请求, 目前默认设置为1分钟 BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL
-                Log.i(TAG, "onReceiveLocation:  get location failed, stop gps service");
+                Log.i(TAG, "onReceiveLocation:  get location failed, baidu service continue");
             }
         }
 
