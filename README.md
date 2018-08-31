@@ -321,7 +321,11 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
 ```
 
 #### 问题12 AlarmService定时服务时间不准, 延迟严重
-使用AlarmService开启定时服务, `manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+startServiceInterval, startServiceInterval, pi);` 定时5分钟, 但是有时候6, 7分钟, 有时候长达15分钟才会运行一次
+使用AlarmService的`setRepeating`开启定时服务
+```
+manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+startServiceInterval, startServiceInterval, pi);
+```
+定时5分钟, 但是有时候6, 7分钟, 有时候长达15分钟才会运行一次
 ```
 08-14 15:15:01.044 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
 08-14 15:22:37.839 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
@@ -334,7 +338,7 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
 08-14 16:30:01.054 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
 08-14 16:45:01.022 2535-2535/com.hsf1002.sky.xljgps I/GpsService: onStartCommand:
 ```
-使用循环 `handler.postDelayed(task, 1000 * 60)`;的结果, 误差不会超过50ms:  
+使用循环 `handler.postDelayed(task, 1000 * 60)`;的结果, 误差不会超过50ms,灭屏状态下无法唤醒系统:  
 ```
 08-15 17:18:05.724 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
 08-15 17:19:05.752 17422-17422/com.hsf1002.sky.xljgps I/GpsService: task: postDelayed-------------------------------------------
@@ -368,7 +372,7 @@ public void onReceive(Context context, Intent intent) {
 08-15 18:32:19.279 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
 08-15 18:33:19.277 18152-18152/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
 ```
-如果将AlarmManager的 set 改为 setExact, 误差会小很多, 在60ms左右:  
+如果将AlarmManager的 set 改为 setExact, 误差会小很多, 在60ms左右, 但是在灭屏状态下无法唤醒系统:  
 ```
 08-15 18:55:48.514 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
 08-15 18:56:48.582 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
@@ -381,10 +385,29 @@ public void onReceive(Context context, Intent intent) {
 08-15 19:03:48.962 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
 08-15 19:04:49.021 21766-21766/com.hsf1002.sky.xljgps E/GpsService: +++++++++++++++++++>>>onReceive
 ```
+将参数绝对时间改为相对时间`ELAPSED_REALTIME_WAKEUP`大部分时间准确,偶尔误差很大
+```
+manager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), startServiceInterval, pi);
+```
+API23及以上可以使用`setExactAndAllowWhileIdle`以及循环发广播的方式会很精准, 功耗也在可控范围:
+```
+main.log:44314: 08-31 05:22:35.167  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+main.log:44407: 08-31 05:25:35.240  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+main.log:44490: 08-31 05:28:35.305  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+main.log:44614: 08-31 05:31:36.078  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+main.log:44690: 08-31 05:34:36.126  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+main.log:44806: 08-31 05:37:36.233  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+main.log:44898: 08-31 05:40:36.335  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+main.log:44980: 08-31 05:43:37.107  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+main.log:45063: 08-31 05:46:37.157  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+main.log:45145: 08-31 05:49:37.206  2843  2843 I SocketModel: reportBeatHeart: gsonString = {"company":"xiaolajiao","imei":"867400020248002","type":301}
+```
 根本原因:  
 从Android 4.4 版本开始，Alarm 任务的触发时间将会变得不准确，有可能会延迟一段时间后任务才能得到执行, 这是系统在耗电性方面进行的优化。系统会自动检测目前有多少Alarm 任务存在，然后将触发时间将近的几个任务放在一起执行，这就可以大幅度地减少CPU 被唤醒的次数，从而有效延长电池的使用时间。如果你要求Alarm 任务的执行时间必须准备无误，Android 仍然提供了解决方案。使用AlarmManager 的setExact()方法来替代set()方法  
 解决方案:  
-相对于定时的准确性而言, 功耗更为重要, 依然采用Android默认的处理方式
+```
+sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, sPendingIntent);
+```
 
 #### 问题13 SystemProperties.get报错
 ```
@@ -434,7 +457,7 @@ wl.acquire();
 wl.release();
 ```
 解决方案:  
-灭屏20分钟不要关闭数据业务
+灭屏20分钟不要关闭数据业务, 但是深圳地区,移动的网络依然一个小时会关闭一次,但也不是必现的
 
 #### 问题15 Socket断开-SocketException-Connection reset by peer
 ```
@@ -456,7 +479,7 @@ wl.release();
 08-23 21:42:33.456  2853  2888 W System.err: 	at libcore.io.BlockGuardOs.recvfrom(BlockGuardOs.java:250)
 08-23 21:42:33.456  2853  2888 W System.err: 	at libcore.io.IoBridge.recvfrom(IoBridge.java:549)
 ```
-可能的原因有:
+可能的原因:
 * 服务器的并发连接数超过了其承载量，服务器会将其中一些连接关闭
 * 网络连接非常慢的时候
 * 下载大文件时，频繁请求服务器，请求的端口一直被占用
@@ -481,7 +504,7 @@ wl.release();
 08-26 18:21:44.885  4869  4885 W System.err: 	at libcore.io.BlockGuardOs.recvfrom(BlockGuardOs.java:250)
 08-26 18:21:44.885  4869  4885 W System.err: 	at libcore.io.IoBridge.recvfrom(IoBridge.java:549)
 ```
-可能的原因有:
+可能的原因:
 * 网络连接负载过重
 * 服务器负载过重
 * 连接会话设置了不合适的超时参数
@@ -527,6 +550,10 @@ wl.release();
 08-28 01:30:00.263  2804  3153 W System.err: 	at libcore.io.BlockGuardOs.sendto(BlockGuardOs.java:278)
 08-28 01:30:00.264  2804  3153 W System.err: 	at libcore.io.IoBridge.sendto(IoBridge.java:509)
 ```
+可能的原因:
+* TCP握手尚未结束时，连接已经close
+* 服务端收到一次read，但write了多次
+* 连接通道被占满，新连接被拒绝时，client中断了所有连接
 
 
 ### HTTP 协议基础
