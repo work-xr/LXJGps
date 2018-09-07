@@ -100,7 +100,7 @@ public class BaiduGpsApp {
         //可选，设置是否使用gps，默认false, 使用高精度和仅用设备两种定位模式的，参数必须设置为true
         option.setOpenGps(false);
         //可选，定位SDK内部是一个service，并放到了独立进程。设置是否在stop的时候杀死这个进程，默认（建议）不杀死，即setIgnoreKillProcess(true)
-        option.setIgnoreKillProcess(false);
+        option.setIgnoreKillProcess(true);
         //可选，设置是否需要过滤GPS仿真结果，默认需要，即参数为false
         //option.setEnableSimulateGps(false);
         //mLocationClient为第二步初始化过的LocationClient对象, 需将配置好的LocationClientOption对象，通过setLocOption方法传递给LocationClient对象使用
@@ -233,6 +233,8 @@ public class BaiduGpsApp {
                 setBaiduGpsStatus(/*address.toString(), */latitude, longitude, locTypeStr, locationType);
                 // 0805 定位成功, 停止百度服务(百度服务运行在一个单独的进程), 如果定位失败, 隔一分钟继续定位,直到成功再停止
                 // 0825 不要stop, 否则会报异常, 导致整个应用死掉:
+                // 0906 需要sotp, 这样定位服务开启的时候, start百度才能获取到最新的位置信息
+                // 调用stop的时候不要杀死百度进程整个应用就不会死掉, setIgnoreKillProcess(true)
                 /*08-30 21:54:51.894  2851  2851 I BaiduGpsApp: onReceiveLocation:  get location success, stop gps service
                 08-30 21:54:51.894  2851  2851 I BaiduGpsApp: stopBaiduGps: isStarted = true
                 08-30 21:54:51.898  7635  7635 D baidu_location_service: baidu location service stop ...
@@ -247,6 +249,8 @@ public class BaiduGpsApp {
                 // 如果定位失败, 隔一段时间会重新发起定位请求, 目前默认设置为1分钟 BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL
                 Log.i(TAG, "onReceiveLocation:  get location failed, baidu service continue");
             }
+
+            stopBaiduGps();
         }
 
         @Override
