@@ -37,6 +37,7 @@ public class BeatHeartService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        sContext = GpsApplication.getAppContext();
         registerBeatheartReceiver();
     }
 
@@ -157,6 +158,10 @@ public class BeatHeartService extends Service {
 
             SocketModel.getInstance().reportBeatHeart();
             sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, sPendingIntent);
+
+            // 检查重连服务
+            SocketService service = new SocketService();
+            service.startReconnect(TAG);
         }
     };
 
