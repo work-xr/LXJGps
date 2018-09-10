@@ -15,6 +15,7 @@ import android.util.Log;
 import com.hsf1002.sky.xljgps.app.GpsApplication;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
 import com.hsf1002.sky.xljgps.model.SocketModel;
+import com.hsf1002.sky.xljgps.util.WakeLockUtil;
 
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SCAN_SPAN_TIME_INTERVAL_NAME;
 import static com.hsf1002.sky.xljgps.util.Constant.BAIDU_GPS_SERVICE_SCAN_INTERVAL;
@@ -46,6 +47,7 @@ public class GpsService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
+        sContext = GpsApplication.getAppContext();
         registerGpsReceiver();
     }
 
@@ -193,6 +195,9 @@ public class GpsService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "onReceive: gpsReceiver startServiceInterval = " + startServiceInterval);
+
+            //WakeLockUtil wakeLock = new WakeLockUtil();
+            //wakeLock.acquireWakeLock();
 
             BaiduGpsApp.getInstance().startBaiduGps();
             SocketModel.getInstance().reportPosition(SOCKET_TYPE_TIMING, null);

@@ -30,6 +30,7 @@ public class ReconnectSocketService extends Service {
     private static Intent sIntentReceiver = new Intent(ACTION_TIMING_RECONNECT_SOCKET);
     private static PendingIntent sPendingIntent = null;
     private static AlarmManager sManager = null;
+    private static boolean sIsServiceStarted = false;
 
     @Nullable
     @Override
@@ -47,6 +48,7 @@ public class ReconnectSocketService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        sContext = GpsApplication.getAppContext();
         registerReconnectReceiver();
     }
 
@@ -95,10 +97,11 @@ public class ReconnectSocketService extends Service {
         sPendingIntent = PendingIntent.getBroadcast(context, 0, sIntentReceiver, FLAG_UPDATE_CURRENT);
 
         sManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Log.e(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn);
+        Log.e(TAG, "setServiceAlarm: startServiceInterval = " + startServiceInterval + ", isOn = " + isOn + ", sIsServiceStarted = " + sIsServiceStarted);
 
-        if (isOn)
+        if (isOn && !sIsServiceStarted)
         {
+            sIsServiceStarted = true;
             reconnectSocket();
             sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), sPendingIntent);
         }
@@ -167,7 +170,9 @@ public class ReconnectSocketService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.i(TAG, "onDestroy: ");
         unregisterReconnectReceiver();
+        sIsServiceStarted = false;
         super.onDestroy();
     }
 }
