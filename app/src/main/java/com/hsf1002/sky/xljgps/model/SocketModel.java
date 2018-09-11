@@ -1,11 +1,15 @@
 package com.hsf1002.sky.xljgps.model;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.hsf1002.sky.xljgps.R;
 import com.hsf1002.sky.xljgps.app.GpsApplication;
 import com.hsf1002.sky.xljgps.baidu.BaiduGpsApp;
+import com.hsf1002.sky.xljgps.baidu.NetworkApp;
 import com.hsf1002.sky.xljgps.params.BaiduGpsParam;
 import com.hsf1002.sky.xljgps.params.BeatHeartParam;
 import com.hsf1002.sky.xljgps.params.SosPositionParam;
@@ -13,6 +17,7 @@ import com.hsf1002.sky.xljgps.params.UploadNumberParam;
 import com.hsf1002.sky.xljgps.presenter.NetworkPresenter;
 import com.hsf1002.sky.xljgps.service.SocketService;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
+import com.hsf1002.sky.xljgps.util.WakeLockUtil;
 
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -35,7 +40,7 @@ import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
 */
 public class SocketModel implements BaseModel {
     private static final String TAG = "SocketModel";
-    private static ThreadPoolExecutor sThreadPool;
+    private static ThreadPoolExecutor sThreadPool = null;
     private SocketService socketService = new SocketService();
 
     /**
@@ -46,13 +51,15 @@ public class SocketModel implements BaseModel {
     *  return:
     */
     public SocketModel() {
-        sThreadPool = new ThreadPoolExecutor(
-                1,
-                1,
-                THREAD_KEEP_ALIVE_TIMEOUT,
-                 TimeUnit.SECONDS,
-                 new LinkedBlockingDeque<Runnable>(),
-                 new ThreadPoolExecutor.AbortPolicy());
+        if (sThreadPool == null) {
+            sThreadPool = new ThreadPoolExecutor(
+                    1,
+                    1,
+                    THREAD_KEEP_ALIVE_TIMEOUT,
+                    TimeUnit.SECONDS,
+                    new LinkedBlockingDeque<Runnable>(),
+                    new ThreadPoolExecutor.AbortPolicy());
+        }
     }
 
     /**
@@ -120,7 +127,6 @@ public class SocketModel implements BaseModel {
                 }
             });
         }
-
     }
 
     /**
@@ -194,5 +200,8 @@ public class SocketModel implements BaseModel {
         Log.i(TAG, "reportPosition: imei = " + imei + ", time = " + time + ", capacity = " + capacity + ", gson = " + gsonString);
 
         postDataToServer(gsonString);
+
+        //WakeLockUtil wakeLock = new WakeLockUtil();
+        //wakeLock.releaseWakeLock();
     }
 }

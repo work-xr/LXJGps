@@ -606,7 +606,7 @@ public class SocketService extends Service {
      *  param:
     *  return:  
     */
-    private void startReconnect(String tag)
+    public void startReconnect(String tag)
     {
         if (NetworkUtils.isNetworkAvailable())
         {

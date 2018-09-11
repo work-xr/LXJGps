@@ -13,7 +13,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.hsf1002.sky.xljgps.app.GpsApplication;
+import com.hsf1002.sky.xljgps.baidu.NetworkApp;
 import com.hsf1002.sky.xljgps.model.SocketModel;
+import com.hsf1002.sky.xljgps.util.NetworkUtils;
 
 import static android.app.PendingIntent.FLAG_NO_CREATE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -162,6 +164,10 @@ public class BeatHeartService extends Service {
             // 检查重连服务
             SocketService service = new SocketService();
             service.startReconnect(TAG);
+
+            NetworkApp networkApp = new NetworkApp();
+            networkApp.getLocationNetwork();
+            networkApp.getAllCellInfo();
         }
     };
 
