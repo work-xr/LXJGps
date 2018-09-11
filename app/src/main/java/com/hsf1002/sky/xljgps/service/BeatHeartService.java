@@ -13,7 +13,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.hsf1002.sky.xljgps.app.GpsApplication;
+import com.hsf1002.sky.xljgps.baidu.NetworkApp;
 import com.hsf1002.sky.xljgps.model.SocketModel;
+import com.hsf1002.sky.xljgps.util.NetworkUtils;
 
 import static android.app.PendingIntent.FLAG_NO_CREATE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -156,12 +158,16 @@ public class BeatHeartService extends Service {
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "onReceive: beatheartReceiver startServiceInterval = " + startServiceInterval);
 
-            SocketModel.getInstance().reportBeatHeart();
-            sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, sPendingIntent);
-
             // 检查重连服务
             SocketService service = new SocketService();
             service.startReconnect(TAG);
+
+            SocketModel.getInstance().reportBeatHeart();
+            sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, sPendingIntent);
+
+            //NetworkApp networkApp = new NetworkApp();
+            //networkApp.getLocationNetwork();
+            //networkApp.getAllCellInfo();
         }
     };
 
