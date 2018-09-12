@@ -60,7 +60,7 @@ public class NetworkReceiver extends BroadcastReceiver {
                     BeatHeartService.setServiceAlarm(appContext, false);
                     // 如果重连服务开启了, 关闭
                     //if (ReconnectSocketService.isServiceAlarmOn(appContext)) {
-                        ReconnectSocketService.setServiceAlarm(appContext, false);
+                        //ReconnectSocketService.setServiceAlarm(appContext, false);
                     //}
                     return;
                 }

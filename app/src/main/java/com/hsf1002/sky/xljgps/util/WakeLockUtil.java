@@ -12,7 +12,6 @@ import com.hsf1002.sky.xljgps.app.GpsApplication;
  * Created by hefeng on 18-9-6.
  */
 
-@Deprecated
 public class WakeLockUtil {
     private static final String TAG = "WakeLockUtil";
     private static PowerManager.WakeLock wakeLock = null;

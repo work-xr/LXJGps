@@ -16,6 +16,7 @@ import com.hsf1002.sky.xljgps.result.ResultServerOuterElectricMsg;
 import com.hsf1002.sky.xljgps.result.ResultServerStatusInfoMsg;
 import com.hsf1002.sky.xljgps.util.NetworkUtils;
 import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
+import com.hsf1002.sky.xljgps.util.WakeLockUtil;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -30,7 +31,14 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import static com.hsf1002.sky.xljgps.util.Constant.ACTION_ACTIVATED_CONNECTIVITY;
+import static com.hsf1002.sky.xljgps.util.Constant.ACTION_INACTIVATED_CONNECTIVITY;
+import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_SLEEP;
+import static com.hsf1002.sky.xljgps.util.Constant.RECONNECT_COUNT_MAX;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_SUCCESS;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_COMMAND;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_IMEI;
@@ -55,6 +63,8 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_POWERON;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_SOS;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_UPLOAD;
+import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
+import static com.hsf1002.sky.xljgps.util.NetworkUtils.ping;
 
 
 /**
@@ -89,6 +99,9 @@ public class SocketService extends Service {
     private volatile boolean isRunning = true;
     // 读的线程是否进入了wait阻塞状态
     private static boolean sIsReadThreadWaited = false;
+    // 统计重连次数
+    private static int sReconnectCount = 0;
+    private static ThreadPoolExecutor sThreadPool = null;
 
 
     @Override
@@ -219,24 +232,17 @@ public class SocketService extends Service {
                 if (!sReconnectFlag)
                 {
                     Log.i(TAG, "ConnectServerThread: start first enter, do not sleep****************");
-                    // 如果是网络断开后的连接, 加点延迟10s, 如果是服务器端断开重新连接, 直接连
-                    /*try {
-                        Thread.sleep(SOCKET_SERVER_CONNECT_WAIT_DURATION);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                        return;
-                    }*/
                 }
                 else
                 {
+                    sReconnectCount++;
                     Log.i(TAG, "ConnectServerThread reconnect start*************************");
                 }
+
                 try {
+                    //ping();
                     sSocket = new Socket(SOCKET_SERVER_ADDRESS_URL, SOCKET_SERVER_ADDRESS_PORT);
                     sSocket.setKeepAlive(true);
-                    //sSocket.setSoTimeout(SOCKET_SERVER_TIMEOUT);
                 }
                 catch (IOException e) {
                     handleException(e, "ConnectServerThread: ");
@@ -258,7 +264,7 @@ public class SocketService extends Service {
 
                         // 如果开启了重连定时服务, 关闭
                         //if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
-                            ReconnectSocketService.setServiceAlarm(sContext, false);
+                           // ReconnectSocketService.setServiceAlarm(sContext, false);
                         //}
 
                         // 让读的线程开始运行
@@ -279,11 +285,11 @@ public class SocketService extends Service {
                     else
                     {
                         Log.i(TAG, "ConnectServerThread: failed, ready to connect again*************");
-                        startReconnect("ConnectServerThread:");
+                        //startReconnect("ConnectServerThread:");
                     }
                 }
             }
-            Log.i(TAG, "ConnectServerThread: stopped***************************************");
+            Log.i(TAG, "ConnectServerThread: stopped****************************************");
         }
     }
 
@@ -337,6 +343,97 @@ public class SocketService extends Service {
         }
 
         Log.i(TAG, "disConnectSocketServer: finished****************************************");
+    }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-9-11 下午2:38
+     *  desc:
+     *  param:
+     *  return:
+     */
+    private void sendBroadCastNetworkActivated()
+    {
+        Intent intent = new Intent();
+        intent.setAction(ACTION_ACTIVATED_CONNECTIVITY);
+        sContext.sendBroadcast(intent);
+        Log.i(TAG, "sendBroadCastNetworkActivated: ");
+    }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-9-11 下午2:39
+     *  desc:
+     *  param:
+     *  return:
+     */
+    private void sendBroadCastNetworkInactivated()
+    {
+        Intent intent = new Intent();
+        intent.setAction(ACTION_INACTIVATED_CONNECTIVITY);
+        sContext.sendBroadcast(intent);
+        Log.i(TAG, "sendBroadCastNetworkInactivated: ");
+    }
+
+    /**
+    *  author:  hefeng
+    *  created: 18-9-11 下午3:49
+    *  desc:
+    *  param:
+    *  return:
+    */
+    private static void createThreadPool()
+    {
+        if (sThreadPool == null) {
+            sThreadPool = new ThreadPoolExecutor(
+                    1,
+                    1,
+                    THREAD_KEEP_ALIVE_TIMEOUT,
+                    TimeUnit.SECONDS,
+                    new LinkedBlockingDeque<Runnable>(),
+                    new ThreadPoolExecutor.AbortPolicy());
+        }
+    }
+
+    /**
+     *  author:  hefeng
+     *  created: 18-9-11 下午3:26
+     *  desc:
+     *  param:
+     *  return:
+     */
+    private void resetNetworkState()
+    {
+        Log.i(TAG, "resetNetworkState: ");
+        createThreadPool();
+
+        if (sThreadPool != null) {
+            sThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    //synchronized (this) {
+                        // 防止系统睡下去, 导致广播无法正常发送
+                        WakeLockUtil wakeLockUtil = new WakeLockUtil();
+                        wakeLockUtil.acquireWakeLock();
+                        Log.i(TAG, "run: resetNetworkState acquireWakeLock");
+                        sendBroadCastNetworkInactivated();
+
+                        try {
+                            Thread.sleep(RECONNCET_SOCKET_SERVICE_SLEEP);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        finally {
+                            sendBroadCastNetworkActivated();
+
+                            // 放在finally,保证能释放掉,尽量避免用同步
+                            wakeLockUtil.releaseWakeLock();
+                            Log.i(TAG, "run: resetNetworkState releaseWakeLock");
+                        }
+                   // }
+                }
+            });
+        }
     }
 
     /**
@@ -488,7 +585,7 @@ public class SocketService extends Service {
             {
                 Log.i(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected!");
                 disConnectSocketServer();
-                startReconnect("");
+                startReconnect("getParseDataString");
                 return null;
             }
 
@@ -595,7 +692,7 @@ public class SocketService extends Service {
             Log.i(TAG, tag + " Other IOException*************************");
         }
         disConnectSocketServer();
-        startReconnect(tag);
+        //startReconnect(tag);
     }
     
     /**
@@ -610,11 +707,13 @@ public class SocketService extends Service {
     {
         if (NetworkUtils.isNetworkAvailable())
         {
-            Log.i(TAG, tag + " network available, start to reconnect");
+            Log.i(TAG, tag + " network available, check socket connection");
             if (isSocketConnected())
             {
-                Log.i(TAG, tag + " network available, socket service already started");
-                ReconnectSocketService.setServiceAlarm(sContext, false);
+                Log.i(TAG, tag + "socket service already started, sReconnectCount: " + sReconnectCount);
+                //Intent intent = new Intent(sContext, ReconnectSocketService.class);
+                //sContext.startService(intent);
+                //ReconnectSocketService.setServiceAlarm(sContext, false);
                 // 如果重连服务已经开启, 关闭
                 /*if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
                     Log.i(TAG, tag + " network available, reconnect service already started, stop it");
@@ -625,8 +724,20 @@ public class SocketService extends Service {
             }
             else {
                 // 如果重连服务已经关闭, 开启
-                Log.i(TAG, tag + " network available, socket service stopped");
-                ReconnectSocketService.setServiceAlarm(sContext, true);
+                Log.i(TAG, tag + "socket service has stopped, sReconnectCount: " + sReconnectCount);
+                //ReconnectSocketService.setServiceAlarm(sContext, true);
+                if (sReconnectCount > RECONNECT_COUNT_MAX)
+                {
+                    Log.i(TAG, "startReconnect: reset network *******************************");
+                    resetNetworkState();
+                    sReconnectCount = 0;
+                }
+                else
+                {
+                    Log.d(TAG, "startReconnect: start reconnect *****************************");
+                    Intent intent = new Intent(sContext, ReconnectSocketService.class);
+                    sContext.startService(intent);
+                }
                 /*if (!ReconnectSocketService.isServiceAlarmOn(sContext)) {
                     Log.i(TAG, tag + " network available, reconnect service did not start, start it");
                     ReconnectSocketService.setServiceAlarm(sContext, true);
