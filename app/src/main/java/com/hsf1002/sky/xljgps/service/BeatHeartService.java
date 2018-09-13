@@ -159,8 +159,9 @@ public class BeatHeartService extends Service {
             Log.i(TAG, "onReceive: beatheartReceiver startServiceInterval = " + startServiceInterval);
 
             // 检查重连服务
-            SocketService service = new SocketService();
-            service.startReconnect(TAG);
+            //SocketService service = new SocketService();
+            //service.startReconnect(TAG);
+            SocketService.getInstance().startReconnect(TAG);
 
             SocketModel.getInstance().reportBeatHeart();
             sManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + startServiceInterval, sPendingIntent);

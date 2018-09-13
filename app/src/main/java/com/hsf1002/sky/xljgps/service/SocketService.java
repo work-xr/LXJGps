@@ -37,7 +37,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hsf1002.sky.xljgps.util.Constant.ACTION_ACTIVATED_CONNECTIVITY;
 import static com.hsf1002.sky.xljgps.util.Constant.ACTION_INACTIVATED_CONNECTIVITY;
-import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_SLEEP;
+import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_CHANGE_CONNECTIVITY_SLEEP;
+import static com.hsf1002.sky.xljgps.util.Constant.RECONNCET_SOCKET_SERVICE_RECEIVE_BROADCAST_SLEEP;
 import static com.hsf1002.sky.xljgps.util.Constant.RECONNECT_COUNT_MAX;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_MSG_SUCCESS;
 import static com.hsf1002.sky.xljgps.util.Constant.RESULT_PARAM_COMMAND;
@@ -51,8 +52,6 @@ import static com.hsf1002.sky.xljgps.util.Constant.RESULT_SUCCESS_1;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_ENCODE_TYPE;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_ADDRESS_PORT;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_ADDRESS_URL;
-import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_CONNECT_WAIT_DURATION;
-import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_SERVER_TIMEOUT;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_BEATHEART;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_CURRENT;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_DOWNLOAD;
@@ -64,7 +63,6 @@ import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_SOS;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_TIMING;
 import static com.hsf1002.sky.xljgps.util.Constant.SOCKET_TYPE_UPLOAD;
 import static com.hsf1002.sky.xljgps.util.Constant.THREAD_KEEP_ALIVE_TIMEOUT;
-import static com.hsf1002.sky.xljgps.util.NetworkUtils.ping;
 
 
 /**
@@ -102,7 +100,26 @@ public class SocketService extends Service {
     // 统计重连次数
     private static int sReconnectCount = 0;
     private static ThreadPoolExecutor sThreadPool = null;
+    // 用于测试ReadTimeout的异常
+    @Deprecated
+    private static boolean sIsTerminated = false;
 
+    /**
+    *  author:  hefeng
+    *  created: 18-9-12 上午10:41
+    *  desc:
+    *  param:
+    *  return:
+    */
+    public static SocketService getInstance()
+    {
+        return SocketService.Holder.instance;
+    }
+
+    private static final class Holder
+    {
+        private static final SocketService instance = new SocketService();
+    }
 
     @Override
     public void onCreate() {
@@ -219,7 +236,7 @@ public class SocketService extends Service {
     /**
     *  author:  hefeng
     *  created: 18-8-13 下午7:50
-    *  desc:    连接socket的线程, 连接成功后, 开启心跳服务
+    *  desc:    连接socket的线程, 连接成功后, 开启心跳服务, 定位服务
     *  param:
     *  return:
     */
@@ -229,6 +246,10 @@ public class SocketService extends Service {
         public void run() {
             Log.i(TAG, "ConnectServerThread: start******************************************");
             if (sSocket == null) {
+                // 如果在灭屏状态下连接, 为了防止系统睡下去, 导致连接成功延迟
+                //Log.i(TAG, "run: begin acquireWakeLock");
+                //WakeLockUtil.getInstance().acquireWakeLock("ConnectServerThread");
+
                 if (!sReconnectFlag)
                 {
                     Log.i(TAG, "ConnectServerThread: start first enter, do not sleep****************");
@@ -269,8 +290,16 @@ public class SocketService extends Service {
 
                         // 让读的线程开始运行
                         Log.i(TAG, "ConnectServerThread ReadThread isRunning = " + isRunning);
+                        // 放在finally,保证能释放掉,尽量避免用同步
+                        WakeLockUtil.getInstance().releaseWakeLock("ConnectServerThread");
+
                         if (!isRunning) {
                             isRunning = true;
+                            if (sReadServerThread != null) {
+                                if (!sReadServerThread.isAlive()) {
+                                    sReadServerThread.run();
+                                }
+                            }
                         }
 
                         if (sIsReadThreadWaited) {
@@ -285,8 +314,13 @@ public class SocketService extends Service {
                     else
                     {
                         Log.i(TAG, "ConnectServerThread: failed, ready to connect again*************");
+                        //Log.i(TAG, "run: begin releaseWakeLock");
+                        //WakeLockUtil.getInstance().releaseWakeLock("ConnectServerThread");
                         //startReconnect("ConnectServerThread:");
                     }
+                    // 放在finally,保证能释放掉,尽量避免用同步, 放在这, 如果连接成功就会调用不到
+                    //Log.i(TAG, "run: begin releaseWakeLock");
+                    //WakeLockUtil.getInstance().releaseWakeLock("ConnectServerThread");
                 }
             }
             Log.i(TAG, "ConnectServerThread: stopped****************************************");
@@ -399,6 +433,14 @@ public class SocketService extends Service {
      *  author:  hefeng
      *  created: 18-9-11 下午3:26
      *  desc:
+     *  09-12 17:19:30.879  2865  5586 I SocketService: sendBroadCastNetworkActivated:
+        09-12 17:19:32.597  2865  2865 D NetworkReceiver: onReceive: NetworkInfo.State.CONNECTED info.type = TYPE_MOBILE
+
+        09-12 20:47:36.631 3188-3188/com.hsf1002.sky.xljgps D/NetworkReceiver: onReceive: NetworkInfo.State.CONNECTED info.type = TYPE_MOBILE
+        09-12 20:47:37.364 3188-3261/com.hsf1002.sky.xljgps I/SocketService: ConnectServerThread: success^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+        不管亮屏还是灭屏: 如果是关闭数据业务, 再开启数据业务, 正常需要耗时5 + 2 + 1 = 8s, 就可以再次连接成功
+
      *  param:
      *  return:
      */
@@ -413,22 +455,29 @@ public class SocketService extends Service {
                 public void run() {
                     //synchronized (this) {
                         // 防止系统睡下去, 导致广播无法正常发送
-                        WakeLockUtil wakeLockUtil = new WakeLockUtil();
-                        wakeLockUtil.acquireWakeLock();
-                        Log.i(TAG, "run: resetNetworkState acquireWakeLock");
+                        //WakeLockUtil.getInstance().acquireWakeLock("resetNetworkState");
                         sendBroadCastNetworkInactivated();
 
+                        // 发送关闭数据业务的广播和开启数据业务的广播, 睡5s
                         try {
-                            Thread.sleep(RECONNCET_SOCKET_SERVICE_SLEEP);
+                            Thread.sleep(RECONNCET_SOCKET_SERVICE_CHANGE_CONNECTIVITY_SLEEP);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                         finally {
                             sendBroadCastNetworkActivated();
-
+                            // 发送连接网络到收到广播之间, 大约需要2s; 收到数据业务的开启广播到连接上socket,需要1s
+                            // 只要睡眠就不会releaseWakeLock了
+                            /*try
+                            {
+                                Thread.sleep(RECONNCET_SOCKET_SERVICE_RECEIVE_BROADCAST_SLEEP);
+                            }
+                            catch (InterruptedException e)
+                            {
+                                e.printStackTrace();
+                            }*/
                             // 放在finally,保证能释放掉,尽量避免用同步
-                            wakeLockUtil.releaseWakeLock();
-                            Log.i(TAG, "run: resetNetworkState releaseWakeLock");
+                            //WakeLockUtil.getInstance().releaseWakeLock("resetNetworkState");
                         }
                    // }
                 }
@@ -560,6 +609,19 @@ public class SocketService extends Service {
 
     /**
     *  author:  hefeng
+    *  created: 18-9-12 下午2:30
+    *  desc:    仅仅用于测试
+    *  param:
+    *  return:
+    */
+    @Deprecated
+    public void terminatedService(boolean teminated)
+    {
+        sIsTerminated = teminated;
+    }
+
+    /**
+    *  author:  hefeng
     *  created: 18-8-9 下午1:47
     *  desc:    对从服务器端读到的数据进行处理,先读取数据长度,再读取实际数据,最后解码转为String类型
      *  返回数据格式: 0054{"success":1,"company":"xiaolajiao","command":301}
@@ -578,14 +640,15 @@ public class SocketService extends Service {
         {
             dis.read(sizeBytes);
             String sizeStr = new String(sizeBytes);
-            Log.i(TAG, "getParseDataString: sizeStr = " + sizeStr + ", dis.available = " + dis.available());
+            Log.i(TAG, "getParseDataString: sizeStr = " + sizeStr + ", dis.available = " + dis.available() + ", sIsTerminated = " + sIsTerminated);
 
             // 前4个字节应该都是数字,否则丢弃此次读取, 并且断开socket服务
-            if ( !TextUtils.isDigitsOnly(sizeStr) && !sizeStr.equals("{\"su") )
+            if ( sIsTerminated || ( !TextUtils.isDigitsOnly(sizeStr) && !sizeStr.equals("{\"su")) )
             {
                 Log.i(TAG, "getParseDataString: the first 4 bytes invalid, we're convinced the socket has been disconnected!");
                 disConnectSocketServer();
                 startReconnect("getParseDataString");
+                terminatedService(false);
                 return null;
             }
 
@@ -711,8 +774,6 @@ public class SocketService extends Service {
             if (isSocketConnected())
             {
                 Log.i(TAG, tag + "socket service already started, sReconnectCount: " + sReconnectCount);
-                //Intent intent = new Intent(sContext, ReconnectSocketService.class);
-                //sContext.startService(intent);
                 //ReconnectSocketService.setServiceAlarm(sContext, false);
                 // 如果重连服务已经开启, 关闭
                 /*if (ReconnectSocketService.isServiceAlarmOn(sContext)) {
@@ -723,21 +784,26 @@ public class SocketService extends Service {
                 }*/
             }
             else {
-                // 如果重连服务已经关闭, 开启
                 Log.i(TAG, tag + "socket service has stopped, sReconnectCount: " + sReconnectCount);
-                //ReconnectSocketService.setServiceAlarm(sContext, true);
+                // 如果是关闭数据业务, 再开启数据业务, 需要耗时 8s, 可以再次连接成功
+                // 如果在灭屏状态下连接, 为了防止系统睡下去, 导致连接延迟
+                WakeLockUtil.getInstance().acquireWakeLock(TAG);
+
                 if (sReconnectCount > RECONNECT_COUNT_MAX)
                 {
                     Log.i(TAG, "startReconnect: reset network *******************************");
                     resetNetworkState();
                     sReconnectCount = 0;
                 }
+                // 如果是单纯的断开重新连接, 需要 2s 可以重新连接成功
                 else
                 {
                     Log.d(TAG, "startReconnect: start reconnect *****************************");
                     Intent intent = new Intent(sContext, ReconnectSocketService.class);
                     sContext.startService(intent);
                 }
+                // 如果重连服务已经关闭, 开启
+                //ReconnectSocketService.setServiceAlarm(sContext, true);
                 /*if (!ReconnectSocketService.isServiceAlarmOn(sContext)) {
                     Log.i(TAG, tag + " network available, reconnect service did not start, start it");
                     ReconnectSocketService.setServiceAlarm(sContext, true);
@@ -1105,6 +1171,13 @@ public class SocketService extends Service {
                         else
                         {
                             Log.i(TAG, "ReadServerThread: data empty, no need to send!");
+
+                            // 如果读到的前四个字节不是数字断开了,就会重连, 如果不在此处退出, 大循环会再跑一次, startReconnect会调用两次
+                            /*if (!isSocketConnected())
+                            {
+                                isRunning = false;
+                                break;
+                            }*/
                         }
 
                         Thread.sleep(100);
@@ -1131,7 +1204,8 @@ public class SocketService extends Service {
                         }
                     }*/
 
-                    startReconnect("ReadServerThread:");
+                    // 此处不要重连, 可能会调用两次
+                    //startReconnect("ReadServerThread:");
                 }
             }
 
