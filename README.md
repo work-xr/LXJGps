@@ -555,6 +555,62 @@ wl.release();
 * 服务端收到一次read，但write了多次
 * 连接通道被占满，新连接被拒绝时，client中断了所有连接
 
+#### 问题19 百度定位在灭屏下长时间不更新定位信息
+灭屏状态下,为了功耗考虑,MODEM侧不会主动给上层更新基站小区信息;上层获取基站信息有两个接口
+`getCellLocation`在灭屏状态下是不会更新小区信息的
+```
+TelephonyManager mTelNet = (TelephonyManager) GpsApplication.getAppContext().getSystemService(Context.TELEPHONY_SERVICE);
+GsmCellLocation location = null;
+
+try
+{
+    location = (GsmCellLocation) mTelNet.getCellLocation();
+}
+catch (SecurityException e)
+{
+    e.printStackTrace();
+}
+```
+`getAllCellInfo`在更新patch(上层更新so,底层更新modem)条件下,只要上层调用该接口,就会去向modem请求基站信息
+```
+TelephonyManager mTelNet = (TelephonyManager) GpsApplication.getAppContext().getSystemService(Context.TELEPHONY_SERVICE);
+ConnectivityManager ns = (ConnectivityManager) GpsApplication.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+try {
+    Log.d(TAG," getAllCellInfo = " + mTelNet.getAllCellInfo() + " \n " + " ns = " + ns.getActiveNetworkInfo());
+}
+catch (SecurityException e)
+{
+    e.printStackTrace();
+}
+```
+可以确定百度SDK使用的是`getAllCellInfo`这个接口  
+在radio.log通过关键字`[GsmSST] SST.getAllCellInfo(): X`可以查询当前所有小区信息
+
+#### 问题20 WakeLock无法释放
+不能在releaseWakeLock之前sleep
+```
+//Log.i(TAG, "run: begin releaseWakeLock ");
+//WakeLockUtil.getInstance().releaseWakeLock(TAG);
+
+  reconnectSocket();
+
+  // 等待去连接, 连接成功后释放锁
+  // 只要睡眠就不会releaseWakeLock了
+  /*try {
+      Log.i(TAG, "run: begin sleep 2");
+      Thread.sleep(RECONNCET_SOCKET_SERVICE_CONNECTION_SLEEP);
+  }
+  catch (InterruptedException e)
+  {
+      e.printStackTrace();
+  }
+  finally {*/
+      // 放在finally,保证能释放掉,尽量避免用同步, 不能放在这
+      //Log.i(TAG, "run: begin releaseWakeLock ");
+      //WakeLockUtil.getInstance().releaseWakeLock(TAG);
+    }
+```
 
 ### HTTP 协议基础
 #### GET请求的特点:
