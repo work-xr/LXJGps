@@ -1,11 +1,51 @@
+ * [项目架构](#项目架构)
+ * [客户需求](#客户需求)
+ * [主要步骤](#主要步骤)
+ * [友情提示](#友情提示)
+ * [问题汇总](#问题汇总)
+    * [接口调试问题1 sos exits null](#接口调试问题1-sos-exits-null)
+    * [接口调试问题2 company error](#接口调试问题2-company-error)
+    * [接口调试问题3 sos error ID](#接口调试问题3-sos-error-id)
+    * [接口调试问题4 没有任何提示信息](#接口调试问题4-没有任何提示信息)
+    * [问题1 自启动失败-接收不到BOOT_COMPLETED广播可能的原因](#问题1-自启动失败-接收不到boot_completed广播可能的原因)
+    * [问题2 通过GPS基站或者Wifi MAC地址无法定位成功](#问题2-通过gps基站或者wifi-mac地址无法定位成功)
+    * [问题3 百度SDK定位功能, 申请KEY需提供APK签名文件JKS的HASH值](#问题3-百度sdk定位功能-申请key需提供apk签名文件jks的hash值)
+    * [问题4 读取其他应用SharedPreferences失败](#问题4-读取其他应用sharedpreferences失败)
+    * [问题5 AS找不到SystemProperties](#问题5-as找不到systemproperties)
+    * [问题6 生成的签名APK 内置到工程, 无法安装成功](#问题6-生成的签名apk-内置到工程-无法安装成功)
+    * [问题7 百度定位只有第一次成功,后面一直失败, 返回码505](#问题7-百度定位只有第一次成功后面一直失败-返回码505)
+    * [问题8 手动安装可以正常定位, 把apk内置到system/app下定位失败, 返回码162](#问题8-手动安装可以正常定位-把apk内置到systemapp下定位失败-返回码162)
+    * [问题9 socket连接一个线程写入的数据, 被另一个线程读取了](#问题9-socket连接一个线程写入的数据-被另一个线程读取了)
+    * [问题10 进入孝老平台主界面无法退出](#问题10-进入孝老平台主界面无法退出)
+    * [问题11 孝老平台主界面RecyclerView添加选中框](#问题11-孝老平台主界面recyclerview添加选中框)
+    * [问题12 AlarmService定时服务时间不准, 延迟严重](#问题12-alarmservice定时服务时间不准-延迟严重)
+    * [问题13 SystemProperties.get报错](#问题13-systempropertiesget报错)
+    * [问题14 灭屏状态下Socket会自动断开](#问题14-灭屏状态下socket会自动断开)
+    * [问题15 Socket断开-SocketException-Connection reset by peer](#问题15-socket断开-socketexception-connection-reset-by-peer)
+    * [问题16 Socket断开-SocketException-Connection timed out](#问题16-socket断开-socketexception-connection-timed-out)
+    * [问题17 Socket断开-ConnectException-Connection timed out](#问题17-socket断开-connectexception-connection-timed-out)
+    * [问题18 Socket断开-SocketException-sendto failed: EPIPE (Broken pipe)](#问题18-socket断开-socketexception-sendto-failed-epipe-broken-pipe)
+    * [问题19 百度定位在灭屏下长时间不更新定位信息](#问题19-百度定位在灭屏下长时间不更新定位信息)
+    * [问题20 WakeLock无法释放](#问题20-wakelock无法释放)
+    * [问题21 服务器端发送的消息无法实时接收](#问题21-服务器端发送的消息无法实时接收)
+ * [HTTP 协议基础](#http-协议基础)
+    * [GET请求的特点:](#get请求的特点)
+    * [POST请求的特点:](#post请求的特点)
+    * [7种常见请求方式](#7种常见请求方式)
+    * [GET和POST传输长度的误区](#get和post传输长度的误区)
+    * [postman中 form-data、x-www-form-urlencoded、raw、binary的区别](#postman中-form-datax-www-form-urlencodedrawbinary的区别)
+ * [信息摘要技术和算法](#信息摘要技术和算法)
+    * [特点](#特点)
+    * [选择](#选择)
+
 ### 项目架构
 * 使用MVP架构
 * 使用AlarmService开启定位服务-GpsService
 * 使用AlarmService开启心跳服务-BeatHeartService
-* 使用AlarmService开启重连服务-ReconnectSocketService
+* 使用IntentService开启重连服务-ReconnectSocketService
 * 使用StickyService打开socket连接服务-SocketService
 * 使用百度SDK定位(本身支持基站定位, WIFI定位和GPS定位,为了最大限度降低功耗,仅使用基站定位模式)  
-~~* 使用RxJava访问网络~~
+~~使用RxJava访问网络~~
 * 使用TCP-Socket与服务器通信
 
 ### 客户需求
@@ -38,16 +78,17 @@
 主要流程：孝老平台下发获取设备相关状态信息~~
 
 ### 主要步骤
-1. 收到开机广播,同时开启定时服务和sticky service(会打开socket连接,准备接收服务器数据)
+1. 收到开机广播,同时开启定位服务和socket服务(打开socket连接,准备接收服务器数据)
 2. socket连接成功则开启心跳服务(五分钟启动一次), 连接失败则开启重连服务
 3. 每隔30分钟启动一次定位服务(后台服务会开始用百度进行定位)
 4. 如果定位失败如超时,则停止定位服务(百度定位服务在单独的进程)
 5. 如果定位成功,将定位信息上传到服务器,并停止定位服务
 6. 将本地孝老平台设置号码上传到服务器
 7. 如果客户按了SOS键,则将SOS定位信息上传到服务器
-8. socket有三个线程, 一个用于连接socket, 一个用于接收服务器指令并响应, 一个用于主动发送消息到服务器
-9. 对socket连接接收的数据进行解析, 判断是服务器主动发送的指令(此时要返回数据给服务器)还是客户端发送数据到服务器后服务器的返回数据(此时无需再向服务器写数据, 只打印出来即可)
-10. 如果接收到服务器的如下5种指令, 需要做出相应处理:  
+8. socket有三个线程, 一个用于连接socket,连接成功即停止, 一个用于接收服务器指令并响应,是个死循环,除非socket断开,否则不会停止, 一个用于主动发送消息到服务器,执行完即结束; 还有一个线程池, 在启动重连服务的时候,用于给Settings模块发送断开数据业务和启动数据业务的广播
+9. 重连服务只在三个地方调用, 1-写的线程,判断如果socket断开, 则启动重连服务 2-读的线程,读到的数据前四个字节不是数字,认为连接已经断开, 则启动重连服务 3-心跳服务, 每隔5分钟心跳发送之前判断如果连接已断开, 且在网络正常情况下, 如果重连次数小于5, 直接重连, 2s内连接成功, 如果重连次数大于5, 发送关闭和启动数据业务的广播, 8s内连接成功
+10. 对socket连接接收的数据进行解析, 判断是服务器主动发送的指令(此时要返回数据给服务器)还是客户端发送数据到服务器后服务器的返回数据(此时无需再向服务器写数据, 只打印出来即可)
+11. 如果接收到服务器的如下5种指令, 需要做出相应处理:  
 > 如果是修改设备亲情号码的指令: 将服务器上设置的号码同步到本地;   
 > 如果是查询位置指令: 将目前定位信息上传到服务器;  
 > 如果是修改设备定位上传频率指令: 则修改定时服务的时间间隔;  
@@ -92,17 +133,16 @@ sign = MD5Utils.encrypt(data + RXJAVAHTTP_SECRET_CODE);
 常用参数配置见Constant.java
 
 ### 问题汇总
-#### 接口调试中的问题
-##### sos exits null
+#### 接口调试问题1 sos exits null
 服务器接口地址必须无误, 参数名字必须无误, 每个参数都不能传递空值
 
-##### company error
+#### 接口调试问题2 company error
 company是客户名字,每个项目不一样
 
-##### sos error ID
+#### 接口调试问题3 sos error ID
 可能是sign有问题,需要检查双方的secretCode是否一致
 
-##### 没有任何提示信息
+#### 接口调试问题4 没有任何提示信息
 `{"success":0,"imei":"867400020316620","time":"20180802104641"}`  
 可能是IMEI没有入库, 需要第三方协助入库操作
 
@@ -483,6 +523,11 @@ wl.release();
 * 服务器的并发连接数超过了其承载量，服务器会将其中一些连接关闭
 * 网络连接非常慢的时候
 * 下载大文件时，频繁请求服务器，请求的端口一直被占用
+可以通过radio.log查看当时网络信号强度, 如下如果太差, 就会出现此错误:
+```
+09-13 10:18:08.979  4118  4870 W System.err: Caused by: android.system.ErrnoException: sendto failed: ECONNRESET (Connection reset by peer)
+09-13 10:18:09.829  2984  3940 D GsmSST  : mTimeStamp=653720909642ns CellIdentityLte:{ mMcc=460 mMnc=0 mCi=216623656 mPci=485 mTac=24807} CellSignalStrengthLte: ss=13 rsrp=-127 rsrq=-20 rssnr=2147483647 cqi=2147483647 ta=2147483647}]
+```
 
 #### 问题16 Socket断开-SocketException-Connection timed out
 ```
@@ -611,6 +656,18 @@ catch (SecurityException e)
       //WakeLockUtil.getInstance().releaseWakeLock(TAG);
     }
 ```
+
+#### 问题21 服务器端发送的消息无法实时接收
+服务器下发指令后, 客户端无法实时接收到, 会在每次上报心跳或定位唤醒的时候, 接收到信息并返回; 睡眠之后两种唤醒方式:  
+1. 客户端的唤醒, 一次rtc唤醒，客户端给服务器发送数据，这样后面就可以接收服务器信息，传输数据
+```
+[08-31 17:15:22.044] <6>[ 2296.948974] c0 wakeup wake lock: rtc_interrupt
+```
+2. 服务器端的唤醒, 一次sipc唤醒，服务器主动发送push消息，唤醒客户端，也能就收到服务器数据
+```
+[08-31 17:16:10.845] <6>[ 2300.778167] c0 wakeup wake lock: sipc-smsg
+```
+延时有可能发生在modem睡眠时需要建立数据通路, 也有可能是modem做了限制
 
 ### HTTP 协议基础
 #### GET请求的特点:
