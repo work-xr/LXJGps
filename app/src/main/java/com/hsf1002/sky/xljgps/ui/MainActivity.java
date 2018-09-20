@@ -15,7 +15,9 @@ import com.hsf1002.sky.xljgps.R;
 import com.hsf1002.sky.xljgps.adapter.MainRecycleAdapter;
 import com.hsf1002.sky.xljgps.presenter.NetworkPresenterImpl;
 import com.hsf1002.sky.xljgps.result.ResultMsg;
+import com.hsf1002.sky.xljgps.service.SocketService;
 import com.hsf1002.sky.xljgps.util.DividerItemDecoration;
+import com.hsf1002.sky.xljgps.util.SprdCommonUtils;
 import com.hsf1002.sky.xljgps.view.BaseView;
 
 import java.util.ArrayList;
@@ -125,10 +127,12 @@ public class MainActivity extends Activity implements BaseView{
                 startActivity(new Intent(MainActivity.this, PlatformCenterActivity.class));
                 break;*/
             case UPLOAD_INFO_TO_PLATFORM_INDEX:
-                uploadInfoToPlatform();
+                //uploadInfoToPlatform();
+                SocketService.getInstance().terminatedService(true);
                 break;
             case REPORT_INFO_TO_PLATFORM_INDEX:
-                reportSosGpsInfoToPlatform();
+                //reportSosGpsInfoToPlatform();
+                SprdCommonUtils.getInstance().sendSosSmsBroadcast();
                 break;
             default:
                 break;

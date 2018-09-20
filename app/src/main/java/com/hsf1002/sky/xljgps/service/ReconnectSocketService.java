@@ -102,18 +102,19 @@ public class ReconnectSocketService extends IntentService {
     *  created: 18-9-11 上午11:04
     *  desc:
      *  如果是单纯的断开重新连接, 需要 2s 可以重新连接成功
+     *  onHandleIntent本身已是working thread, 无需创建线程池
     *  param:
     *  return:
     */
     private static void startReconnectSocket()
     {
         Log.i(TAG, "startReconnectSocket: ");
-        createThreadPool();
+        //createThreadPool();
 
-        if (sThreadPool != null) {
+        /*if (sThreadPool != null) {
             sThreadPool.execute(new Runnable() {
                 @Override
-                public void run() {
+                public void run() {*/
                     // 如果在灭屏状态下连接, 为了防止系统睡下去, 导致连接成功延迟
                     //Log.i(TAG, "run: begin acquireWakeLock ");
                     //WakeLockUtil.getInstance().acquireWakeLock(TAG);
@@ -149,9 +150,9 @@ public class ReconnectSocketService extends IntentService {
                             //Log.i(TAG, "run: begin releaseWakeLock ");
                             //WakeLockUtil.getInstance().releaseWakeLock(TAG);
                     }
-                }
+                /*}
             });
-        }
+        }*/
     }
 
     /**
@@ -277,6 +278,7 @@ public class ReconnectSocketService extends IntentService {
      *  param:
      *  return:
      */
+    @Deprecated
     private BroadcastReceiver reconnectReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

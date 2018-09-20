@@ -546,10 +546,6 @@ public class SocketService extends Service {
         if (sSocket != null && sSocket.isConnected())
         {
             isConnected = true;
-        }
-
-        if (isConnected)
-        {
             Log.i(TAG, "socket server: connected normally***********************************");
         }
         else
@@ -755,7 +751,9 @@ public class SocketService extends Service {
             Log.i(TAG, tag + " Other IOException*************************");
         }
         disConnectSocketServer();
-        //startReconnect(tag);
+        // 在读或连的线程, 如果出现exception像Connection reset by peer, 一段时间内可能都连不上, 如果重连, 会反反复复在此重连, 加点延迟(目前是1s), 效果会好些
+        // 但是如果不在此重连, 要等心跳进行检查或者定时定位服务写的时候发现连接断了后再重连, 会有延迟
+        startReconnect(tag);
     }
     
     /**

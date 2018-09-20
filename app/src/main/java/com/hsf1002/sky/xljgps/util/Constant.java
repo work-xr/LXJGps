@@ -72,6 +72,12 @@ public class Constant {
     public static final String SET_RELATION_NUMBER = "com.hsf1002.sky.xljgps.setrelationnumber";
     // 给SOS发送广播,去给亲情号码发送短信, 通报老人已经超出电子围栏
     public static final String ACTION_SOS_SEND_MSG = "intent.action.SOS_SEND_MSG";
+    // 开启数据业务
+    public static final String ACTION_ACTIVATED_CONNECTIVITY = "intent.action.ACTIVATED_CONNECTIVITY";
+    // 关闭数据业务
+    public static final String ACTION_INACTIVATED_CONNECTIVITY = "intent.action.INACTIVATED_CONNECTIVITY";
+    // 重连最大值,超过就关闭->开启数据业务
+    public static final int RECONNECT_COUNT_MAX = 4;
 
     // 返回给服务器的数据参数, 0表示失败, 1表示成功
     public static final int RESULT_SUCCESS_0 = 0;
@@ -105,11 +111,17 @@ public class Constant {
     // 重连服务一次连接等待时长
     public static final int RECONNCET_SOCKET_SERVICE_INTERVAL = 1 * 60 * 1000;
     // 重连服务休眠时长,因为只有网络状态正常连接的时候才会启动重连服务, 等待2s足够
-    public static final int RECONNCET_SOCKET_SERVICE_SLEEP = 1 * 2;
+    public static final int RECONNCET_SOCKET_SERVICE_SLEEP = 1 * 1000;
+    // 重连服务发送关闭数据业务和打开数据业务的时间间隔
+    public static final int RECONNCET_SOCKET_SERVICE_CHANGE_CONNECTIVITY_SLEEP = 5 * 1000;
+    // 重连服务发送打开数据业务的广播到收到该广播的时间间隔
+    public static final int RECONNCET_SOCKET_SERVICE_RECEIVE_BROADCAST_SLEEP = 5 * 1000;
+    // 网络正常的情况下, 等待连接上socket的时间间隔
+    public static final int RECONNCET_SOCKET_SERVICE_CONNECTION_SLEEP = 2 * 1000;
     // 开机等待多久开始上报定位信息
-    public static final int POWERON_REPORT_POSITION_SLEEP = 2 * 60 * 1000;
+    public static final int POWERON_REPORT_POSITION_SLEEP = 2 * 50 * 1000;
     // 每次定时服务时间到了之后等待多久开始上报定位信息, 为了等百度定位成功后
-    public static final int BAIDU_REPORT_POSITION_SLEEP = 1 * 5 * 1000;
+    public static final int BAIDU_REPORT_POSITION_SLEEP = 1 * 1 * 1000;
 
     /********************************** 改为socket通信后, 这些就没用了 ************************************/
     public static final String RXJAVAHTTP_BASE_URL_TEST = "http://healthdata.4000300659.com:8088/api/xiaolajiaotest/";

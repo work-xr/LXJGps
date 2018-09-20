@@ -52,8 +52,7 @@ public class NetworkReceiver extends BroadcastReceiver {
                 {
                     Log.d(TAG, "onReceive: NetworkInfo.State.DISCONNECTED ***************************");
                     // 断开socket服务, 实际上无法停止service, 只能让连接, 读和写的线程停止, 连上网后再重新运行这三个线程
-                    SocketService socketService = new SocketService();
-                    socketService.stopSocketService();
+                    SocketService.getInstance().stopSocketService();
                     // 关闭定时定位服务
                     GpsService.setServiceAlarm(appContext, false);
                     // 关闭定时心跳服务
