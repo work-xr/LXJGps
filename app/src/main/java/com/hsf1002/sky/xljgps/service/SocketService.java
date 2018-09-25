@@ -271,6 +271,7 @@ public class SocketService extends Service {
                 }
                 finally {
                     if (sSocket != null && sSocket.isConnected()) {
+                        sReconnectCount = 0;
                         Log.i(TAG, "ConnectServerThread: success^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 
                         // 如果没有开启心跳定时服务, 开启
